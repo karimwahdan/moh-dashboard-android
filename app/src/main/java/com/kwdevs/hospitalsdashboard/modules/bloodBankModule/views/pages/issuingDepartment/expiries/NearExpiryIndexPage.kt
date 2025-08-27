@@ -1,6 +1,7 @@
 package com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.issuingDepartment.expiries
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -111,34 +112,37 @@ fun NearExpiryIndexPage(navHostController: NavHostController){
             when(state){
                 is UiState.Success->{}
                 else->{
-                    BoxContainer(hasBorder = false) {
-                        ComboBox(
-                            loadedItems = searchList,
-                            selectedItem = selectedSource,
-                            selectedContent = { CustomInput(selectedSource.value?.second?: SELECT_UNIT_SOURCE_LABEL)}
-                        ) {
-                            Label(it?.second?: EMPTY_STRING)
-                        }
-                    }
-                    VerticalSpacer()
-                    Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp),
-                        horizontalArrangement = Arrangement.Center) {
-                        CustomButtonWithImage(icon = R.drawable.ic_view_timeline_blue,
-                            label = LOAD_DATA_LABEL,
-                            maxWidth = 82, maxLines = 2) {
-                            when(selectedSource.value?.first){
-                                BloodNearExpiredSourceFilter.MY_BLOOD_BANK->{controller.indexMine()}
-                                BloodNearExpiredSourceFilter.OTHER_BLOOD_BANKS->{controller.indexOther()}
-                                else->{}
+                    Column(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp)){
+                        Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp),
+                            horizontalArrangement = Arrangement.Center) {
+                            CustomButtonWithImage(icon = R.drawable.ic_view_timeline_blue,
+                                label = LOAD_DATA_LABEL,
+                                maxWidth = 82, maxLines = 2) {
+                                when(selectedSource.value?.first){
+                                    BloodNearExpiredSourceFilter.MY_BLOOD_BANK->{controller.indexMine()}
+                                    BloodNearExpiredSourceFilter.OTHER_BLOOD_BANKS->{controller.indexOther()}
+                                    else->{}
+                                }
+                            }
+                            HorizontalSpacer(10)
+                            CustomButtonWithImage(icon = R.drawable.ic_add_circle_green,
+                                label = ADD_NEW_LABEL,
+                                maxWidth = 82, maxLines = 2) {
+                                Preferences.BloodBanks.NearExpiredBloodUnits().delete()
+                                navHostController.navigate(NearExpiredCreateRoute.route)
                             }
                         }
-                        HorizontalSpacer(10)
-                        CustomButtonWithImage(icon = R.drawable.ic_add_circle_green,
-                            label = ADD_NEW_LABEL,
-                            maxWidth = 82, maxLines = 2) {
-                            Preferences.BloodBanks.NearExpiredBloodUnits().delete()
-                            navHostController.navigate(NearExpiredCreateRoute.route)
+                        VerticalSpacer()
+                        BoxContainer(hasBorder = false) {
+                            ComboBox(
+                                loadedItems = searchList,
+                                selectedItem = selectedSource,
+                                selectedContent = { CustomInput(selectedSource.value?.second?: SELECT_UNIT_SOURCE_LABEL)}
+                            ) {
+                                Label(it?.second?: EMPTY_STRING)
+                            }
                         }
+
                     }
                 }
             }

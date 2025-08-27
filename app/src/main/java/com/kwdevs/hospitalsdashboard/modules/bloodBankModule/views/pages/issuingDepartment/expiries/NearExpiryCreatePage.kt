@@ -2,6 +2,7 @@ package com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.issuin
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,6 +21,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +40,7 @@ import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.controller.BloodNea
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.NearExpiredIndexRoute
 import com.kwdevs.hospitalsdashboard.responses.options.BloodOptionsData
 import com.kwdevs.hospitalsdashboard.views.assets.ADD_NEW_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.BLACK
 import com.kwdevs.hospitalsdashboard.views.assets.BLOOD_GROUP_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.BLUE
 import com.kwdevs.hospitalsdashboard.views.assets.BoxContainer
@@ -49,14 +54,17 @@ import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
 import com.kwdevs.hospitalsdashboard.views.assets.EXPIRY_DATE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.Label
 import com.kwdevs.hospitalsdashboard.views.assets.NEAR_EXPIRED_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.ORANGE
 import com.kwdevs.hospitalsdashboard.views.assets.SAVE_CHANGES_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_BLOOD_GROUP_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_DATE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SELECT_EXPIRY_DATE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_STATUS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_UNIT_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.STATUS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.UNITS_NUMBER_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.UNIT_TYPE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.FailScreen
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.LoadingScreen
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.SuccessScreen
@@ -138,6 +146,9 @@ fun NearExpiryCreatePage(navHostController: NavHostController){
         else->{}
     }
 
+    LaunchedEffect(selectedUnitType.value) {
+        selectedBloodGroup.value=null
+    }
     DatePickerWidget(showExpiryDatePicker,expiryDateState,expiryDate)
     Container(title = NEAR_EXPIRED_LABEL,
         showSheet = showSheet,
@@ -148,42 +159,52 @@ fun NearExpiryCreatePage(navHostController: NavHostController){
         else{
             if(!success && !fail){
                 Row(modifier= Modifier.fillMaxWidth().padding(horizontal = 5.dp)){
-                    BoxContainer(hasBorder = false) {
+                    Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)) {
                         ComboBox(title = UNIT_TYPE_LABEL, hasTitle = true,
                             loadedItems = unitTypes, selectedItem = selectedUnitType,
                             selectedContent = { CustomInput(selectedUnitType.value?.name?: SELECT_UNIT_TYPE_LABEL)}) {
                             Label(it?.name?: EMPTY_STRING)
                         }
                     }
-                    BoxContainer(hasBorder = false) {
+                    Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)) {
                         ComboBox(title = BLOOD_GROUP_LABEL, hasTitle = true,
-                            loadedItems = if(selectedUnitType.value?.id in listOf(3,4,5,6))bloodGroups.filter { it.id !in listOf(2,4,6,8) } else bloodGroups, selectedItem = selectedBloodGroup,
+                            loadedItems = if(selectedUnitType.value?.id in listOf(3,4,5,6))bloodGroups.filter { it.id !in listOf(2,4,6,8) }.map { model ->
+                                model.copy(name = (model.name?: EMPTY_STRING).replace("pos", ""))} else bloodGroups, selectedItem = selectedBloodGroup,
                             selectedContent = { CustomInput(selectedBloodGroup.value?.name?: SELECT_BLOOD_GROUP_LABEL)}) {
                             Label(it?.name?: EMPTY_STRING)
                         }
                     }
                 }
-                CustomInput(quantity, UNITS_NUMBER_LABEL, keyboardOptions = numericKeyBoard)
-                if(quantity.value.toIntOrNull() ==1 &&
-                    selectedUnitType.value?.id !in listOf(3,4,5,6))
-                {CustomInput(code, CODE_LABEL)}
-                Row(modifier= Modifier.fillMaxWidth().padding(horizontal = 5.dp)){
-                    BoxContainer(hasBorder = false) {
-                        ComboBox(title = STATUS_LABEL, hasTitle = true,
-                            loadedItems = statuses, selectedItem = selectedStatus,
-                            selectedContent = { CustomInput(selectedStatus.value?.name?: SELECT_STATUS_LABEL)}) {
-                            Label(it?.name?: EMPTY_STRING)
+                if(selectedUnitType.value!=null && selectedBloodGroup.value!=null){
+                    CustomInput(quantity, UNITS_NUMBER_LABEL, keyboardOptions = numericKeyBoard,
+                        onTextChange = {t->if(t.toIntOrNull()!=null) quantity.value=t else quantity.value=EMPTY_STRING})
+                    if(quantity.value.toIntOrNull() ==1 &&
+                        selectedUnitType.value?.id !in listOf(3,4,5,6))
+                    {CustomInput(code, CODE_LABEL)}
+                    Row(modifier= Modifier.fillMaxWidth().padding(horizontal = 5.dp)){
+                        BoxContainer(hasBorder = false) {
+                            ComboBox(title = STATUS_LABEL, hasTitle = true,
+                                loadedItems = statuses, selectedItem = selectedStatus,
+                                selectedContent = { CustomInput(selectedStatus.value?.name?: SELECT_STATUS_LABEL)}) {
+                                Label(it?.name?: EMPTY_STRING)
+                            }
                         }
                     }
-                }
-                if(expiryDate.value!= EMPTY_STRING){
+                    VerticalSpacer()
                     BoxContainer(hasBorder = false) {
-                        Label(text=expiryDate.value, label = EXPIRY_DATE_LABEL)
+                        Label(text=if(expiryDate.value!= EMPTY_STRING)expiryDate.value else SELECT_EXPIRY_DATE_LABEL,
+                            label = EXPIRY_DATE_LABEL,
+                            color = if(expiryDate.value!= EMPTY_STRING) BLACK else Color.Red,)
                     }
+                    BoxContainer(hasBorder = false) { CustomButton(label = SELECT_DATE_LABEL, enabledBackgroundColor = ORANGE) {showExpiryDatePicker.value=true} }
+                    VerticalSpacer()
+                    HorizontalDivider()
+                    VerticalSpacer()
                 }
-                BoxContainer(hasBorder = false) { CustomButton(label = SELECT_DATE_LABEL) {showExpiryDatePicker.value=true} }
                 BoxContainer(hasBorder = false) {
                     CustomButton(label = SAVE_CHANGES_LABEL,
+                        buttonShadowElevation = 6,
+                        buttonShape = RectangleShape,
                         enabled = (selectedUnitType.value!=null && selectedBloodGroup.value!=null &&
                                 ((selectedUnitType.value?.id in listOf(3,4,5,6) && selectedBloodGroup.value?.id !in listOf(2,4,6,8)) ||
                                         selectedUnitType.value?.id !in listOf(3,4,5,6)) &&
@@ -216,6 +237,7 @@ fun NearExpiryCreatePage(navHostController: NavHostController){
                         }
                     }
                 }
+                VerticalSpacer()
             }
             else if(success) SuccessScreen(modifier=Modifier.fillMaxSize()) {
                 Column(modifier=Modifier.fillMaxSize(),

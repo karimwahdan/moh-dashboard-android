@@ -1,0 +1,242 @@
+package com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.issuingDepartment.expiries
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.kwdevs.hospitalsdashboard.R
+import com.kwdevs.hospitalsdashboard.app.Preferences
+import com.kwdevs.hospitalsdashboard.app.retrofit.UiState
+import com.kwdevs.hospitalsdashboard.controller.SettingsController
+import com.kwdevs.hospitalsdashboard.models.hospital.SimpleHospital
+import com.kwdevs.hospitalsdashboard.models.settings.BasicModel
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.bodies.BloodNearExpiredItemBody
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.controller.BloodNearExpiredController
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.NearExpiredIndexRoute
+import com.kwdevs.hospitalsdashboard.responses.options.BloodOptionsData
+import com.kwdevs.hospitalsdashboard.views.assets.ADD_NEW_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.BLOOD_GROUP_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.BLUE
+import com.kwdevs.hospitalsdashboard.views.assets.BoxContainer
+import com.kwdevs.hospitalsdashboard.views.assets.CODE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.ComboBox
+import com.kwdevs.hospitalsdashboard.views.assets.CustomButton
+import com.kwdevs.hospitalsdashboard.views.assets.CustomInput
+import com.kwdevs.hospitalsdashboard.views.assets.DATA_SAVED_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.DatePickerWidget
+import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
+import com.kwdevs.hospitalsdashboard.views.assets.EXPIRY_DATE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.Label
+import com.kwdevs.hospitalsdashboard.views.assets.NEAR_EXPIRED_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SAVE_CHANGES_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SELECT_BLOOD_GROUP_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SELECT_DATE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SELECT_STATUS_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SELECT_UNIT_TYPE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.STATUS_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.UNITS_NUMBER_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.UNIT_TYPE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.FailScreen
+import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.LoadingScreen
+import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.SuccessScreen
+import com.kwdevs.hospitalsdashboard.views.assets.container.Container
+import com.kwdevs.hospitalsdashboard.views.numericKeyBoard
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NearExpiryCreatePage(navHostController: NavHostController){
+    val savedItem=Preferences.BloodBanks.NearExpiredBloodUnits().get()
+    val user = Preferences.User().get()
+    val thisHospital=Preferences.Hospitals().get()
+    val thisBloodBank=Preferences.BloodBanks().get()
+    val settingsController:SettingsController= viewModel()
+    val controller:BloodNearExpiredController= viewModel()
+    val state by controller.singleState.observeAsState()
+    val bloodOptionsState by settingsController.bloodOptionsState.observeAsState()
+    var unitTypes by remember { mutableStateOf<List<BasicModel>>(emptyList()) }
+    val selectedUnitType = remember { mutableStateOf<BasicModel?>(null) }
+
+    var bloodGroups by remember { mutableStateOf<List<BasicModel>>(emptyList()) }
+    val selectedBloodGroup = remember { mutableStateOf<BasicModel?>(null) }
+    var statuses by remember { mutableStateOf<List<BasicModel>>(emptyList()) }
+    val selectedStatus = remember { mutableStateOf<BasicModel?>(null) }
+
+    var hospitals by remember { mutableStateOf<List<SimpleHospital>>(emptyList()) }
+
+    val quantity = remember { mutableStateOf(EMPTY_STRING) }
+    val code = remember { mutableStateOf(EMPTY_STRING) }
+    val expiryDateState         =  rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
+    val expiryDate              =  remember { mutableStateOf(EMPTY_STRING) }
+    val showExpiryDatePicker    =  remember { mutableStateOf(false) }
+
+    val showSheet = remember { mutableStateOf(false) }
+
+    var loadingBloodOptions by remember { mutableStateOf(false) }
+    var failBloodOptions by remember { mutableStateOf(false) }
+    var successBloodOptions by remember { mutableStateOf(false) }
+
+    var loading by remember { mutableStateOf(false) }
+    var fail by remember { mutableStateOf(false) }
+    var success by remember { mutableStateOf(false) }
+    when(bloodOptionsState){
+        is UiState.Loading->{
+            LaunchedEffect(Unit) {loadingBloodOptions=true;failBloodOptions=false;successBloodOptions=false }
+        }
+        is UiState.Error->{
+            LaunchedEffect(Unit) {loadingBloodOptions=true;failBloodOptions=false;successBloodOptions=false }
+        }
+        is UiState.Success->{
+            LaunchedEffect(Unit) {
+                loadingBloodOptions=false
+                failBloodOptions=false;successBloodOptions=true
+                val s=bloodOptionsState as UiState.Success<BloodOptionsData>
+                val d=s.data
+                val r=d.data
+                bloodGroups=r.bloodGroups
+                unitTypes=r.bloodTypes
+                statuses=r.statuses
+                hospitals=r.hospitals.filter { it.id!=thisHospital?.id }
+
+            }
+        }
+        else->{settingsController.bloodOptions()}
+    }
+    when(state){
+        is UiState.Loading->{
+            LaunchedEffect(Unit) {loading=true;fail=false;success=false }
+        }
+        is UiState.Error->{
+            LaunchedEffect(Unit) {loading=true;fail=false;success=false }
+        }
+        is UiState.Success->{
+            LaunchedEffect(Unit) {
+                loading=false
+                fail=false;success=true
+            }
+        }
+        else->{}
+    }
+
+    DatePickerWidget(showExpiryDatePicker,expiryDateState,expiryDate)
+    Container(title = NEAR_EXPIRED_LABEL,
+        showSheet = showSheet,
+        headerShowBackButton = true,
+        headerIconButtonBackground = BLUE,
+        headerOnClick = {navHostController.navigate(NearExpiredIndexRoute.route)}) {
+        if(loading) LoadingScreen(modifier=Modifier.fillMaxSize())
+        else{
+            if(!success && !fail){
+                Row(modifier= Modifier.fillMaxWidth().padding(horizontal = 5.dp)){
+                    BoxContainer(hasBorder = false) {
+                        ComboBox(title = UNIT_TYPE_LABEL, hasTitle = true,
+                            loadedItems = unitTypes, selectedItem = selectedUnitType,
+                            selectedContent = { CustomInput(selectedUnitType.value?.name?: SELECT_UNIT_TYPE_LABEL)}) {
+                            Label(it?.name?: EMPTY_STRING)
+                        }
+                    }
+                    BoxContainer(hasBorder = false) {
+                        ComboBox(title = BLOOD_GROUP_LABEL, hasTitle = true,
+                            loadedItems = if(selectedUnitType.value?.id in listOf(3,4,5,6))bloodGroups.filter { it.id !in listOf(2,4,6,8) } else bloodGroups, selectedItem = selectedBloodGroup,
+                            selectedContent = { CustomInput(selectedBloodGroup.value?.name?: SELECT_BLOOD_GROUP_LABEL)}) {
+                            Label(it?.name?: EMPTY_STRING)
+                        }
+                    }
+                }
+                CustomInput(quantity, UNITS_NUMBER_LABEL, keyboardOptions = numericKeyBoard)
+                if(quantity.value.toIntOrNull() ==1 &&
+                    selectedUnitType.value?.id !in listOf(3,4,5,6))
+                {CustomInput(code, CODE_LABEL)}
+                Row(modifier= Modifier.fillMaxWidth().padding(horizontal = 5.dp)){
+                    BoxContainer(hasBorder = false) {
+                        ComboBox(title = STATUS_LABEL, hasTitle = true,
+                            loadedItems = statuses, selectedItem = selectedStatus,
+                            selectedContent = { CustomInput(selectedStatus.value?.name?: SELECT_STATUS_LABEL)}) {
+                            Label(it?.name?: EMPTY_STRING)
+                        }
+                    }
+                }
+                if(expiryDate.value!= EMPTY_STRING){
+                    BoxContainer(hasBorder = false) {
+                        Label(text=expiryDate.value, label = EXPIRY_DATE_LABEL)
+                    }
+                }
+                BoxContainer(hasBorder = false) { CustomButton(label = SELECT_DATE_LABEL) {showExpiryDatePicker.value=true} }
+                BoxContainer(hasBorder = false) {
+                    CustomButton(label = SAVE_CHANGES_LABEL,
+                        enabled = (selectedUnitType.value!=null && selectedBloodGroup.value!=null &&
+                                ((selectedUnitType.value?.id in listOf(3,4,5,6) && selectedBloodGroup.value?.id !in listOf(2,4,6,8)) ||
+                                        selectedUnitType.value?.id !in listOf(3,4,5,6)) &&
+                                quantity.value!= EMPTY_STRING && quantity.value.toIntOrNull()!=null &&
+                                expiryDate.value!= EMPTY_STRING) && user!=null && thisHospital!=null
+
+                    ) {
+                        val bloodGroupAndUnitSelected=selectedUnitType.value!=null && selectedBloodGroup.value!=null
+                        val validPlasmaGroup= selectedUnitType.value?.id in listOf(3,4,5,6) && selectedBloodGroup.value?.id !in listOf(2,4,6,8)
+                        val validBloodGroup= selectedUnitType.value?.id !in listOf(3,4,5,6)
+                        val validSelectionOfBloodGroup=validBloodGroup || validPlasmaGroup
+                        val validQuantity = quantity.value!= EMPTY_STRING && quantity.value.toIntOrNull()!=null
+                        val validExpiryDate=expiryDate.value!= EMPTY_STRING
+                        val existing=savedItem!=null
+                        if(bloodGroupAndUnitSelected && validSelectionOfBloodGroup && validQuantity && validExpiryDate){
+
+                            val body = BloodNearExpiredItemBody(
+                                hospitalId = thisHospital?.id,
+                                bloodBankId = thisBloodBank?.id,
+                                unitTypeId = selectedUnitType.value?.id,
+                                bloodGroupId = selectedBloodGroup.value?.id,
+                                quantity = quantity.value.toIntOrNull(),
+                                code = if(selectedUnitType.value?.id !in listOf(3,4,5,6)) code.value else null,
+                                expiryDate =expiryDate.value,
+                                statusId = selectedStatus.value?.id,
+                                createdById = if(!existing) null else user?.id,
+                                updatedById = if(existing) user?.id else null,
+                            )
+                            if(existing) controller.update(body) else controller.store(body)
+                        }
+                    }
+                }
+            }
+            else if(success) SuccessScreen(modifier=Modifier.fillMaxSize()) {
+                Column(modifier=Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center) {
+                    Image(modifier=Modifier.size(144.dp),contentScale = ContentScale.FillBounds,painter = painterResource(R.drawable.logo), contentDescription = null)
+                    Label(DATA_SAVED_LABEL, fontWeight = FontWeight.Bold)
+                    CustomButton(label = ADD_NEW_LABEL) {
+                        success=false;fail=false;loading=false
+                        selectedUnitType.value=null
+                        selectedBloodGroup.value=null
+                        quantity.value= EMPTY_STRING
+                        expiryDate.value= EMPTY_STRING
+                        code.value= EMPTY_STRING
+                        Preferences.BloodBanks.NearExpiredBloodUnits().delete()
+                        controller.reload()
+                    }
+                }
+            }
+            else FailScreen(modifier=Modifier.fillMaxSize())
+        }
+
+    }
+}

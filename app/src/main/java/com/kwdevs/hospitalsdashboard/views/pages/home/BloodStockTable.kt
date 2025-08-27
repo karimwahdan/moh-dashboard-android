@@ -1,0 +1,1179 @@
+package com.kwdevs.hospitalsdashboard.views.pages.home
+
+import android.os.Environment
+import android.widget.Toast
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kwdevs.hospitalsdashboard.R
+import com.kwdevs.hospitalsdashboard.app.BloodFilterBy
+import com.kwdevs.hospitalsdashboard.app.retrofit.UiState
+import com.kwdevs.hospitalsdashboard.controller.SettingsController
+import com.kwdevs.hospitalsdashboard.models.hospital.SimpleHospital
+import com.kwdevs.hospitalsdashboard.models.settings.BasicModel
+import com.kwdevs.hospitalsdashboard.models.settings.hospitalType.HospitalType
+import com.kwdevs.hospitalsdashboard.models.settings.sector.Sector
+import com.kwdevs.hospitalsdashboard.modules.BLOOD_BANK_MODULE
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.bodies.DailyBloodStockFilterBody
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.controller.BloodBankIssuingDepartmentController
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.models.issuingDepartment.DailyBloodStock
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.responses.issuingDepartment.DailyBloodStocksResponse
+import com.kwdevs.hospitalsdashboard.responses.options.BloodOptionsData
+import com.kwdevs.hospitalsdashboard.views.assets.AT_12_PM_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.AT_6_AM_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.AT_6_PM_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.BLOOD_BANK_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.BLOOD_GROUP_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.BLOOD_STOCK_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.BLUE
+import com.kwdevs.hospitalsdashboard.views.assets.CANCEL_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.ColumnContainer
+import com.kwdevs.hospitalsdashboard.views.assets.ComboBox
+import com.kwdevs.hospitalsdashboard.views.assets.CustomButton
+import com.kwdevs.hospitalsdashboard.views.assets.CustomInput
+import com.kwdevs.hospitalsdashboard.views.assets.DATA_LOADED_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.DATE_FROM_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.DATE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.DATE_TO_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.DIRECTORATE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.DatePickerWidget
+import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
+import com.kwdevs.hospitalsdashboard.views.assets.ERROR_LOADING_DATA_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.FILTER_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.FROM_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.HOSPITALS_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_TYPE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.IconButton
+import com.kwdevs.hospitalsdashboard.views.assets.Label
+import com.kwdevs.hospitalsdashboard.views.assets.LabelSpan
+import com.kwdevs.hospitalsdashboard.views.assets.MIDNIGHT_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.OK_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.ORANGE
+import com.kwdevs.hospitalsdashboard.views.assets.SECTORS_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SECTOR_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SELECT_BLOOD_BANK_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SELECT_BLOOD_GROUP_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SELECT_HOSPITAL_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SELECT_HOSPITAL_TYPE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SELECT_SECTOR_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SELECT_TIME_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SELECT_UNIT_TYPE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.Span
+import com.kwdevs.hospitalsdashboard.views.assets.TIME_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.TO_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.UNDER_INSPECTION_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.UNIT_TYPE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
+import com.kwdevs.hospitalsdashboard.views.assets.WHITE
+import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.FailScreen
+import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.LoadingScreen
+import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.SuccessScreen
+import com.kwdevs.hospitalsdashboard.views.assets.montaserFont
+import com.kwdevs.hospitalsdashboard.views.rcs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.ResponseBody
+import retrofit2.Response
+import java.io.File
+import java.io.FileOutputStream
+
+data class HospitalBloodSummary(
+    val hospital: SimpleHospital?,
+    val bloodType: BasicModel?, // from blood_unit_type
+    val date: String,
+    val timeBlock: String,
+    val aPos: Int = 0,
+    val aPosStrategic: Int = 0,
+    val aNeg: Int = 0,
+    val aNegStrategic: Int = 0,
+    val bPos: Int = 0,
+    val bPosStrategic: Int = 0,
+    val bNeg: Int = 0,
+    val bNegStrategic: Int = 0,
+    val abPos: Int = 0,
+    val abPosStrategic: Int = 0,
+    val abNeg: Int = 0,
+    val abNegStrategic: Int = 0,
+    val oPos: Int = 0,
+    val oPosStrategic: Int = 0,
+    val oNeg: Int = 0,
+    val oNegStrategic: Int = 0,
+    val underInspection: Int = 0
+)
+fun List<DailyBloodStock>.toHospitalSummaries(): List<HospitalBloodSummary> {
+    return this
+        .groupBy { Triple(it.hospitalId, it.entryDate, it.timeBlock) }
+        .map { (_, entries) ->
+
+            val hospital = entries.firstOrNull()?.hospital
+            val bloodType = entries.firstOrNull()?.bloodUnitType
+            val date = entries.firstOrNull()?.entryDate.orEmpty()
+            val timeBlock = entries.firstOrNull()?.timeBlock.orEmpty()
+
+            // Create mutable holders
+            var aPos = 0; var aPosStrategic = 0
+            var aNeg = 0; var aNegStrategic = 0
+            var bPos = 0; var bPosStrategic = 0
+            var bNeg = 0; var bNegStrategic = 0
+            var abPos = 0; var abPosStrategic = 0
+            var abNeg = 0; var abNegStrategic = 0
+            var oPos = 0; var oPosStrategic = 0
+            var oNeg = 0; var oNegStrategic = 0
+            var underInspectionAmount = 0
+
+            for (e in entries) {
+                when (e.bloodGroupId) {
+                    1 -> { aPos = e.amount ?: 0; aPosStrategic = e.emergency ?: 0 }
+                    2 -> { aNeg = e.amount ?: 0; aNegStrategic = e.emergency ?: 0 }
+                    3 -> { bPos = e.amount ?: 0; bPosStrategic = e.emergency ?: 0 }
+                    4 -> { bNeg = e.amount ?: 0; bNegStrategic = e.emergency ?: 0 }
+                    5 -> { oPos = e.amount ?: 0; oPosStrategic = e.emergency ?: 0 }
+                    6 -> { oNeg = e.amount ?: 0; oNegStrategic = e.emergency ?: 0 }
+                    7 -> { abPos = e.amount ?: 0; abPosStrategic = e.emergency ?: 0 }
+                    8 -> { abNeg = e.amount ?: 0; abNegStrategic = e.emergency ?: 0 }
+                    else -> {/* if (e.underInspection == true) underInspectionAmount = e.amount ?:0 */}
+                }
+                when(e.underInspection?:false){
+                    true->{underInspectionAmount = e.amount ?: 0}
+                    false->{}
+                }
+            }
+
+            HospitalBloodSummary(
+                hospital = hospital,
+                bloodType = bloodType,
+                date = date,
+                timeBlock = timeBlock,
+                aPos = aPos,
+                aPosStrategic = aPosStrategic,
+                aNeg = aNeg,
+                aNegStrategic = aNegStrategic,
+                bPos = bPos,
+                bPosStrategic = bPosStrategic,
+                bNeg = bNeg,
+                bNegStrategic = bNegStrategic,
+                abPos = abPos,
+                abPosStrategic = abPosStrategic,
+                abNeg = abNeg,
+                abNegStrategic = abNegStrategic,
+                oPos = oPos,
+                oPosStrategic = oPosStrategic,
+                oNeg = oNeg,
+                oNegStrategic = oNegStrategic,
+                underInspection = underInspectionAmount
+            )
+        }
+}
+
+@Composable
+fun BloodStockTable(data: List<HospitalBloodSummary>) {
+    if(data.isNotEmpty()){
+        Row(modifier = Modifier.fillMaxWidth()) {
+
+            // ======= Constant Part =======
+            Column(modifier = Modifier.width(150.dp).background(Color.LightGray)) {
+                // Header
+                Row(modifier = Modifier.background(BLUE)) {
+                    Text(DIRECTORATE_LABEL, fontSize = 12.sp,
+                        fontFamily = montaserFont,
+                        color = WHITE,
+                        modifier = Modifier.weight(1f).padding(8.dp))
+                    Text(HOSPITAL_LABEL,color = WHITE,fontFamily = montaserFont,fontSize = 12.sp,modifier = Modifier.weight(1.2f).padding(8.dp))
+                }
+
+                // Data
+                data.forEach { summary ->
+                    Row(modifier=Modifier.height(70.dp),verticalAlignment = Alignment.CenterVertically) {
+                        Text(summary.hospital?.city?.name ?: EMPTY_STRING,
+                            fontFamily = montaserFont,
+                            fontSize = 10.sp,
+                            softWrap = true,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(0.9f).padding(8.dp), textAlign = TextAlign.Center)
+                        Text((summary.hospital?.name ?: EMPTY_STRING)+"\n",
+                            fontFamily = montaserFont,
+                            fontSize = 10.sp,
+                            modifier = Modifier.weight(1.2f).padding(8.dp),
+                            softWrap = true,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center)
+
+                    }
+                }
+            }
+
+            // ======= (Scrollable) =======
+            LazyRow(modifier = Modifier.fillMaxWidth().background(Color.White)) {
+                item {
+                    Column {
+                        // Header Blood Groups
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            BloodGroupHeader(DATE_LABEL,width=55, fontSize = 12)
+                            BloodGroupHeader(TIME_LABEL,width=45, fontSize = 12)
+                            BloodGroupHeader(UNDER_INSPECTION_LABEL,width=65, fontSize = 10)
+
+                            BloodGroupHeader("A+" )
+                            BloodGroupHeader("A−" )
+                            BloodGroupHeader("B+" )
+                            BloodGroupHeader("B−" )
+                            BloodGroupHeader("O+" )
+                            BloodGroupHeader("O−" )
+                            BloodGroupHeader("AB+")
+                            BloodGroupHeader("AB−")
+                        }
+                        HorizontalDivider(color = WHITE)
+                        // Data
+                        data.forEach { summary ->
+                            Row(modifier=Modifier.height(70.dp),verticalAlignment = Alignment.CenterVertically) {
+                                BloodGroupCell(summary.date.replaceRange(5,summary.date.length,EMPTY_STRING), null, width = 55)
+                                BloodGroupCell(summary.timeBlock, null, width = 45)
+                                BloodGroupCell(summary.underInspection.toString(),null, width = 60)
+
+                                BloodGroupCell(summary.aPos.toString(), summary.aPosStrategic.toString())
+                                BloodGroupCell(summary.aNeg.toString(), summary.aNegStrategic.toString())
+                                BloodGroupCell(summary.bPos.toString(), summary.bPosStrategic.toString())
+                                BloodGroupCell(summary.bNeg.toString(), summary.bNegStrategic.toString())
+                                BloodGroupCell(summary.oPos.toString(), summary.oPosStrategic.toString())
+                                BloodGroupCell(summary.oNeg.toString(), summary.oNegStrategic.toString())
+                                BloodGroupCell(summary.abPos.toString(), summary.abPosStrategic.toString())
+                                BloodGroupCell(summary.abNeg.toString(), summary.abNegStrategic.toString())
+                            }
+                        }
+                        HorizontalDivider(color = Color.Black)
+
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+
+@Composable
+fun BloodGroupHeader(name: String,width:Int=40,fontSize: Int=14) {
+    Column(
+        modifier = Modifier.width(width.dp).background(Color.Gray).padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(name,fontSize=fontSize.sp,
+            fontWeight = FontWeight.Bold,modifier=Modifier.padding(vertical = 4.dp))
+    }
+}
+
+// (amount و strategic)
+@Composable
+fun BloodGroupCell(amount: String, strategic: String?,width:Int=40) {
+    Column(
+        modifier = Modifier.width(width.dp).padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(amount, fontWeight = FontWeight.Bold)
+        strategic?.let{Text(strategic, color = Color.Gray)}
+    }
+}
+
+@Composable
+fun BloodStockTable(records:MutableState<List<DailyBloodStock>>){
+    val context= LocalContext.current
+    val showFilterDialog = remember { mutableStateOf(false) }
+    val controller:BloodBankIssuingDepartmentController= viewModel()
+    val body = remember { mutableStateOf<DailyBloodStockFilterBody?>(null) }
+    val exportState by controller.stockExcelState.observeAsState()
+
+    LaunchedEffect(exportState) {
+        when (exportState) {
+            is UiState.Success<*> -> {
+                val response = (exportState as UiState.Success<Response<ResponseBody>>).data
+                if (response.isSuccessful) {
+                    val saved = saveExcelFile(
+                        //context = context,
+                        responseBody = response.body()!!,
+                        fileName = "daily_blood_stock.xlsx"
+                    )
+                    Toast.makeText(
+                        context,
+                        if (saved) "Downloaded to Downloads folder" else "Failed to save file",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    Toast.makeText(context, "Download failed: ${response.code()}", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            is UiState.Error -> {
+                val message = (exportState as UiState.Error).exception.message ?: ERROR_LOADING_DATA_LABEL
+                Toast.makeText(context, "Error: $message", Toast.LENGTH_LONG).show()
+            }
+
+            else -> {}
+        }
+    }
+
+    val filteredRecords = records.value.sortedByDescending { it.entryDate }.filter { it.bloodUnitTypeId in listOf(null,1,2) }
+        .sortedWith(compareByDescending<DailyBloodStock> { it.entryDate }
+            .thenByDescending { it.hospital?.cityId ?: Int.MIN_VALUE}
+            .thenByDescending { it.hospital?.areaId ?: Int.MIN_VALUE }
+            .thenByDescending { it.hospitalId ?: Int.MIN_VALUE }
+            .thenBy { it.timeBlock})
+
+
+    Column(modifier = Modifier.fillMaxWidth().scrollable(state = rememberScrollState(),orientation = Orientation.Horizontal))
+    {
+        // Header Row
+        Row(modifier=Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.Center){
+            IconButton(R.drawable.ic_filter_blue) {
+                controller.reload()
+                showFilterDialog.value=true
+            }
+            Box(modifier=Modifier.fillMaxWidth().weight(1f),
+                contentAlignment = Alignment.Center){
+                Label(text=BLOOD_STOCK_LABEL,
+                    fontSize = 12, fontWeight = FontWeight.Bold,
+                    color = BLUE
+                )
+            }
+
+            body.value?.let { if(filteredRecords.isNotEmpty())IconButton(R.drawable.ic_save_blue) { controller.saveStockExcelFile(it) } }
+        }
+        if(filteredRecords.isNotEmpty()) BloodStockTable(filteredRecords.toHospitalSummaries())
+
+    }
+    FilterDialog(showDialog=showFilterDialog,records=records,controller,body)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FilterDialog(showDialog: MutableState<Boolean>,
+                         records: MutableState<List<DailyBloodStock>>,
+                         controller:BloodBankIssuingDepartmentController,
+                         body: MutableState<DailyBloodStockFilterBody?>) {
+    val state by controller.state.observeAsState()
+    val settingsController:SettingsController= viewModel()
+    val optionsState by settingsController.bloodOptionsState.observeAsState()
+    var success by remember { mutableStateOf(false) }
+    var fail by remember { mutableStateOf(false) }
+    var loading by remember { mutableStateOf(false) }
+    val filterByList = listOf<Pair<BloodFilterBy,String>>(
+        Pair(BloodFilterBy.HOSPITAL,HOSPITAL_LABEL),
+        Pair(BloodFilterBy.SECTOR, SECTOR_LABEL),
+        Pair(BloodFilterBy.HOSPITAL_TYPE, HOSPITAL_TYPE_LABEL),
+        Pair(BloodFilterBy.BLOOD_BANK, BLOOD_BANK_LABEL),
+
+        )
+    if(showDialog.value){
+        val timeBlocks = listOf(Pair("00", MIDNIGHT_LABEL),Pair("06", AT_6_AM_LABEL),Pair("12",
+            AT_12_PM_LABEL),Pair("18", AT_6_PM_LABEL))
+        val selectedTimeBlock = remember { mutableStateOf<Pair<String,String>?>(null) }
+
+        var hospitals           by remember { mutableStateOf<List<SimpleHospital>>(emptyList()) }
+        val selectedHospital    = remember { mutableStateOf<SimpleHospital?>(null) }
+        val selectedHospitals   = remember { mutableStateOf<List<SimpleHospital>>(emptyList()) }
+
+        var sectors             by remember { mutableStateOf<List<Sector>>(emptyList()) }
+        val selectedSector      = remember { mutableStateOf<Sector?>(null) }
+        val selectedSectors     = remember { mutableStateOf<List<Sector>>(emptyList()) }
+
+        var hospitalTypes       by remember { mutableStateOf<List<HospitalType>>(emptyList()) }
+        val selectedHospitalType  = remember { mutableStateOf<HospitalType?>(null) }
+        val selectedHospitalTypes = remember { mutableStateOf<List<HospitalType>>(emptyList()) }
+
+        var bloodBanks          by remember { mutableStateOf<List<SimpleHospital>>(emptyList()) }
+        val selectedBloodBank   =  remember { mutableStateOf<SimpleHospital?>(null) }
+        val selectedBloodBanks  =  remember { mutableStateOf<List<SimpleHospital>>(emptyList()) }
+
+        var bloodGroups         by remember { mutableStateOf<List<BasicModel>>(emptyList()) }
+        val selectedBloodGroup  =  remember { mutableStateOf<BasicModel?>(null) }
+        val selectedBloodGroups =  remember { mutableStateOf<List<BasicModel>>(emptyList()) }
+
+        var unitTypes           by remember { mutableStateOf<List<BasicModel>>(emptyList()) }
+        val selectedUnitType    =  remember { mutableStateOf<BasicModel?>(null) }
+        val selectedUnitTypes   =  remember { mutableStateOf<List<BasicModel>>(emptyList()) }
+
+        val startDateState      =  rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
+        val startDate           =  remember { mutableStateOf(EMPTY_STRING) }
+        val showStartDatePicker =  remember { mutableStateOf(false) }
+
+        val endDateState        =  rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
+        val endDate             =  remember { mutableStateOf(EMPTY_STRING) }
+        val showEndDatePicker   =  remember { mutableStateOf(false) }
+        val selectedFilterBy    =  remember { mutableStateOf<Pair<BloodFilterBy,String>?>(null) }
+        when(state){
+            is UiState.Loading->{ LaunchedEffect(Unit) {loading=true;success=false;fail=false} }
+            is UiState.Error->{LaunchedEffect(Unit) {loading=false;success=false;fail=true} }
+            is UiState.Success->{
+                LaunchedEffect(Unit) {
+                    loading=false;success=true;fail=false
+                    try{
+                        val s =state as UiState.Success<DailyBloodStocksResponse>
+                        val r = s.data
+                        val data=r.data
+                        records.value=data.sortedWith(
+                            compareByDescending<DailyBloodStock> { it.hospital?.cityId ?: Int.MIN_VALUE }
+                                .thenByDescending { it.hospital?.areaId ?: Int.MIN_VALUE }
+                                .thenByDescending { it.hospitalId ?: Int.MIN_VALUE }
+                                .thenByDescending { it.entryDate}
+                                .thenBy { it.timeBlock}
+                        )
+                    }
+                    catch (e:Exception){
+                        e.printStackTrace()
+                    }
+
+
+                }
+            }
+            else->{}
+        }
+        when(optionsState){
+            is UiState.Loading->{}
+            is UiState.Error->{}
+            is UiState.Success->{
+                LaunchedEffect(Unit) {
+                    val s =optionsState as UiState.Success<BloodOptionsData>
+                    val r = s.data
+                    val data=r.data
+                    unitTypes=data.bloodTypes
+                    bloodBanks=data.bloodBanks
+                    bloodGroups=data.bloodGroups
+                    sectors=data.sectors
+                    hospitalTypes=data.hospitalTypes
+                    hospitals=data.hospitals
+                    data.hospitals.map { it.city }
+
+                }
+            }
+
+            else->{ LaunchedEffect(Unit) { settingsController.bloodOptions() } }
+        }
+        LaunchedEffect(Unit) {
+            loading=false;success=false;fail=false
+            controller.reload()
+            selectedSectors.value= emptyList()
+            selectedHospitals.value= emptyList()
+            selectedBloodBanks.value= emptyList()
+            selectedUnitTypes.value= emptyList()
+            selectedHospitalTypes.value= emptyList()
+            selectedBloodGroups.value= emptyList()
+            startDate.value=EMPTY_STRING
+            endDate.value=EMPTY_STRING
+            selectedTimeBlock.value=null
+
+
+        }
+        LaunchedEffect(selectedHospital.value) {
+            if(selectedSectors.value.isEmpty() && selectedHospitalTypes.value.isEmpty()){
+                val new= mutableListOf<SimpleHospital>()
+                new.addAll(selectedHospitals.value)
+                val hasNone= new.none { it==selectedHospital.value }
+                if(hasNone) selectedHospital.value?.let{new.add(it)}
+                selectedHospital.value=null
+                selectedHospitals.value=new
+            }
+        }
+        LaunchedEffect(selectedBloodBank.value) {
+            if(selectedSectors.value.isEmpty() && selectedHospitalTypes.value.isEmpty()){
+                val new= mutableListOf<SimpleHospital>()
+                new.addAll(selectedBloodBanks.value)
+                val hasNone= new.none { it==selectedBloodBank.value }
+                if(hasNone) selectedBloodBank.value?.let{new.add(it)}
+                selectedBloodBank.value=null
+                selectedBloodBanks.value=new
+            }
+        }
+        LaunchedEffect(selectedSector.value) {
+            val new= mutableListOf<Sector>()
+            new.addAll(selectedSectors.value)
+            val hasNone= new.none { it==selectedSector.value }
+            if(hasNone) selectedSector.value?.let{new.add(it)}
+            selectedSector.value=null
+            selectedSectors.value=new
+            selectedBloodBanks.value= emptyList()
+            selectedBloodBanks.value= emptyList()
+            selectedHospitals.value= emptyList()
+        }
+        LaunchedEffect(selectedHospitalType.value) {
+            val new= mutableListOf<HospitalType>()
+            new.addAll(selectedHospitalTypes.value)
+            val hasNone= new.none { it==selectedHospitalType.value }
+            if(hasNone) selectedHospitalType.value?.let{new.add(it)}
+            selectedHospitalType.value=null
+            selectedHospitalTypes.value=new
+            selectedBloodBanks.value= emptyList()
+            selectedHospitals.value= emptyList()
+        }
+        LaunchedEffect(selectedBloodGroup.value) {
+            val new= mutableListOf<BasicModel>()
+            new.addAll(selectedBloodGroups.value)
+            val hasNone= new.none { it==selectedBloodGroup.value }
+            if(hasNone) selectedBloodGroup.value?.let{new.add(it)}
+            selectedBloodGroup.value=null
+            selectedBloodGroups.value=new
+        }
+        LaunchedEffect(selectedUnitType.value) {
+            val new= mutableListOf<BasicModel>()
+            new.addAll(selectedUnitTypes.value)
+            val hasNone= new.none { it==selectedUnitType.value }
+            if(hasNone) selectedUnitType.value?.let{new.add(it)}
+            selectedUnitType.value=null
+            selectedUnitTypes.value=new
+
+        }
+        DatePickerWidget(showStartDatePicker,startDateState,startDate)
+        DatePickerWidget(showEndDatePicker,endDateState,endDate)
+        Dialog(onDismissRequest = {showDialog.value=false}) {
+            ColumnContainer {
+                Row(modifier= Modifier.fillMaxWidth()
+                    .padding(horizontal = 5.dp, vertical = 10.dp)){
+                    IconButton(R.drawable.ic_cancel_red) { showDialog.value=false }
+                }
+                if(loading) LoadingScreen(modifier=Modifier.fillMaxWidth())
+                else{
+                    if(!success && !fail){
+                        LazyColumn(modifier=Modifier.fillMaxWidth()) {
+                            item{
+                                Row(modifier= Modifier.fillMaxWidth()
+                                    .padding(5.dp), horizontalArrangement = Arrangement.SpaceBetween){
+                                    Row(verticalAlignment = Alignment.CenterVertically){
+                                        LabelSpan(value=startDate.value, label = FROM_LABEL)
+                                        if(startDate.value.trim()!=EMPTY_STRING){
+                                            IconButton(R.drawable.ic_cancel_red) { startDate.value=EMPTY_STRING }
+                                        }
+                                    }
+                                    Row(verticalAlignment = Alignment.CenterVertically){
+                                        LabelSpan(value=endDate.value, label = TO_LABEL)
+                                        if(endDate.value.trim()!=EMPTY_STRING){
+                                            IconButton(R.drawable.ic_cancel_red) { endDate.value=EMPTY_STRING }
+                                        }
+
+                                    }
+
+                                }
+
+                                if(selectedSectors.value.isNotEmpty()){
+                                    Span(SECTORS_LABEL)
+
+                                    selectedSectors.value.forEach {
+                                        Row(verticalAlignment = Alignment.CenterVertically){
+                                            Label(it.name)
+                                            IconButton(R.drawable.ic_delete_red) {
+                                                selectedSectors.value=selectedSectors.value.filter { f->f!=it }
+                                            }
+                                        }
+
+                                    }
+                                }
+                                if(selectedHospitalTypes.value.isNotEmpty()){
+                                    Span(HOSPITAL_TYPE_LABEL, backgroundColor = BLUE, color = WHITE)
+
+                                    selectedHospitalTypes.value.forEach {
+                                        Row(verticalAlignment = Alignment.CenterVertically){
+                                            Label(it.name)
+                                            IconButton(R.drawable.ic_delete_red) {
+                                                selectedHospitalTypes.value=selectedHospitalTypes.value.filter { f->f!=it }
+                                            }
+                                        }
+
+                                    }
+                                }
+                                if(selectedBloodBanks.value.isNotEmpty()){
+                                    Span(BLOOD_BANK_LABEL)
+                                    selectedBloodBanks.value.forEach {
+                                        Row(verticalAlignment = Alignment.CenterVertically){
+                                            Label(it.name?:EMPTY_STRING)
+                                            IconButton(R.drawable.ic_delete_red) {
+                                                selectedBloodBanks.value=selectedBloodBanks.value.filter { f->f!=it }
+                                            }
+                                        }
+
+                                    }
+                                }
+                                if(selectedHospitals.value.isNotEmpty()){
+                                    Span(HOSPITALS_LABEL)
+                                    selectedHospitals.value.forEach {
+                                        Row(verticalAlignment = Alignment.CenterVertically){
+                                            Label(it.name?:EMPTY_STRING)
+                                            IconButton(R.drawable.ic_delete_red) {
+                                                selectedHospitals.value=selectedHospitals.value.filter { f->f!=it }
+                                            }
+                                        }
+                                    }
+                                }
+                                if(selectedBloodGroups.value.isNotEmpty()){
+                                    Span(BLOOD_GROUP_LABEL)
+                                    selectedBloodGroups.value.forEach {
+                                        Row(verticalAlignment = Alignment.CenterVertically){
+                                            Label(it.name?:EMPTY_STRING)
+                                            IconButton(R.drawable.ic_delete_red) {
+                                                selectedBloodGroups.value=selectedBloodGroups.value.filter { f->f!=it }
+                                            }
+                                        }
+                                    }
+                                }
+                                if(selectedUnitTypes.value.isNotEmpty()){
+                                    Span(UNIT_TYPE_LABEL)
+                                    selectedUnitTypes.value.forEach {
+                                        Row(verticalAlignment = Alignment.CenterVertically){
+                                            Label(it.name?:EMPTY_STRING)
+                                            IconButton(R.drawable.ic_delete_red) {
+                                                selectedUnitTypes.value=selectedUnitTypes.value.filter { f->f!=it }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Row(modifier= Modifier
+                                    .fillMaxWidth()
+                                    .padding(5.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween){
+                                    CustomButton(label = DATE_FROM_LABEL ,
+                                        enabledBackgroundColor = ORANGE,
+                                        onClick = { showStartDatePicker.value = !showStartDatePicker.value })
+
+                                    CustomButton(label = DATE_TO_LABEL ,
+                                        enabledBackgroundColor = ORANGE,
+                                        onClick = { showEndDatePicker.value = !showEndDatePicker.value })
+                                }
+                                if(startDate.value!= EMPTY_STRING){
+                                    Row(modifier= Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically){
+                                        Box(modifier= Modifier.padding(5.dp).fillMaxWidth()){
+                                            ComboBox(
+                                                hasTitle = false,
+                                                loadedItems = timeBlocks,
+                                                selectedItem = selectedTimeBlock,
+                                                selectedContent = { CustomInput(selectedTimeBlock.value?.second?: SELECT_TIME_LABEL)},
+                                                itemContent = {Label(it?.second?:EMPTY_STRING)}
+                                            )
+                                        }
+                                    }
+                                    if(selectedTimeBlock.value!=null){
+                                        Row(modifier= Modifier.fillMaxWidth().padding(5.dp),
+                                            verticalAlignment = Alignment.CenterVertically){
+                                            Box(modifier= Modifier.fillMaxWidth()){
+                                                ComboBox(
+                                                    hasTitle = false,
+                                                    loadedItems = filterByList,
+                                                    selectedItem = selectedFilterBy,
+                                                    selectedContent = { CustomInput(selectedFilterBy.value?.second?: FILTER_LABEL)}
+                                                ) {
+                                                    Label(it?.second?:EMPTY_STRING)
+                                                }
+                                            }
+                                        }
+                                        if(selectedFilterBy.value!=null){
+                                            selectedFilterBy.value?.let{
+                                                when(it.first){
+                                                    BloodFilterBy.HOSPITAL->{
+                                                        Row(modifier= Modifier.fillMaxWidth().padding(5.dp),
+                                                            verticalAlignment = Alignment.CenterVertically){
+                                                            Box(modifier= Modifier
+                                                                .fillMaxWidth()){
+                                                                ComboBox(
+                                                                    hasTitle = false,
+                                                                    loadedItems = hospitals,
+                                                                    selectedItem = selectedHospital,
+                                                                    selectedContent = { CustomInput(selectedHospital.value?.name?: SELECT_HOSPITAL_LABEL)}
+                                                                ) {
+                                                                    Label(it?.name?:EMPTY_STRING)
+                                                                }
+                                                            }
+
+                                                        }
+                                                    }
+                                                    BloodFilterBy.SECTOR->{
+                                                        Row(modifier= Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(5.dp),
+                                                            verticalAlignment = Alignment.CenterVertically){
+                                                            Box(modifier= Modifier
+                                                                .fillMaxWidth()
+                                                                .weight(1f)){
+                                                                ComboBox(
+                                                                    hasTitle = false,
+                                                                    loadedItems = sectors,
+                                                                    selectedItem = selectedSector,
+                                                                    selectedContent = { CustomInput(selectedSector.value?.name?: SELECT_SECTOR_LABEL)}
+                                                                ) {
+                                                                    Label(it?.name?:EMPTY_STRING)
+                                                                }
+                                                            }
+
+                                                        }
+                                                    }
+                                                    BloodFilterBy.HOSPITAL_TYPE->{
+                                                        Row(modifier= Modifier.fillMaxWidth().padding(5.dp),
+                                                            verticalAlignment = Alignment.CenterVertically){
+                                                            Box(modifier= Modifier
+                                                                .fillMaxWidth()
+                                                                .weight(1f)){
+                                                                ComboBox(
+                                                                    hasTitle = false,
+                                                                    loadedItems = hospitalTypes,
+                                                                    selectedItem = selectedHospitalType,
+                                                                    selectedContent = { CustomInput(selectedHospitalType.value?.name?:SELECT_HOSPITAL_TYPE_LABEL)}
+                                                                ) {
+                                                                    Label(it?.name?:EMPTY_STRING)
+                                                                }
+                                                            }
+
+                                                        }
+                                                    }
+                                                    BloodFilterBy.BLOOD_BANK->{
+                                                        Row(modifier= Modifier.fillMaxWidth().padding(5.dp),
+                                                            verticalAlignment = Alignment.CenterVertically){
+                                                            Box(modifier= Modifier
+                                                                .fillMaxWidth()
+                                                                .weight(1f)){
+                                                                ComboBox(
+                                                                    hasTitle = false,
+                                                                    loadedItems = bloodBanks,
+                                                                    selectedItem = selectedBloodBank,
+                                                                    selectedContent = { CustomInput(selectedBloodBank.value?.name?: SELECT_BLOOD_BANK_LABEL)}
+                                                                ) {
+                                                                    Label(it?.name?:EMPTY_STRING)
+                                                                }
+                                                            }
+
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                        }
+                                    }
+
+
+
+
+
+
+                                    if(1>2){
+                                        Row(modifier= Modifier.fillMaxWidth().padding(5.dp),
+                                            verticalAlignment = Alignment.CenterVertically){
+                                            Box(modifier= Modifier
+                                                .fillMaxWidth()
+                                                .weight(1f)){
+                                                ComboBox(
+                                                    hasTitle = false,
+                                                    loadedItems = bloodGroups,
+                                                    selectedItem = selectedBloodGroup,
+                                                    selectedContent = { CustomInput(selectedBloodGroup.value?.name?: SELECT_BLOOD_GROUP_LABEL)}
+                                                ) {
+                                                    Label(it?.name?:EMPTY_STRING)
+                                                }
+                                            }
+                                        }
+                                        Row(modifier= Modifier.fillMaxWidth().padding(5.dp),
+                                            verticalAlignment = Alignment.CenterVertically){
+                                            Box(modifier= Modifier
+                                                .fillMaxWidth()
+                                                .weight(1f)){
+                                                ComboBox(
+                                                    hasTitle = false,
+                                                    loadedItems = unitTypes,
+                                                    selectedItem = selectedUnitType,
+                                                    selectedContent = { CustomInput(selectedUnitType.value?.name?: SELECT_UNIT_TYPE_LABEL)}
+                                                ) {
+                                                    Label(it?.name?:EMPTY_STRING)
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                    Row(modifier= Modifier.fillMaxWidth().padding(5.dp).padding(horizontal = 15.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween){
+                                        CustomButton(label= FILTER_LABEL, buttonShape = rcs(5)) {
+                                            val created=DailyBloodStockFilterBody(
+                                                hospitalIds =  if(selectedHospitals.value.isNotEmpty())selectedHospitals.value.map { it.id } else null,
+                                                bloodGroupIds = if(selectedBloodGroups.value.isNotEmpty())selectedBloodGroups.value.map { it.id?:0 } else null,
+                                                sectorIds =  if(selectedSectors.value.isNotEmpty())selectedSectors.value.map { it.id } else null,
+                                                typeIds =  if(selectedHospitalTypes.value.isNotEmpty())selectedHospitalTypes.value.map { it.id } else null,
+                                                bloodBankIds =  if(selectedBloodBanks.value.isNotEmpty())selectedBloodBanks.value.map { it.id } else null,
+                                                bloodUnitTypeId = selectedUnitType.value?.id,
+                                                startDate = if(startDate.value.trim()!=EMPTY_STRING)startDate.value else null,
+                                                endDate = if(endDate.value.trim()!=EMPTY_STRING)endDate.value else null,
+                                                timeBlock = selectedTimeBlock.value?.first,
+                                            )
+                                            body.value=created
+                                            controller.filter(created)
+
+                                        }
+                                        CustomButton(label= CANCEL_LABEL, buttonShape = rcs(5), enabledBackgroundColor = Color.Red) { showDialog.value=false }
+                                    }
+                                    VerticalSpacer()
+                                }
+                            }
+                        }
+                    }
+                    else{
+                        if(fail){
+                            FailScreen(modifier=Modifier.fillMaxSize(),
+                                errors= emptyMap(),
+                                message = ERROR_LOADING_DATA_LABEL)}
+                        if(success) SuccessScreen{
+                            ColumnContainer {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally){
+                                    Image(painter = painterResource(R.drawable.logo),contentDescription = null)
+                                    Label(DATA_LOADED_LABEL)
+                                    CustomButton(label = OK_LABEL) { showDialog.value=false }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+
+        }
+    }
+
+}
+
+@Composable
+private fun Cell(modifier:Modifier=Modifier,text:String,fontSize:Int,spacerHeight:Int=0,padding:Int=0){
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Label(text, fontSize = fontSize, textOverflow = TextOverflow.Ellipsis, softWrap = true, paddingEnd = padding, paddingStart = padding)
+        VerticalSpacer(spacerHeight)
+        HorizontalDivider(thickness = 2.dp)
+    }
+}
+@Composable
+private fun SpanCell(modifier:Modifier=Modifier, text:String, fontSize:Int, backgroundColor:Color= BLUE, spacerHeight:Int=0,padding: Int=0){
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Span(
+            text = text,
+            color = Color.White,
+            fontSize = fontSize,
+            backgroundColor = backgroundColor,
+            startPadding = padding,
+            endPadding = padding
+        )
+        VerticalSpacer(spacerHeight)
+        HorizontalDivider()
+    }
+}
+
+suspend fun saveExcelFile(responseBody: ResponseBody, fileName: String): Boolean {
+    return withContext(Dispatchers.IO) {
+        try {
+            val downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            if (!downloadsFolder.exists()) downloadsFolder.mkdirs()
+
+            val file = File(downloadsFolder, fileName)
+            val inputStream = responseBody.byteStream()
+            val outputStream = FileOutputStream(file)
+
+            inputStream.use { input ->
+                outputStream.use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+}
+
+//val grouped = filteredRecords.groupBy { Pair(it.hospital, it.entryDate ?: EMPTY_STRING) }.mapValues { (_, list) -> list.associateBy({ it.bloodGroupId }, { it.amount ?: 0 }) }
+
+/*
+ val groupedByHospital=filteredRecords.sortedWith(
+    compareByDescending<DailyBloodStock> { it.entryDate }
+        .thenByDescending { it.hospital?.cityId ?: Int.MIN_VALUE}
+        .thenByDescending { it.hospital?.areaId ?: Int.MIN_VALUE }
+        .thenByDescending { it.hospitalId ?: Int.MIN_VALUE }
+        .thenBy { it.timeBlock}
+).groupBy { Pair(it.hospital,it.entryDate?:EMPTY_STRING) }
+val mappedGroupsAmount=groupedByHospital.mapValues { (key,list)->list.associateBy ({ it.bloodGroupId },{it.amount?:0} ) }
+
+ */
+
+/*
+ val cityModifierWeight=1f
+ val areaModifierWeight=0.8f
+ val hospitalModifierWeight=1f
+ val dateModifierWeight=0.7f
+ val timeModifierWeight=0.6f
+ val underModifierInspectionWeight=0.6f
+ val bloodGroupModifierWeight=0.6f
+ if(records.value.isNotEmpty()){
+
+     /*
+     if(1>2){
+         var showCity by remember { mutableStateOf(true) }
+         var showArea by remember { mutableStateOf(true) }
+         var showSector by remember { mutableStateOf(true) }
+         var showHospitalType by remember { mutableStateOf(true) }
+
+         LazyRow(modifier=Modifier.fillMaxWidth()){
+             item{
+                 Column(modifier=Modifier.border(width=1.dp,color= GRAY),horizontalAlignment = Alignment.CenterHorizontally){
+                     IconButton(if(showCity)R.drawable.ic_eye_blue else R.drawable.ic_visibility_off_dark_blue) {
+                         showCity=!showCity
+                     }
+                     if(showCity){
+                         Cell(text=DIRECTORATE_LABEL, fontSize = 16,spacerHeight = 6, padding = 5)
+                         mappedGroupsAmount.forEach{map->
+                             Cell(text=map.key.first?.city?.name?:EMPTY_STRING, fontSize = 16,spacerHeight = 6, padding = 5)
+                         }
+
+                     }
+                 }
+                 Column(modifier=Modifier.border(width=1.dp,color= GRAY),horizontalAlignment = Alignment.CenterHorizontally){
+                     IconButton(if(showArea)R.drawable.ic_eye_blue else R.drawable.ic_visibility_off_dark_blue) {
+                         showArea=!showArea
+                     }
+                     if(showArea){
+                         Cell(text= AREA_LABEL, fontSize = 16,spacerHeight = 6, padding = 5)
+                         mappedGroupsAmount.forEach{map->
+                             Cell(text=map.key.first?.area?.name?:EMPTY_STRING, fontSize = 16,spacerHeight = 6, padding = 5)
+                         }
+
+                     }
+                 }
+                 Column(modifier=Modifier.border(width=1.dp,color= GRAY),horizontalAlignment = Alignment.CenterHorizontally){
+                     IconButton(if(showSector)R.drawable.ic_eye_blue else R.drawable.ic_visibility_off_dark_blue) {
+                         showSector=!showSector
+                     }
+                     if(showSector){
+                         Cell(text= SECTOR_LABEL, fontSize = 16,spacerHeight = 6, padding = 5)
+                         mappedGroupsAmount.forEach{map->
+                             Cell(text=map.key.first?.sector?.name?:EMPTY_STRING, fontSize = 16,spacerHeight = 6, padding = 5)
+                         }
+
+                     }
+                 }
+                 Column(modifier=Modifier.border(width=1.dp,color= GRAY),horizontalAlignment = Alignment.CenterHorizontally){
+                     IconButton(if(showHospitalType)R.drawable.ic_eye_blue else R.drawable.ic_visibility_off_dark_blue) {
+                         showHospitalType=!showHospitalType
+                     }
+                     if(showHospitalType){
+                         Cell(text= HOSPITAL_TYPE_LABEL, fontSize = 16,spacerHeight = 6, padding = 5)
+                         mappedGroupsAmount.forEach{map->
+                             Cell(text=map.key.first?.type?.name?:EMPTY_STRING, fontSize = 16,spacerHeight = 6, padding = 5)
+                         }
+
+                     }
+                 }
+                 Column(modifier=Modifier.border(width=1.dp,color= GRAY),horizontalAlignment = Alignment.CenterHorizontally){
+                     VerticalSpacer(25)
+                     Cell(text= HOSPITAL_LABEL, fontSize = 16,spacerHeight = 6, padding = 5)
+                     mappedGroupsAmount.forEach{map->
+                         Cell(text=map.key.first?.name?:EMPTY_STRING, fontSize = 16,spacerHeight = 6, padding = 5)
+                     }
+                 }
+                 Column(modifier=Modifier.border(width=1.dp,color= GRAY),horizontalAlignment = Alignment.CenterHorizontally){
+                     VerticalSpacer(25)
+                     Cell(text= DATE_LABEL, fontSize = 16,spacerHeight = 6, padding = 5)
+                     VerticalSpacer(8)
+                     mappedGroupsAmount.forEach{map->
+                         Cell(text= map.key.second, fontSize = 16,spacerHeight = 9, padding = 5)
+                     }
+                 }
+                 Column(modifier=Modifier.border(width=1.dp,color= GRAY),horizontalAlignment = Alignment.CenterHorizontally){
+                     VerticalSpacer(27)
+                     Cell(text= TIME_LABEL, fontSize = 16,spacerHeight = 6, padding = 5)
+                     mappedGroupsAmount.forEach{map->
+                         val currentRecord =records.value.find { (it.hospital == map.key.first) && (it.entryDate == map.key.second) }
+                         val timeBlock=currentRecord?.timeBlock
+                         val timeBlockString=when(timeBlock){
+                             "00"->"من 12 مساءا حتى 6 صباحا"
+                             "06"->"من 6 صباحا حتى 12 ظهرا"
+                             "12"->"من 12 ظهرا حتى 6 مساءا"
+                             "18"->"من 6 مساءا حتى 12 صباحا"
+                             else->"لم يتم إدخال التوقيت"
+                         }
+                         Cell(text=timeBlockString, fontSize = 16,spacerHeight = 6, padding = 5)
+                     }
+                 }
+                 Column(modifier=Modifier.border(width=1.dp,color= GRAY),horizontalAlignment = Alignment.CenterHorizontally){
+                     VerticalSpacer(25)
+                     Cell(text= UNDER_INSPECTION_LABEL, fontSize = 16,spacerHeight = 6, padding = 5)
+                     mappedGroupsAmount.forEach{map->
+                         val currentRecord =records.value.find { (it.hospital == map.key.first) && (it.entryDate == map.key.second) && (it.underInspection==true) }
+                         val amount=currentRecord?.amount?:0
+                         SpanCell(text=amount.toString(), fontSize = 16,spacerHeight = 10, padding = 5)
+                     }
+                 }
+                 bloodGroupOrder.forEach { bloodGroup->
+                     Column(modifier=Modifier.border(width=1.dp,color= GRAY),horizontalAlignment = Alignment.CenterHorizontally){
+                         VerticalSpacer(25)
+                         Cell(text= bloodGroup.second, fontSize = 16,spacerHeight = 6, padding = 5)
+                         VerticalSpacer(3)
+                         mappedGroupsAmount.forEach{map->
+                             val currentRecord =records.value.find { (it.hospital == map.key.first) && (it.entryDate == map.key.second) && (it.underInspection!=true)&& (it.bloodGroupId ==bloodGroup.first) }
+                             val amount=currentRecord?.amount?:0
+                             SpanCell(text=amount.toString(), fontSize = 16,spacerHeight = 10, padding = 5)
+                         }
+                     }
+                 }
+             }
+         }
+         HorizontalDivider()
+     }
+      */
+     Row(modifier = Modifier.fillMaxWidth()) {
+         Box(modifier= Modifier.width(1.dp).height(25.dp).background(Color.Black)){}
+         //Text(DIRECTORATE_LABEL, modifier = Modifier.weight(cityModifierWeight), fontSize = 12.sp, textAlign = TextAlign.Center)
+         Cell(modifier=Modifier.weight(cityModifierWeight),DIRECTORATE_LABEL, fontSize = 12,spacerHeight = 6)
+         //Box(modifier= Modifier.width(1.dp).height(25.dp).background(Color.Black)){}
+         //Text(AREA_LABEL, modifier = Modifier.weight(areaModifierWeight), fontSize = 12.sp, textAlign = TextAlign.Center)
+         //Cell(modifier=Modifier.weight(areaModifierWeight),AREA_LABEL, fontSize = 12,spacerHeight = 6)
+
+         Box(modifier= Modifier.width(1.dp).height(25.dp).background(Color.Black)){}
+         //Text(HOSPITAL_LABEL, modifier = Modifier.weight(hospitalModifierWeight), fontSize = 12.sp, textAlign = TextAlign.Center)
+         Cell(modifier=Modifier.weight(hospitalModifierWeight),HOSPITAL_LABEL, fontSize = 12,spacerHeight = 6)
+
+         Box(modifier= Modifier.width(1.dp).height(25.dp).background(Color.Black)){}
+         //Text(DATE_LABEL, modifier = Modifier.weight(dateModifierWeight), fontSize = 11.sp,textAlign = TextAlign.Center)
+         Cell(modifier=Modifier.weight(dateModifierWeight),DATE_LABEL, fontSize = 12,spacerHeight = 6)
+
+         Box(modifier= Modifier.width(1.dp).height(25.dp).background(Color.Black)){}
+         //Text(TIME_LABEL, modifier = Modifier.weight(timeModifierWeight), fontSize = 11.sp, textAlign = TextAlign.Center)
+         Cell(modifier=Modifier.weight(timeModifierWeight),TIME_LABEL, fontSize = 12,spacerHeight = 6)
+         Box(modifier= Modifier.width(1.dp).height(25.dp).background(Color.Black)){}
+         //Text("تحت الفحص", modifier = Modifier.weight(underModifierInspectionWeight), fontSize = 11.sp, textAlign = TextAlign.Center)
+         Cell(modifier=Modifier.weight(underModifierInspectionWeight),"تحت الفحص", fontSize = 12,spacerHeight = 6)
+         for ((_, label) in bloodGroupOrder) {
+             Box(modifier= Modifier.width(1.dp).height(25.dp).background(Color.Black)){}
+             Cell(modifier=Modifier.weight(bloodGroupModifierWeight),label, fontSize = 12,spacerHeight = 10)
+         }
+         Box(modifier= Modifier.width(1.dp).height(25.dp).background(Color.Black)){}
+
+     }
+     HorizontalDivider()
+
+     var lastCity: String? = null
+     var lastArea: String? = null
+     var lastHospitalName: String? = null
+     var lastDate:String?=null
+     var lastTimeBlock:String?=null
+     // Body Rows
+     grouped.forEach { (key, groupData) ->
+         val (hospitalId, entryTime) = key
+         val currentRecord =records.value.find { it.hospital == hospitalId && it.entryDate == entryTime }
+         val hospital = currentRecord?.hospital
+         val currentCity = hospital?.city?.name ?: EMPTY_STRING
+         //val currentArea = hospital?.area?.name ?: EMPTY_STRING
+         val currentHospitalName = hospital?.name ?: EMPTY_STRING
+         val currentTimeBlock = currentRecord?.timeBlock
+         val underInspection=if(currentRecord?.underInspection==true) currentRecord.amount?:0 else 0
+         val underInspectionBackground=if (underInspection.toString() != "0") Color.Blue else Color.Red
+         val cityToDisplay = if (currentCity == lastCity) "----" else currentCity
+         //val areaToDisplay = if (currentArea == lastArea) "----" else currentArea
+         val hospitalNameToDisplay =
+             if (currentHospitalName == lastHospitalName) "----" else currentHospitalName
+         val timeBLockToDisplay =if (currentTimeBlock == lastTimeBlock) "----" else currentTimeBlock
+         val dateToDisplay = if (entryTime == lastDate) "----" else entryTime
+         val finalDateTiDisplay=if(dateToDisplay!="----")dateToDisplay.replaceRange(6, entryTime.length, EMPTY_STRING)
+             .replaceRange(5, 6, EMPTY_STRING)
+         else dateToDisplay
+         // Update tracking values
+         lastCity = currentCity
+         //lastArea = currentArea
+         lastHospitalName = currentHospitalName
+         lastTimeBlock = currentTimeBlock
+         lastDate = entryTime
+
+         Row(
+             modifier = Modifier.fillMaxWidth(),
+             verticalAlignment = Alignment.CenterVertically
+         ) {
+             Box(modifier = Modifier
+                 .width(1.dp)
+                 .height(25.dp)
+                 .background(Color.Black)) {}
+             Cell(modifier=Modifier.weight(cityModifierWeight),cityToDisplay, fontSize = 11,spacerHeight = 6)
+             //Box(modifier = Modifier.width(1.dp).height(25.dp).background(Color.Black)) {}
+             //Cell(modifier=Modifier.weight(areaModifierWeight),areaToDisplay, fontSize = 11,spacerHeight = 6)
+             Box(modifier = Modifier
+                 .width(1.dp)
+                 .height(25.dp)
+                 .background(Color.Black)) {}
+             // Only show name if it's not repeated
+             Cell(modifier=Modifier.weight(hospitalModifierWeight),hospitalNameToDisplay, fontSize = 11,spacerHeight = 6)
+             Box(modifier = Modifier
+                 .width(1.dp)
+                 .height(25.dp)
+                 .background(Color.Black)) {}
+             //Date
+             Cell(modifier=Modifier.weight(dateModifierWeight),finalDateTiDisplay, fontSize = 11,spacerHeight = 6)
+
+             Box(modifier = Modifier
+                 .width(1.dp)
+                 .height(25.dp)
+                 .background(Color.Black)) {}
+             //Time
+             Cell(modifier=Modifier.weight(timeModifierWeight),timeBLockToDisplay ?: EMPTY_STRING, fontSize = 11,spacerHeight = 6)
+             Box(modifier = Modifier.width(1.dp).height(25.dp).background(Color.Black)) {}
+
+             SpanCell(modifier = Modifier.fillMaxWidth().weight(underModifierInspectionWeight),
+                 text = underInspection.toString(),backgroundColor = underInspectionBackground,
+                 fontSize = 14,spacerHeight = 6)
+             for ((bloodGroupId, _) in bloodGroupOrder) {
+                 val amount = groupData[bloodGroupId] ?: "0"
+                 val amountBackground=if (amount != "0") Color.Blue else Color.Red
+
+                 Box(modifier = Modifier.width(1.dp).height(25.dp).background(Color.Black)) {}
+                 SpanCell(modifier = Modifier.fillMaxWidth().weight(bloodGroupModifierWeight),
+                     text = amount.toString(),backgroundColor = amountBackground,
+                     fontSize = 14,spacerHeight = 6)
+             }
+             Box(modifier = Modifier.width(1.dp).height(25.dp).background(Color.Black)) {}
+         }
+     }
+ }
+
+ */

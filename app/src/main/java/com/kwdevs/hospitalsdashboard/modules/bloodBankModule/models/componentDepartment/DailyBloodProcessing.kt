@@ -30,7 +30,7 @@ data class DailyBloodProcessing(
     val total:Int?=null,
 
     @Json(name = "blood_unit_type")
-    val bloodType:BasicModel?=null,
+    val unitType:BasicModel?=null,
 
     @Json(name = "editable")
     val editable:Boolean?=null,

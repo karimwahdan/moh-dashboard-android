@@ -22,6 +22,7 @@ import com.kwdevs.hospitalsdashboard.models.settings.wardTypes.WardTypeResponse
 import com.kwdevs.hospitalsdashboard.models.users.normal.HospitalUserSSResponse
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.bodies.KpiFilterBody
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.models.chartModels.city.CityBloodBankKpiResponse
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.models.chartModels.hospital.ComparativeBloodBankKpiResponse
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.models.chartModels.hospital.HospitalBloodBankKpiResponse
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.BLOOD_BANKS_PREFIX
 import com.kwdevs.hospitalsdashboard.modules.hospitalMainModule.subModules.hospitalUserSubModule.routes.USERS_PREFIX
@@ -86,6 +87,12 @@ interface SettingsApi {
 
     @POST("$HOSPITALS_PREFIX/$BLOOD_BANKS_PREFIX/nbts-chart")
     suspend fun nBTSCharts(@Body body: KpiFilterBody): HospitalBloodBankKpiResponse
+
+    @POST("$HOSPITALS_PREFIX/$BLOOD_BANKS_PREFIX/comparative-chart")
+    suspend fun comparativeCharts(@Body body: KpiFilterBody): ComparativeBloodBankKpiResponse
+
+    @POST("$HOSPITALS_PREFIX/$BLOOD_BANKS_PREFIX/comparative-directorate-nbts-chart")
+    suspend fun comparativeDirectorateWithNBTSCharts(@Body body: KpiFilterBody): ComparativeBloodBankKpiResponse
 
     @GET("$HOME_PREFIX/$HOME_PREFIX")
     suspend fun home(

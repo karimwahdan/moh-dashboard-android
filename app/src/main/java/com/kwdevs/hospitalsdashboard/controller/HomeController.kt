@@ -8,6 +8,7 @@ import com.kwdevs.hospitalsdashboard.app.Preferences
 import com.kwdevs.hospitalsdashboard.app.retrofit.UiState
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.bodies.KpiFilterBody
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.models.chartModels.city.CityBloodBankKpiResponse
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.models.chartModels.hospital.ComparativeBloodBankKpiResponse
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.models.chartModels.hospital.HospitalBloodBankKpiResponse
 import com.kwdevs.hospitalsdashboard.responses.home.HomeResponse
 import com.kwdevs.hospitalsdashboard.routes.Callers
@@ -28,6 +29,9 @@ class HomeController : ViewModel() {
 
     private val specializedKpiDatum=MutableLiveData<UiState<HospitalBloodBankKpiResponse>>()
     val specializedKpiState: LiveData<UiState<HospitalBloodBankKpiResponse>> get() = specializedKpiDatum
+
+    private val comparativeKpiDatum=MutableLiveData<UiState<ComparativeBloodBankKpiResponse>>()
+    val comparativeKpiState: LiveData<UiState<ComparativeBloodBankKpiResponse>> get() = comparativeKpiDatum
 
     private val insuranceKpiDatum=MutableLiveData<UiState<HospitalBloodBankKpiResponse>>()
     val insuranceKpiState: LiveData<UiState<HospitalBloodBankKpiResponse>> get() = insuranceKpiDatum
@@ -121,6 +125,21 @@ class HomeController : ViewModel() {
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     specializedKpiDatum.value = UiState.Error(error(e))
+                }
+            }
+        }
+    }
+
+    fun getComparativeCharts(kpiBody: KpiFilterBody){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main){comparativeKpiDatum.value = UiState.Loading}
+                val response = api.comparativeCharts(kpiBody)
+                withContext(Dispatchers.Main) {comparativeKpiDatum.value = UiState.Success(response) }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    comparativeKpiDatum.value = UiState.Error(error(e))
                 }
             }
         }

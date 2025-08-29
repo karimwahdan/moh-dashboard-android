@@ -101,6 +101,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.LoadingScreen
 import com.kwdevs.hospitalsdashboard.views.assets.container.Container
 import com.kwdevs.hospitalsdashboard.views.cards.AreaCard
 import com.kwdevs.hospitalsdashboard.views.pages.home.homeCharts.bloodBankModule.general.CityBloodBankKpiSection
+import com.kwdevs.hospitalsdashboard.views.pages.home.homeCharts.bloodBankModule.general.ComparativeBloodBankKpiSection
 import com.kwdevs.hospitalsdashboard.views.pages.home.homeCharts.bloodBankModule.general.CurativeBloodBankKpiSection
 import com.kwdevs.hospitalsdashboard.views.pages.home.homeCharts.bloodBankModule.general.EducationalBloodBankKpiSection
 import com.kwdevs.hospitalsdashboard.views.pages.home.homeCharts.bloodBankModule.general.InsuranceBloodBankKpiSection
@@ -313,8 +314,6 @@ fun HomeScreen(navHostController: NavHostController){
                 LazyColumn(modifier=Modifier.fillMaxWidth().weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally) {
                     item{
-
-
                         Row(modifier=Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically){
@@ -334,7 +333,6 @@ fun HomeScreen(navHostController: NavHostController){
                                     }
                                 }
                             }
-
                             superUser?.let {
                                 if(it.isSuper){
                                     HorizontalSpacer()
@@ -445,7 +443,9 @@ fun HomeScreen(navHostController: NavHostController){
                         NBTSBloodBankKpiSection(controller)
                         HorizontalDivider()
                         VerticalSpacer()
-
+                        ComparativeBloodBankKpiSection(controller)
+                        HorizontalDivider()
+                        VerticalSpacer()
                     }
                 }
                 VerticalSpacer()

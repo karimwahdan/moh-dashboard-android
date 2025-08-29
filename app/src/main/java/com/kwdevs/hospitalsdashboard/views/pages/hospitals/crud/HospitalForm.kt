@@ -10,11 +10,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.TextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,8 +37,8 @@ import com.kwdevs.hospitalsdashboard.R
 import com.kwdevs.hospitalsdashboard.app.Preferences
 import com.kwdevs.hospitalsdashboard.app.ViewType
 import com.kwdevs.hospitalsdashboard.app.retrofit.UiState
-import com.kwdevs.hospitalsdashboard.controller.hospital.RenalDevicesController
 import com.kwdevs.hospitalsdashboard.controller.SettingsController
+import com.kwdevs.hospitalsdashboard.controller.hospital.RenalDevicesController
 import com.kwdevs.hospitalsdashboard.models.hospital.Hospital
 import com.kwdevs.hospitalsdashboard.models.hospital.HospitalDepartment
 import com.kwdevs.hospitalsdashboard.models.hospital.HospitalWard
@@ -84,6 +83,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.HAS_RENAL_DEVICES_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HAS_WARDS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_ADDRESS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_NAME_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HorizontalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.Icon
 import com.kwdevs.hospitalsdashboard.views.assets.IconButton
@@ -101,11 +101,10 @@ import com.kwdevs.hospitalsdashboard.views.assets.SPECIAL_NAME_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.Span
 import com.kwdevs.hospitalsdashboard.views.assets.TOTAL_UNITS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.TRY_AGAIN_LATER_LABEL
-import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.WHITE
-import com.kwdevs.hospitalsdashboard.views.cards.hospitals.renalDevices.RenalDeviceCard
 import com.kwdevs.hospitalsdashboard.views.cards.hospitals.WardCard
+import com.kwdevs.hospitalsdashboard.views.cards.hospitals.renalDevices.RenalDeviceCard
 import com.kwdevs.hospitalsdashboard.views.numericKeyBoard
 import com.kwdevs.hospitalsdashboard.views.rcs
 import com.kwdevs.hospitalsdashboard.views.rcsB
@@ -272,9 +271,14 @@ fun SpecialWardInput(hasWard:MutableState<Boolean>, label:String, allBeds:Mutabl
     if(hasWard.value){
         ColumnContainer {
             VerticalSpacer()
-            CustomInput(value = allBeds,label = TOTAL_UNITS_LABEL,keyboardOptions = numericKeyBoard)
+            CustomInput(value = allBeds,
+                label = TOTAL_UNITS_LABEL,keyboardOptions = numericKeyBoard, enabled =true,
+                onTextChange = {t->if(t.toIntOrNull()!=null) allBeds.value=t else allBeds.value=EMPTY_STRING}
+            )
             VerticalSpacer()
-            CustomInput(value = freeBeds,label = FREE_UNITS_LABEL,keyboardOptions = numericKeyBoard)
+            CustomInput(value = freeBeds,label = FREE_UNITS_LABEL,keyboardOptions = numericKeyBoard, enabled = true,
+                onTextChange = {t->if(t.toIntOrNull()!=null) freeBeds.value=t else freeBeds.value=EMPTY_STRING}
+            )
             VerticalSpacer()
         }
         VerticalSpacer()
@@ -378,7 +382,8 @@ fun InPatientWardsInput(hasWard: MutableState<Boolean>,wards:MutableState<List<H
             VerticalSpacer()
             CustomInput(value = wardName,label = NAME_LABEL)
             VerticalSpacer()
-            CustomInput(value = allBeds,label = TOTAL_UNITS_LABEL,keyboardOptions = numericKeyBoard)
+            CustomInput(value = allBeds,label = TOTAL_UNITS_LABEL,keyboardOptions = numericKeyBoard, enabled = true,
+                onTextChange = {t->if(t.toIntOrNull()!=null) allBeds.value=t else allBeds.value=EMPTY_STRING})
             VerticalSpacer()
             CustomCheckbox(label= ACTIVE_LABEL,active)
             VerticalSpacer()

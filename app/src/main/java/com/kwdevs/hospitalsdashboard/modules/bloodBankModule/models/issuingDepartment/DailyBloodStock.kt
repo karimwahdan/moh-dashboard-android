@@ -24,7 +24,7 @@ data class DailyBloodStock(
     @Json(name = "amount")
     val amount:Int?=null,
 
-    @Json(name = "strategic")
+    @Json(name = "emergency")
     val emergency:Int?=null,
 
     @Json(name = "under_inspection")

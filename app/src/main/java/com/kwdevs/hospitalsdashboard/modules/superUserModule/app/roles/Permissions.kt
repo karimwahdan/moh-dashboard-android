@@ -1,5 +1,6 @@
 package com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles
 
+
 //HOSPITAL
 const val READ_HOSPITAL="read.hospital"
 const val BROWSE_HOSPITAL="browse.hospital"
@@ -44,3 +45,4 @@ const val BROWSE_BB_DONATION_CAMPAIGNS="browse.bb.donation.campaigns"
 const val VIEW_HOSPITAL_DEVICE_MODULE="view.hospital.device.module"
 const val VIEW_HOSPITAL_DEPARTMENT_MODULE="view.hospital.department.module"
 const val VIEW_HOSPITAL_WARD_MODULE="view.hospital.ward.module"
+const val VIEW_HOSPITAL_BLOOD_MODULE="view.hospital.blood.module"

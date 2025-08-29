@@ -68,8 +68,8 @@ import com.kwdevs.hospitalsdashboard.views.assets.IconButton
 import com.kwdevs.hospitalsdashboard.views.assets.Label
 import com.kwdevs.hospitalsdashboard.views.assets.MONTH_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.NEW_INCINERATION_ITEM_LABEL
-import com.kwdevs.hospitalsdashboard.views.assets.QUANTITY_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SAVE_CHANGES_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SAVE_PROMPT
 import com.kwdevs.hospitalsdashboard.views.assets.SEARCH_BY_CAMPAIGN_CODE
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_BLOOD_GROUP_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_REASON_LABEL
@@ -81,6 +81,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.WHITE
 import com.kwdevs.hospitalsdashboard.views.assets.YEAR_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.container.Container
+import com.kwdevs.hospitalsdashboard.views.assets.monthName
 import com.kwdevs.hospitalsdashboard.views.assets.months
 import com.kwdevs.hospitalsdashboard.views.assets.years
 
@@ -152,7 +153,8 @@ fun IncinerationCreatePage(navHostController: NavHostController){
         }
         else->{}
     }
-    SaveDialog(showDialog,controller,bodies)
+    LaunchedEffect(selectedUnitType.value) { selectedBloodGroup.value=null }
+    SaveDialog(showDialog,controller,bodies,items)
     Container(
         title = "$NEW_INCINERATION_ITEM_LABEL ($departmentName)",
         showSheet = showSheet,
@@ -248,10 +250,10 @@ fun IncinerationCreatePage(navHostController: NavHostController){
                                 loadedItems = months,
                                 selectedItem = selectedMonth,
                                 selectedContent = {
-                                    CustomInput(selectedMonth.value)
+                                    CustomInput(monthName(selectedMonth.value))
                                 }
                             ) {
-                                Label(it)
+                                Label(monthName(it))
                             }
                         }
                         Box(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp).weight(1f),
@@ -314,6 +316,22 @@ fun IncinerationCreatePage(navHostController: NavHostController){
                             Row(modifier=Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically){
                                 Row(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
+                                    Box(modifier=Modifier.fillMaxWidth().weight(1f),
+                                        contentAlignment = Alignment.Center){
+                                        ComboBox(
+                                            title = UNIT_TYPE_LABEL,
+                                            loadedItems = unitTypes,
+                                            selectedItem = selectedUnitType,
+                                            selectedContent = {
+                                                CustomInput(selectedUnitType.value?.name?: SELECT_UNIT_TYPE_LABEL)
+                                            }
+                                        ) {
+                                            Label(it?.name?:EMPTY_STRING)
+                                        }
+                                    }
+                                }
+
+                                Row(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                     Column {
                                         VerticalSpacer(35)
                                         IconButton(R.drawable.ic_cancel_red) {
@@ -324,25 +342,12 @@ fun IncinerationCreatePage(navHostController: NavHostController){
                                         contentAlignment = Alignment.Center){
                                         ComboBox(
                                             title = BLOOD_GROUP_LABEL,
-                                            loadedItems = bloodGroups,
+                                            loadedItems = if(selectedUnitType.value?.id in listOf(3,4,5,6)) bloodGroups.filter { b->b.id in listOf(1,3,5,7) }
+                                                .map { model ->
+                                                    model.copy(name = (model.name?: EMPTY_STRING).replace("pos", EMPTY_STRING))} else bloodGroups,
                                             selectedItem = selectedBloodGroup,
                                             selectedContent = {
                                                 CustomInput(selectedBloodGroup.value?.name?: SELECT_BLOOD_GROUP_LABEL)
-                                            }
-                                        ) {
-                                            Label(it?.name?:EMPTY_STRING)
-                                        }
-                                    }
-                                }
-                                Row(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
-                                    Box(modifier=Modifier.fillMaxWidth().weight(1f),
-                                        contentAlignment = Alignment.Center){
-                                        ComboBox(
-                                            title = UNIT_TYPE_LABEL,
-                                            loadedItems = unitTypes,
-                                            selectedItem = selectedUnitType,
-                                            selectedContent = {
-                                                CustomInput(selectedUnitType.value?.name?: SELECT_UNIT_TYPE_LABEL)
                                             }
                                         ) {
                                             Label(it?.name?:EMPTY_STRING)
@@ -419,21 +424,26 @@ fun IncinerationCreatePage(navHostController: NavHostController){
 private fun SaveDialog(
     showDialog: MutableState<Boolean>,
     controller: IncinerationController,
-    bodies: MutableState<List<MonthlyIncinerationBody>>
+    bodies: MutableState<List<MonthlyIncinerationBody>>,
+    items:List<MonthlyIncineration>,
 ) {
     if(showDialog.value){
         Dialog(onDismissRequest = {showDialog.value=false}){
             ColumnContainer {
-
-                VerticalSpacer()
-                Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween){
-                    CustomButton(label=SAVE_CHANGES_LABEL, buttonShape = RectangleShape) {
-                        controller.storeMonthlyIncineration(bodies.value)
-                        showDialog.value=false
-                    }
-                    CustomButton(label= CANCEL_LABEL, buttonShape = RectangleShape, enabledBackgroundColor = Color.Red) {
-                        showDialog.value=false
+                Column{
+                    Label(SAVE_PROMPT)
+                    VerticalSpacer()
+                    LazyColumn(modifier=Modifier.weight(1f)) { items(items){ IncinerationCard(it)} }
+                    VerticalSpacer()
+                    Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween){
+                        CustomButton(label=SAVE_CHANGES_LABEL, buttonShape = RectangleShape) {
+                            controller.storeMonthlyIncineration(bodies.value)
+                            showDialog.value=false
+                        }
+                        CustomButton(label= CANCEL_LABEL, buttonShape = RectangleShape, enabledBackgroundColor = Color.Red) {
+                            showDialog.value=false
+                        }
                     }
                 }
             }

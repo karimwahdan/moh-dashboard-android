@@ -120,7 +120,7 @@ fun BloodImportCreatePage(navHostController: NavHostController){
     val hospitalName= remember { mutableStateOf(EMPTY_STRING) }
 
     var bloodTypes by remember { mutableStateOf<List<BasicModel>>(emptyList()) }
-    val selectedBloodType = remember { mutableStateOf<BasicModel?>(null) }
+    val selectedUnitType = remember { mutableStateOf<BasicModel?>(null) }
 
     var bloodGroups by remember { mutableStateOf<List<BasicModel>>(emptyList()) }
     val selectedBloodGroup = remember { mutableStateOf<BasicModel?>(null) }
@@ -179,6 +179,7 @@ fun BloodImportCreatePage(navHostController: NavHostController){
         if(!isPrivateSector.value){ hospitalName.value=selectedHospital.value?.name?: EMPTY_STRING }
 
     }
+    LaunchedEffect(selectedUnitType.value) { selectedBloodGroup.value=null }
     SaveDialog(showDialog = showDialog,controller, body,item )
     Container(
         title = NEW_IMPORT_LABEL,
@@ -226,7 +227,6 @@ fun BloodImportCreatePage(navHostController: NavHostController){
                                         Label(it)
                                     }
                                 }
-
                             }
                             if(day.value!= EMPTY_STRING && year.value!= EMPTY_STRING && month.value!= EMPTY_STRING){
                                 Row(modifier=Modifier.fillMaxWidth(),
@@ -282,20 +282,25 @@ fun BloodImportCreatePage(navHostController: NavHostController){
                                     }
                                     else->{Label(SELECT_UNIT_SOURCE_LABEL, color = Color.Red)}
                                 }
-                                if(selectedSource.value!=null){
+                                if(selectedSource.value!=null && (selectedSource.value?.first in listOf(RecipientType.NBTS,RecipientType.GOVERNMENTAL_HOSPITAL) &&
+                                            selectedHospital.value!=null) ||
+                                    (selectedSource.value?.first==RecipientType.PRIVATE_HOSPITAL &&
+                                            hospitalName.value!= EMPTY_STRING)
+                                ){
                                     Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp)){
                                         Box(modifier=Modifier.fillMaxWidth().padding(5.dp).weight(1f)){
                                             ComboBox(
                                                 loadedItems = bloodTypes,
-                                                selectedItem = selectedBloodType,
-                                                selectedContent = { CustomInput(selectedBloodType.value?.name?: SELECT_UNIT_TYPE_LABEL)}
+                                                selectedItem = selectedUnitType,
+                                                selectedContent = { CustomInput(selectedUnitType.value?.name?: SELECT_UNIT_TYPE_LABEL)}
                                             ) {
                                                 Label(it?.name?: EMPTY_STRING)
                                             }
                                         }
                                         Box(modifier=Modifier.fillMaxWidth().padding(5.dp).weight(1f)){
                                             ComboBox(
-                                                loadedItems = bloodGroups,
+                                                loadedItems = if(selectedUnitType.value?.id in listOf(3,4,5,6)) bloodGroups.filter { it.id in listOf(1,3,5,7) }.map { model ->
+                                                    model.copy(name = (model.name?: EMPTY_STRING).replace("pos", EMPTY_STRING))} else bloodGroups,
                                                 selectedItem = selectedBloodGroup,
                                                 selectedContent = { CustomInput(selectedBloodGroup.value?.name?: SELECT_BLOOD_GROUP_LABEL)}
                                             ) {
@@ -304,7 +309,7 @@ fun BloodImportCreatePage(navHostController: NavHostController){
                                         }
 
                                     }
-                                    if(selectedBloodType.value!=null && selectedBloodGroup.value!=null){
+                                    if(selectedUnitType.value!=null && selectedBloodGroup.value!=null){
                                         Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp)){
                                             CustomInput(quantity, QUANTITY_LABEL,
                                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -315,7 +320,6 @@ fun BloodImportCreatePage(navHostController: NavHostController){
                                 }
                                 VerticalSpacer()
                             }
-
                         }
                     }
                     Row(modifier=Modifier.fillMaxWidth(),
@@ -326,7 +330,14 @@ fun BloodImportCreatePage(navHostController: NavHostController){
                             enabled = (quantity.value.trim()!= EMPTY_STRING &&
                                     selectedSource.value!=null && day.value.trim()!= EMPTY_STRING
                                     && month.value.trim()!= EMPTY_STRING
-                                    && year.value.trim()!= EMPTY_STRING),
+                                    && year.value.trim()!= EMPTY_STRING &&
+                                    (
+                                            (selectedSource.value?.first in listOf(RecipientType.NBTS,RecipientType.GOVERNMENTAL_HOSPITAL) &&
+                                            selectedHospital.value!=null) ||
+                                                    (selectedSource.value?.first==RecipientType.PRIVATE_HOSPITAL &&
+                                                            hospitalName.value!= EMPTY_STRING)
+                                            )
+                                    ),
                             buttonShadowElevation = 6) {
                             if(quantity.value.trim()!= EMPTY_STRING &&
                                 selectedSource.value!=null && day.value.trim()!= EMPTY_STRING
@@ -345,7 +356,7 @@ fun BloodImportCreatePage(navHostController: NavHostController){
                                     hospitalName =if(selectedSource.value?.first==RecipientType.PRIVATE_HOSPITAL) hospitalName.value else null,
                                     senderHospital = selectedHospital.value,
                                     bloodGroup = selectedBloodGroup.value,
-                                    bloodUnitType = selectedBloodType.value,
+                                    bloodUnitType = selectedUnitType.value,
 
                                     )
                                 body.value=BloodImportBody(
@@ -356,7 +367,7 @@ fun BloodImportCreatePage(navHostController: NavHostController){
                                     isPrivateSector = selectedSource.value?.first==RecipientType.PRIVATE_HOSPITAL,
                                     byPatient = byPatient.value,
                                     bloodGroupId = selectedBloodGroup.value?.id,
-                                    unitTypeId = selectedBloodType.value?.id,
+                                    unitTypeId = selectedUnitType.value?.id,
                                     quantity = quantity.value.toInt(),
                                     day = day.value,
                                     month = month.value,
@@ -373,21 +384,10 @@ fun BloodImportCreatePage(navHostController: NavHostController){
                     }
                 }
             }
-            else{
-                if(fail){
-                    FailScreen(modifier=Modifier.fillMaxSize(),
-                        errors = errors,
-                        message = errorMessage)
-                }
-            }
+            else if(fail) FailScreen(modifier=Modifier.fillMaxSize(),errors = errors,message = errorMessage)
         }
     }
-    BackHandler {
-        if(fail){
-            fail=false
-            controller.reload()
-        }
-    }
+    BackHandler { if(fail){fail=false;controller.reload()} }
 }
 
 @Composable

@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.kwdevs.hospitalsdashboard.R
+import com.kwdevs.hospitalsdashboard.app.Preferences
 import com.kwdevs.hospitalsdashboard.app.retrofit.UiState
 import com.kwdevs.hospitalsdashboard.bodies.control.RoleBody
 import com.kwdevs.hospitalsdashboard.controller.control.PermissionsController
@@ -42,13 +43,13 @@ import com.kwdevs.hospitalsdashboard.views.assets.ComboBox
 import com.kwdevs.hospitalsdashboard.views.assets.CustomButton
 import com.kwdevs.hospitalsdashboard.views.assets.CustomInput
 import com.kwdevs.hospitalsdashboard.views.assets.EDIT_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
 import com.kwdevs.hospitalsdashboard.views.assets.GRAY
 import com.kwdevs.hospitalsdashboard.views.assets.GREEN
 import com.kwdevs.hospitalsdashboard.views.assets.IconButton
 import com.kwdevs.hospitalsdashboard.views.assets.Label
 import com.kwdevs.hospitalsdashboard.views.assets.NAME_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.PERMISSIONS_LABEL
-import com.kwdevs.hospitalsdashboard.views.assets.ROLES_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SAVE_CHANGES_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_PERMISSION_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SLUG_LABEL
@@ -61,8 +62,8 @@ import com.kwdevs.hospitalsdashboard.views.rcsT
 @Composable
 fun AddNewRoleDialog(showDialog: MutableState<Boolean>, controller: PermissionsController){
     val context= LocalContext.current
-    val name = remember { mutableStateOf("") }
-    val slug = remember { mutableStateOf("") }
+    val name = remember { mutableStateOf(EMPTY_STRING) }
+    val slug = remember { mutableStateOf(EMPTY_STRING) }
     var role by remember { mutableStateOf<Role?>(null) }
     val state by controller.singleRoleState.observeAsState()
     if(showDialog.value){
@@ -74,21 +75,17 @@ fun AddNewRoleDialog(showDialog: MutableState<Boolean>, controller: PermissionsC
                     val data = response.data
                     role = data
                     toast(context, "${data.name} Role Added Successfully")
-                    Log.e(UserControlRoute.route,"Add New Dialog: Success")
                     controller.reload()
                     showDialog.value=false
                 }
                 is UiState.Error -> {
                     toast(context, "Failed to Add New Role")
-                    Log.e(UserControlRoute.route,"Add New Dialog: Error")
                     controller.reload()
                     showDialog.value=false
                 }
                 is UiState.Loading->{
-                    Log.e(UserControlRoute.route,"Add New Dialog: Loading")
                 }
                 else -> {
-                    Log.e(UserControlRoute.route,"Add New Dialog: Else")
                 }
             }
         }
@@ -116,10 +113,11 @@ fun AddNewRoleDialog(showDialog: MutableState<Boolean>, controller: PermissionsC
                         enabledBackgroundColor = GREEN,
                         buttonShadowElevation = 5,
                         buttonShape = rcs(5),
-                        enabled = name.value!="" && slug.value!="") {
+                        enabled = name.value!=EMPTY_STRING && slug.value!=EMPTY_STRING) {
                         val input= RoleBody(
                             name=name.value.trim(),
-                            slug = slug.value.trim().replace("\\s+".toRegex(), ".")
+                            slug = slug.value.trim().replace("\\s+".toRegex(), "."),
+                            permissions = null,
                         )
                         controller.storeNewRole(input)
                     }
@@ -142,8 +140,8 @@ fun AddNewRoleDialog(showDialog: MutableState<Boolean>, controller: PermissionsC
 fun EditRoleDialog(showDialog: MutableState<Boolean>, controller: PermissionsController,
                            item: Role?){
     val context= LocalContext.current
-    val name = remember { mutableStateOf("") }
-    val slug = remember { mutableStateOf("") }
+    val name = remember { mutableStateOf(EMPTY_STRING) }
+    val slug = remember { mutableStateOf(EMPTY_STRING) }
     var role by remember { mutableStateOf<Role?>(null) }
     var permissions by remember { mutableStateOf<List<Permission>>(emptyList()) }
     val selectedPermission = remember { mutableStateOf<Permission?>(null) }
@@ -163,8 +161,8 @@ fun EditRoleDialog(showDialog: MutableState<Boolean>, controller: PermissionsCon
             else->{controller.permissionsList()}
         }
         LaunchedEffect(Unit) {
-            name.value=item?.name?:""
-            slug.value=item?.slug?:""
+            name.value=item?.name?:EMPTY_STRING
+            slug.value=item?.slug?:EMPTY_STRING
             selectedPermissions.value=role?.permissions?: emptyList()
 
         }
@@ -178,10 +176,14 @@ fun EditRoleDialog(showDialog: MutableState<Boolean>, controller: PermissionsCon
                     toast(context, "${data.name} Role Added Successfully")
                     controller.reload()
                     showDialog.value=false
+                    Preferences.Roles().delete()
+                    controller.reloadSingleRole()
                 }
                 is UiState.Error -> {
                     toast(context, "Failed to Add New Role")
                     showDialog.value=false
+                    Preferences.Roles().delete()
+                    controller.reloadSingleRole()
                 }
                 is UiState.Loading->{
                     Log.e(UserControlRoute.route,"Add New Dialog: Loading")
@@ -189,7 +191,10 @@ fun EditRoleDialog(showDialog: MutableState<Boolean>, controller: PermissionsCon
                 else -> {}
             }
         }
-        Dialog(onDismissRequest = {showDialog.value=false}) {
+        Dialog(onDismissRequest = {
+            showDialog.value=false
+            Preferences.Roles().delete()
+        }) {
             Column(modifier= Modifier.fillMaxWidth()
                 .shadow(elevation = 5.dp, shape = rcs(20))
                 .background(color = WHITE, shape = rcs(20))) {
@@ -209,7 +214,7 @@ fun EditRoleDialog(showDialog: MutableState<Boolean>, controller: PermissionsCon
                             loadedItems = permissions, selectedItem = selectedPermission, selectedContent = {
                                 CustomInput(selectedPermission.value?.name?: SELECT_PERMISSION_LABEL)
                             }) {
-                            Label(it?.name?:"")
+                            Label(it?.name?:EMPTY_STRING)
                         }
                     }
                     IconButton(R.drawable.ic_add_circle_green) {
@@ -226,7 +231,7 @@ fun EditRoleDialog(showDialog: MutableState<Boolean>, controller: PermissionsCon
                 LazyRow {
                     items(selectedPermissions.value){
                         Row(modifier= Modifier.padding(5.dp).border(1.dp, BLACK)){
-                            Label(it.name?:"")
+                            Label(it.name?:EMPTY_STRING)
                             IconButton(R.drawable.ic_delete_red) {
                                 selectedPermissions.value=selectedPermissions.value.filter { p->p!=it }
                             }
@@ -243,12 +248,12 @@ fun EditRoleDialog(showDialog: MutableState<Boolean>, controller: PermissionsCon
                         enabledBackgroundColor = GREEN,
                         buttonShadowElevation = 5,
                         buttonShape = rcs(5),
-                        enabled = name.value!="" && slug.value!="") {
+                        enabled = name.value!=EMPTY_STRING && slug.value!=EMPTY_STRING) {
                         val input= RoleBody(
                             id=item?.id,
                             name=name.value.trim(),
                             slug = slug.value.trim().replace("\\s+".toRegex(), "."),
-                            permissions = selectedPermissions.value
+                            permissions = if(selectedPermissions.value.isNotEmpty())selectedPermissions.value else null
                         )
                         controller.updateRole(input)
                     }
@@ -258,6 +263,7 @@ fun EditRoleDialog(showDialog: MutableState<Boolean>, controller: PermissionsCon
                         buttonShape = rcs(5),
                         enabledBackgroundColor = Color.Red) {
                         showDialog.value=false
+                        Preferences.Roles().delete()
                     }
                 }
                 VerticalSpacer()

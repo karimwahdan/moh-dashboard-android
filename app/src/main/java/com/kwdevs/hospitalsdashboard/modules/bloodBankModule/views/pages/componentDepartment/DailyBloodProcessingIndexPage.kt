@@ -165,7 +165,7 @@ fun DailyBloodProcessingIndexPage(navHostController: NavHostController){
                                     byCampaign.forEach { (campaign, processes) ->
                                         processes.forEach { process->
                                             val bgColor=if((process.total?:0)<(campaign?.total?:0)) Color.Red else GREEN
-                                            Label(process.bloodType?.name?:"", fontSize = 12)
+                                            Label(process.unitType?.name?:"", fontSize = 12)
                                             Row{
                                                 Label((campaign?.total?:0).toString(), fontSize = 12)
                                                 HorizontalSpacer()

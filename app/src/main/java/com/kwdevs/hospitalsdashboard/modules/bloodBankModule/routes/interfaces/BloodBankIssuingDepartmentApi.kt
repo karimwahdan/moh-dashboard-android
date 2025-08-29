@@ -121,16 +121,16 @@ interface BloodBankIssuingDepartmentApi {
     @POST("$BB_ISSUING_DEPARTMENT_PREFIX/kpi/store/multiple")
     suspend fun storeMultipleKpiItems(@Body bodies:List<KpiBody>):BloodBankKpisResponse
 
-    @GET("$BLOOD_BANKS_PREFIX/near-expiry/index/by-hospital")
+    @GET("$BB_ISSUING_DEPARTMENT_PREFIX/near-expiry/index/by-hospital")
     suspend fun indexMyNearExpiryBloodUnits(@Query("hospitalId")hospitalId: Int):ApiResponse<PaginationData<BloodNearExpiredItem>>
 
-    @GET("$BLOOD_BANKS_PREFIX/near-expiry/index/all")
+    @GET("$BB_ISSUING_DEPARTMENT_PREFIX/near-expiry/index/all")
     suspend fun indexOtherNearExpiryBloodUnits(@Query("hospitalId")hospitalId: Int):ApiResponse<PaginationData<BloodNearExpiredItem>>
 
-    @POST("$BLOOD_BANKS_PREFIX/near-expiry/store")
+    @POST("$BB_ISSUING_DEPARTMENT_PREFIX/near-expiry/store")
     suspend fun storeNearExpiryBloodUnits(@Body body: BloodNearExpiredItemBody):BloodNearExpiredItemSingleResponse
 
-    @POST("$BLOOD_BANKS_PREFIX/near-expiry/update")
+    @POST("$BB_ISSUING_DEPARTMENT_PREFIX/near-expiry/update")
     suspend fun updateNearExpiryBloodUnits(@Body body: BloodNearExpiredItemBody):BloodNearExpiredItemSingleResponse
 
 }

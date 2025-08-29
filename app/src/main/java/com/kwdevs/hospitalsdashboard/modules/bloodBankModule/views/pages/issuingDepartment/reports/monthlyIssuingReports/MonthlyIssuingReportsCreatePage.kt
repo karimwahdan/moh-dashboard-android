@@ -317,19 +317,7 @@ fun MonthlyIssuingReportsCreatePage(navHostController: NavHostController){
                                val inSelectorsAndSelected=inSelectors && selected
                                if(selectedRecipientType.value!=null && (inSelectorsAndSelected || inOthers || isPrivate)){
                                    Row(modifier=Modifier.fillMaxWidth().padding(5.dp)){
-                                       Box(modifier=Modifier.fillMaxWidth().padding(5.dp).weight(1f),
-                                           contentAlignment = Alignment.Center){
-                                           ComboBox(
-                                               title = BLOOD_GROUP_LABEL,
-                                               loadedItems = bloodGroups,
-                                               selectedItem = selectedBloodGroup,
-                                               selectedContent = {
-                                                   CustomInput(selectedBloodGroup.value?.name?:SELECT_BLOOD_GROUP_LABEL)
-                                               }
-                                           ) {
-                                               Label(it?.name?: EMPTY_STRING)
-                                           }
-                                       }
+
                                        Box(modifier=Modifier.fillMaxWidth().padding(5.dp).weight(1f),
                                            contentAlignment = Alignment.Center){
                                            ComboBox(
@@ -342,6 +330,23 @@ fun MonthlyIssuingReportsCreatePage(navHostController: NavHostController){
                                            ) {
                                                Label(it?.name?: EMPTY_STRING)
                                            }
+                                       }
+                                       if(selectedBloodType.value!=null){
+                                           Box(modifier=Modifier.fillMaxWidth().padding(5.dp).weight(1f),
+                                               contentAlignment = Alignment.Center){
+                                               ComboBox(
+                                                   title = BLOOD_GROUP_LABEL,
+                                                   loadedItems = if(selectedBloodType.value?.id in listOf(3,4,5,6)) bloodGroups.filter { it.id in listOf(1,3,5,7) }.map { model ->
+                                                       model.copy(name = (model.name?: EMPTY_STRING).replace("pos", EMPTY_STRING))} else bloodGroups,
+                                                   selectedItem = selectedBloodGroup,
+                                                   selectedContent = {
+                                                       CustomInput(selectedBloodGroup.value?.name?:SELECT_BLOOD_GROUP_LABEL)
+                                                   }
+                                               ) {
+                                                   Label(it?.name?: EMPTY_STRING)
+                                               }
+                                           }
+
                                        }
                                    }
                                    if(selectedBloodType.value!=null && selectedBloodGroup.value!=null){

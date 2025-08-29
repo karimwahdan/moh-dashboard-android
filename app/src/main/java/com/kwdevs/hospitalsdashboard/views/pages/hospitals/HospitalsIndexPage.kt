@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
@@ -32,7 +31,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -105,6 +103,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.HAS_ONCOLOGY_CU_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HAS_RENAL_DEVICES_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HAS_WARDS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HOSPITALS_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HorizontalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.IN_AREA_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.IN_CITY_LABEL
@@ -124,13 +123,13 @@ import com.kwdevs.hospitalsdashboard.views.assets.SELECT_DEVICE_STATUS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_SECTOR_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.Span
-import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.WHITE
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.FailScreen
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.LoadingScreen
 import com.kwdevs.hospitalsdashboard.views.assets.container.Container
 import com.kwdevs.hospitalsdashboard.views.assets.container.PaginationContainer
+import com.kwdevs.hospitalsdashboard.views.numericKeyBoard
 import com.kwdevs.hospitalsdashboard.views.rcs
 import com.kwdevs.hospitalsdashboard.views.rcsB
 import com.kwdevs.hospitalsdashboard.views.rcsT
@@ -771,7 +770,8 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeIcuBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)minFreeIcuBeds.value=t else minFreeIcuBeds.value = EMPTY_STRING}
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -783,7 +783,8 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeIcuBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)maxFreeIcuBeds.value=t else maxFreeIcuBeds.value=EMPTY_STRING}
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -808,7 +809,8 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeIcuBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)minFreeIcuBeds.value=t else minFreeIcuBeds.value=EMPTY_STRING}
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -820,7 +822,8 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeCcuBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)maxFreeCcuBeds.value=t else maxFreeCcuBeds.value=EMPTY_STRING}
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -846,7 +849,9 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeNicuBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)minFreeNicuBeds.value=t else minFreeNicuBeds.value=EMPTY_STRING}
+
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -859,7 +864,9 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeNicuBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)maxFreeNicuBeds.value=t else maxFreeNicuBeds.value=EMPTY_STRING}
+
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -885,7 +892,9 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeOncologyCuBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)minFreeOncologyCuBeds.value=t else minFreeOncologyCuBeds.value=EMPTY_STRING}
+
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -898,7 +907,9 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeOncologyCuBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)maxFreeOncologyCuBeds.value=t else maxFreeOncologyCuBeds.value=EMPTY_STRING}
+
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -924,7 +935,9 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeBurnsCuBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)minFreeBurnsCuBeds.value=t else minFreeBurnsCuBeds.value=EMPTY_STRING}
+
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -937,7 +950,9 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeBurnsCuBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)maxFreeBurnsCuBeds.value=t else maxFreeBurnsCuBeds.value=EMPTY_STRING}
+
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -963,7 +978,9 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeNeurologyCuBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)minFreeNeurologyCuBeds.value=t else minFreeNeurologyCuBeds.value=EMPTY_STRING}
+
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -976,7 +993,9 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeNeurologyCuBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)maxFreeNeurologyCuBeds.value=t else maxFreeNeurologyCuBeds.value=EMPTY_STRING}
+
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -1001,7 +1020,9 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeMorgueBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)minFreeMorgueBeds.value=t else minFreeMorgueBeds.value=EMPTY_STRING}
+
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -1014,7 +1035,10 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeMorgueBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)maxFreeMorgueBeds.value=t else maxFreeMorgueBeds.value=EMPTY_STRING}
+
+
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -1038,7 +1062,9 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeRenalBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)minFreeRenalBeds.value=t else minFreeRenalBeds.value=EMPTY_STRING}
+
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -1051,7 +1077,9 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeRenalBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)maxFreeRenalBeds.value=t else maxFreeRenalBeds.value=EMPTY_STRING}
+
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -1076,7 +1104,9 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)minFreeBeds.value=t else minFreeBeds.value=EMPTY_STRING}
+
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -1089,7 +1119,9 @@ private fun HospitalsFilterDialog(showDialog: MutableState<Boolean>, result: Mut
                                                 Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)maxFreeBeds.value=t else maxFreeBeds.value=EMPTY_STRING}
+
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {

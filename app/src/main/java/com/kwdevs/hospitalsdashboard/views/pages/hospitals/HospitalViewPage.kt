@@ -49,6 +49,7 @@ import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_CITY
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_HOSPITAL
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_HOSPITAL_TYPE
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_SECTOR
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_HOSPITAL_BLOOD_MODULE
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_HOSPITAL_DEPARTMENT_MODULE
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_HOSPITAL_DEVICE_MODULE
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_HOSPITAL_WARD_MODULE
@@ -238,16 +239,18 @@ fun HospitalViewPage(navHostController: NavHostController){
                                     WardsSection(hospital,navHostController,showWards,wards)
                                 }
                             }
-                            if(bloodKpis.isNotEmpty()){
-                                HorizontalDivider()
-                                Row(modifier = Modifier.fillMaxWidth().padding(5.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically){
-                                    Label(KPI_LABEL, fontWeight = FontWeight.Bold)
-                                    HorizontalSpacer()
-                                    IconButton(if(showBloodKpi) ARROW_UP else ARROW_DOWN, background = BLUE){showBloodKpi=!showBloodKpi}
+                            if(permissions.contains(VIEW_HOSPITAL_BLOOD_MODULE) || superUser?.isSuper==true){
+                                if(bloodKpis.isNotEmpty()){
+                                    HorizontalDivider()
+                                    Row(modifier = Modifier.fillMaxWidth().padding(5.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically){
+                                        Label(KPI_LABEL, fontWeight = FontWeight.Bold)
+                                        HorizontalSpacer()
+                                        IconButton(if(showBloodKpi) ARROW_UP else ARROW_DOWN, background = BLUE){showBloodKpi=!showBloodKpi}
+                                    }
+                                    KpiSection(bloodKpis,showBloodKpi)
                                 }
-                                KpiSection(bloodKpis,showBloodKpi)
                             }
 
                         }

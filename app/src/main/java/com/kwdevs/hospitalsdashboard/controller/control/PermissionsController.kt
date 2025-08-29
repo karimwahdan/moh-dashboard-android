@@ -50,6 +50,13 @@ class PermissionsController : ViewModel() {
             }
         }
     }
+    fun reloadSingleRole(){
+        viewModelScope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
+                singleRole.value=UiState.Loading
+            }
+        }
+    }
     fun updateRoles(roleBody: UserRoleBody){
         viewModelScope.launch(Dispatchers.IO) {
             try {

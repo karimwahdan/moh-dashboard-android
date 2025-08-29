@@ -78,7 +78,7 @@ fun BloodImportHorizontalCard(item:BloodImport){
                 .weight(1f),
                 contentAlignment = Alignment.Center){
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Span(bloodGroup?.name?: EMPTY_STRING, backgroundColor = BLUE, color = WHITE)
+                    Span(if(bloodType?.id in listOf(3,4,5,6)) (bloodGroup?.name?: EMPTY_STRING).replace("pos",EMPTY_STRING) else bloodGroup?.name?:EMPTY_STRING, backgroundColor = BLUE, color = WHITE)
                     Label(bloodType?.name?: EMPTY_STRING)
 
                 }

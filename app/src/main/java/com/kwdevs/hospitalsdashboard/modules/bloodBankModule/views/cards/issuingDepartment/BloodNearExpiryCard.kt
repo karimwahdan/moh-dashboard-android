@@ -18,6 +18,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.BLUE
 import com.kwdevs.hospitalsdashboard.views.assets.CODE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.ColumnContainer
 import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
+import com.kwdevs.hospitalsdashboard.views.assets.HorizontalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.IconButton
 import com.kwdevs.hospitalsdashboard.views.assets.Label
 import com.kwdevs.hospitalsdashboard.views.assets.LabelSpan
@@ -28,9 +29,11 @@ fun MyBloodNearExpiryCard(item:BloodNearExpiredItem,navHostController: NavHostCo
     val bgId=item.bloodGroupId
     val unitTypeId=item.unitTypeId
     val bloodGroup=item.bloodGroup
+    val unitType=item.unitType
     val status=item.status
     val quantity=item.quantity
     val code=item.code
+    val expiryDate=item.expiryDate
     val bloodGroupLabel=when(bgId){
         in listOf(1,2)->if(unitTypeId in listOf(3,4,5,6)) "A" else bloodGroup?.name?: EMPTY_STRING
         in listOf(3,4)->if(unitTypeId in listOf(3,4,5,6)) "B" else bloodGroup?.name?: EMPTY_STRING
@@ -40,19 +43,21 @@ fun MyBloodNearExpiryCard(item:BloodNearExpiredItem,navHostController: NavHostCo
     }
     
     ColumnContainer {
-        Row(modifier=Modifier.fillMaxWidth().padding(5.dp)){
-            status?.let {Span(text=it.name?: EMPTY_STRING)}
-
+        Row(modifier=Modifier.fillMaxWidth().padding(5.dp)){status?.let {Span(text=it.name?: EMPTY_STRING)}}
+        Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically){
+            LabelSpan(label = unitType?.name?: EMPTY_STRING, value = bloodGroupLabel, spanColor = BLUE)
+            quantity?.let { if(it>1) Label(it.toString())}
             IconButton(R.drawable.ic_edit_blue) {
                 Preferences.BloodBanks.NearExpiredBloodUnits().set(item)
                 navHostController.navigate(NearExpiredCreateRoute.route) }
         }
-        Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp), horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically){
-            LabelSpan(label = bloodGroup?.name?: EMPTY_STRING, value = bloodGroupLabel, spanColor = BLUE)
-            quantity?.let { if(it>1) Label(it.toString())}
+        Row(){
+            code?.let { Label(CODE_LABEL,it) }
+            HorizontalSpacer()
+            expiryDate?.let{Label(it)}
         }
-        code?.let { Label(CODE_LABEL,it) }
     }
 }
 
@@ -62,6 +67,9 @@ fun OtherBloodNearExpiryCard(item:BloodNearExpiredItem){
     val hospital=item.hospital
     val bgId=item.bloodGroupId
     val unitTypeId=item.unitTypeId
+    val unitType=item.unitType
+    val expiryDate=item.expiryDate
+
     val bloodGroup=item.bloodGroup
     val status=item.status
     val quantity=item.quantity
@@ -78,8 +86,10 @@ fun OtherBloodNearExpiryCard(item:BloodNearExpiredItem){
         Label(hospital?.name?: EMPTY_STRING)
         Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp), horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically){
-            LabelSpan(label = bloodGroup?.name?: EMPTY_STRING, value = bloodGroupLabel, spanColor = BLUE)
+            LabelSpan(label = unitType?.name?: EMPTY_STRING, value = bloodGroupLabel, spanColor = BLUE)
             quantity?.let { if(it>1) Label(it.toString())}
+            expiryDate?.let{Label(it)}
+
         }
     }
 }

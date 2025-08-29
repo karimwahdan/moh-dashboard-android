@@ -55,6 +55,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.ComboBox
 import com.kwdevs.hospitalsdashboard.views.assets.CustomButton
 import com.kwdevs.hospitalsdashboard.views.assets.CustomButtonWithImage
 import com.kwdevs.hospitalsdashboard.views.assets.CustomInput
+import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
 import com.kwdevs.hospitalsdashboard.views.assets.FATHER_NAME_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.FEMALE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.FIRST_NAME_LABEL
@@ -74,6 +75,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.SESSIONS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.WHITE
 import com.kwdevs.hospitalsdashboard.views.assets.container.Container
+import com.kwdevs.hospitalsdashboard.views.numericKeyBoard
 import com.kwdevs.hospitalsdashboard.views.rcs
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -107,10 +109,10 @@ fun CancerCureCreatePage(navHostController: NavHostController){
     val patientsController: PatientsController = viewModel()
     val filteredState by patientsController.allState.observeAsState()
     val selectedPatient = remember { mutableStateOf(savedPatient) }
-    val nationalId = remember { mutableStateOf("") }
+    val nationalId = remember { mutableStateOf(EMPTY_STRING) }
     var patients by remember { mutableStateOf<List<Patient>>(emptyList()) }
     val showNewPatientDialog = remember { mutableStateOf(false) }
-    val sessions = remember { mutableStateOf("") }
+    val sessions = remember { mutableStateOf(EMPTY_STRING) }
     val viewType = Preferences.ViewTypes().get()
 
     when(state){
@@ -173,10 +175,10 @@ fun CancerCureCreatePage(navHostController: NavHostController){
                         CustomInput(value = nationalId, label = NATIONAL_ID_LABEL)
                     }
                     CustomButtonWithImage(icon = R.drawable.ic_filter_blue, iconSize = 26, maxWidth = 26) {
-                        if(nationalId.value.trim() !="" && nationalId.value.length>2) patientsController.filter(nationalId.value)
+                        if(nationalId.value.trim() !=EMPTY_STRING && nationalId.value.length>2) patientsController.filter(nationalId.value)
                     }
                 }
-                if(patients.isEmpty() || nationalId.value.trim() == "" ){
+                if(patients.isEmpty() || nationalId.value.trim() == EMPTY_STRING ){
                     CustomButton(label = ADD_NEW_LABEL
                         , buttonShape = RectangleShape, enabledBackgroundColor = BLUE
                     ) {
@@ -187,18 +189,18 @@ fun CancerCureCreatePage(navHostController: NavHostController){
                     verticalAlignment = Alignment.CenterVertically){
                     Box(modifier=Modifier.padding(horizontal = 5.dp).weight(1f)){
                         ComboBox(hasTitle = false,selectedItem = selectedPatient, loadedItems = patients, selectedContent = {
-                            CustomInput(value=if(selectedPatient.value==null) "Select Patient" else "${selectedPatient.value?.firstName?:""} ${selectedPatient.value?.secondName?:""} ${selectedPatient.value?.thirdName?:""} ${selectedPatient.value?.fourthName?:""}",
+                            CustomInput(value=if(selectedPatient.value==null) "Select Patient" else "${selectedPatient.value?.firstName?:EMPTY_STRING} ${selectedPatient.value?.secondName?:EMPTY_STRING} ${selectedPatient.value?.thirdName?:EMPTY_STRING} ${selectedPatient.value?.fourthName?:EMPTY_STRING}",
                                 readOnly = true,
                                 icon = R.drawable.ic_arrow_drop_down_blue)
                         }) {
                             Label(
-                                "${it?.firstName?:""} ${it?.secondName?:""} ${it?.thirdName?:""} ${it?.fourthName?:""}",
+                                "${it?.firstName?:EMPTY_STRING} ${it?.secondName?:EMPTY_STRING} ${it?.thirdName?:EMPTY_STRING} ${it?.fourthName?:EMPTY_STRING}",
                                 color = if(selectedPatient.value==it) BLUE else BLACK
                             )
                         }
                     }
                     if(selectedPatient.value!=null){
-                        IconButton(icon=R.drawable.ic_cancel_red) { nationalId.value="";selectedPatient.value=null }
+                        IconButton(icon=R.drawable.ic_cancel_red) { nationalId.value=EMPTY_STRING;selectedPatient.value=null }
                     }else{
                         Box(modifier=Modifier.width(26.dp))
                     }
@@ -213,12 +215,12 @@ fun CancerCureCreatePage(navHostController: NavHostController){
                         icon = R.drawable.ic_arrow_drop_down_blue)
                 }) {
                     Label(
-                        it?.name?:"",
+                        it?.name?:EMPTY_STRING,
                         color = if(selectedCureType.value==it) BLUE else BLACK
                     )
                 }
             }
-            CustomInput(label = SESSIONS_LABEL,value=sessions, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number) )
+            CustomInput(label = SESSIONS_LABEL,value=sessions, keyboardOptions = numericKeyBoard,enabled=true )
             Box(modifier=Modifier.padding(horizontal = 5.dp)){
                 ComboBox(hasTitle = false,selectedItem = selectedMonth, loadedItems = months, selectedContent = {
                     CustomInput(value=selectedMonth.value?.second?:"Select Month",
@@ -226,7 +228,7 @@ fun CancerCureCreatePage(navHostController: NavHostController){
                         icon = R.drawable.ic_arrow_drop_down_blue)
                 }) {
                     Label(
-                        it?.second?:"",
+                        it?.second?:EMPTY_STRING,
                         color = if(selectedMonth.value==it) BLUE else BLACK
                     )
                 }
@@ -260,18 +262,18 @@ private fun NewPatientDialog(showDialog: MutableState<Boolean>, controller: Pati
     val settingsController: SettingsController = viewModel()
     val state by controller.singleState.observeAsState()
     //var patient by remember { mutableStateOf<Patient?>(null) }
-    val firstName           =   remember { mutableStateOf("") }
-    val secondName          =   remember { mutableStateOf("") }
-    val thirdName           =   remember { mutableStateOf("") }
-    val fourthName          =   remember { mutableStateOf("") }
-    val nationalId          =   remember { mutableStateOf("") }
-    val mobile              =   remember { mutableStateOf("") }
-    val alternativeMobile   =   remember { mutableStateOf("") }
+    val firstName           =   remember { mutableStateOf(EMPTY_STRING) }
+    val secondName          =   remember { mutableStateOf(EMPTY_STRING) }
+    val thirdName           =   remember { mutableStateOf(EMPTY_STRING) }
+    val fourthName          =   remember { mutableStateOf(EMPTY_STRING) }
+    val nationalId          =   remember { mutableStateOf(EMPTY_STRING) }
+    val mobile              =   remember { mutableStateOf(EMPTY_STRING) }
+    val alternativeMobile   =   remember { mutableStateOf(EMPTY_STRING) }
     val nationality         =   remember { mutableStateOf<Nationality?>(null) }
     var nationalities       by  remember { mutableStateOf<List<Nationality>>(emptyList()) }
     var enabled by remember { mutableStateOf(true) }
     LaunchedEffect(firstName.value,nationalId.value,nationality.value) {
-        enabled = (firstName.value.trim()!="") && (nationalId.value.trim()!="") && (nationality.value!=null)
+        enabled = (firstName.value.trim()!=EMPTY_STRING) && (nationalId.value.trim()!=EMPTY_STRING) && (nationality.value!=null)
     }
     val nationalitiesState by settingsController.nationalitiesState.observeAsState()
     when(nationalitiesState){
@@ -315,7 +317,7 @@ private fun NewPatientDialog(showDialog: MutableState<Boolean>, controller: Pati
                                     CustomInput(nationality.value?.name?: SELECT_NATIONALITY_LABEL)
 
                                 }) {
-                                Label(it?.name?:"")
+                                Label(it?.name?:EMPTY_STRING)
                             }
 
                         }
@@ -324,7 +326,7 @@ private fun NewPatientDialog(showDialog: MutableState<Boolean>, controller: Pati
                         CustomInput(value = alternativeMobile, label = ALTERNATIVE_MOBILE_NUMBER_LABEL)
                         Box(modifier= Modifier.padding(horizontal = 5.dp).weight(1f)){
                             ComboBox(hasTitle = false,selectedItem = selectedGender, loadedItems = genders, selectedContent = {
-                                CustomInput(value=if(selectedGender.value.trim()=="") SELECT_GENDER_LABEL else selectedGender.value,
+                                CustomInput(value=if(selectedGender.value.trim()==EMPTY_STRING) SELECT_GENDER_LABEL else selectedGender.value,
                                     readOnly = true,
                                     icon = R.drawable.ic_arrow_drop_down_blue)
                             }) {
@@ -341,9 +343,9 @@ private fun NewPatientDialog(showDialog: MutableState<Boolean>, controller: Pati
                     , buttonShape = RectangleShape, enabledBackgroundColor = GREEN,
                     enabled = enabled
                 ) {
-                    if(firstName.value.trim()!="" && secondName.value.trim()!=""
-                        && thirdName.value.trim()!="" && mobile.value.trim()!=""
-                        && nationalId.value.trim()!="" && nationality.value!=null){
+                    if(firstName.value.trim()!=EMPTY_STRING && secondName.value.trim()!=EMPTY_STRING
+                        && thirdName.value.trim()!=EMPTY_STRING && mobile.value.trim()!=EMPTY_STRING
+                        && nationalId.value.trim()!=EMPTY_STRING && nationality.value!=null){
                         val body = PatientBody(
                             firstName = firstName.value,
                             secondName = secondName.value,

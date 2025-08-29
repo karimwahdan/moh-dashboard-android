@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -23,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -60,9 +58,10 @@ import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.WHITE
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.FailScreen
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.LoadingScreen
+import com.kwdevs.hospitalsdashboard.views.assets.container.Container
 import com.kwdevs.hospitalsdashboard.views.cards.hospitals.devices.usage.DeviceUsageCard
 import com.kwdevs.hospitalsdashboard.views.getFormattedDateJavaTime
-import com.kwdevs.hospitalsdashboard.views.assets.container.Container
+import com.kwdevs.hospitalsdashboard.views.numericKeyBoard
 import java.time.LocalDate
 import java.time.Month
 import java.time.ZoneId
@@ -245,7 +244,7 @@ private fun NewUsageDialog(showDialog: MutableState<Boolean>, device: HospitalDe
                 Label(day.value)
                 DatePickerWidget(showDatePicker,datePickerState,day)
 
-                CustomInput(value = usageCount,label = USAGE_FREQUENCY_LABEL,keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                CustomInput(value = usageCount,label = USAGE_FREQUENCY_LABEL,keyboardOptions= numericKeyBoard,enabled=true)
                 VerticalSpacer()
                 CustomButton(label = SAVE_CHANGES_LABEL) {
                     val body = HospitalDeviceUsageBody(
@@ -322,7 +321,7 @@ private fun UpdateUsageDialog(showDialog: MutableState<Boolean>, device: Hospita
                 Label(day.value)
                 DatePickerWidget(showDatePicker,datePickerState,day)
 
-                CustomInput(value = usageCount,label = USAGE_FREQUENCY_LABEL,keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                CustomInput(value = usageCount,label = USAGE_FREQUENCY_LABEL,keyboardOptions= numericKeyBoard,enabled=true)
                 VerticalSpacer()
                 CustomButton(label = SAVE_CHANGES_LABEL) {
                     if(item!=null){

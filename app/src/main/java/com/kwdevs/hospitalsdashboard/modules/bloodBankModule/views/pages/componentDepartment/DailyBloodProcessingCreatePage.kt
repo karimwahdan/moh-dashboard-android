@@ -42,8 +42,11 @@ import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.responses.component
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.responses.componentDepartment.DailyBloodProcessingSingleResponse
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.DailyBloodProcessingIndexRoute
 import com.kwdevs.hospitalsdashboard.views.assets.BLUE
+import com.kwdevs.hospitalsdashboard.views.assets.CAMPAIGN_CODE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.CAMPAIGN_DATE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.CAMPAIGN_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.CANCEL_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.COLLECTION_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.ColumnContainer
 import com.kwdevs.hospitalsdashboard.views.assets.ComboBox
 import com.kwdevs.hospitalsdashboard.views.assets.CustomButton
@@ -58,11 +61,13 @@ import com.kwdevs.hospitalsdashboard.views.assets.GREEN
 import com.kwdevs.hospitalsdashboard.views.assets.IconButton
 import com.kwdevs.hospitalsdashboard.views.assets.Label
 import com.kwdevs.hospitalsdashboard.views.assets.ORANGE
+import com.kwdevs.hospitalsdashboard.views.assets.PROCESSING_DATE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SAVE_CHANGES_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SAVE_PROMPT
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_PROCESSING_DATE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_UNIT_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SHOW_DATE_TIME_PICKER_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SPACE
 import com.kwdevs.hospitalsdashboard.views.assets.TOTAL_PROCESSED_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.UNIT_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
@@ -88,6 +93,7 @@ fun DailyBloodProcessingCreatePage(navHostController: NavHostController){
     val bloodBank                   =  Preferences.BloodBanks().get()
     val hospital                    =  Preferences.Hospitals().get()
     val body                        =  remember { mutableStateOf<DailyBloodProcessingBody?>(null) }
+    var preSavedItem                by remember {mutableStateOf<DailyBloodProcessing?>(null)}
     val selectedBloodType           =  remember { mutableStateOf<BasicModel?>(null) }
     val total                       =  remember { mutableStateOf(EMPTY_STRING) }
     val campaignCode                =  remember { mutableStateOf(EMPTY_STRING) }
@@ -141,14 +147,14 @@ fun DailyBloodProcessingCreatePage(navHostController: NavHostController){
     }
     LaunchedEffect(Unit) {
         if(old!=null){
-            selectedBloodType.value=old.bloodType
+            selectedBloodType.value=old.unitType
             selectedBloodCollection.value=old.campaign
             total.value=(old.total?:0).toString()
             processingDate.value=old.processingDate?: EMPTY_STRING
         }
     }
     DatePickerWidget(showProcessingDatePicker,processingDateState,processingDate)
-    SaveDialog(showDialog = showDialog,controller=controller,body=body)
+    SaveDialog(showDialog = showDialog,controller=controller,body=body,item=preSavedItem)
     Container(
         title = DAILY_PROCESSING_LABEL,
         showSheet = showSheet,
@@ -183,7 +189,7 @@ fun DailyBloodProcessingCreatePage(navHostController: NavHostController){
                                     val code=selectedBloodCollection.value?.code?:EMPTY_STRING
                                     val collectionDate= (selectedBloodCollection.value?.collectionDate?:EMPTY_STRING)
                                     val campaignType = selectedBloodCollection.value?.campaignType?.name?:EMPTY_STRING
-                                    val dateOnly=collectionDate.replaceAfterLast(" ",EMPTY_STRING)
+                                    val dateOnly=collectionDate.replaceAfterLast(SPACE,EMPTY_STRING)
                                     val totalCollected=selectedBloodCollection.value?.total?:0
                                     CustomInput("$code - $dateOnly - $campaignType \n مجمع: $totalCollected", maxLines = 2)
                                 }) {
@@ -191,7 +197,7 @@ fun DailyBloodProcessingCreatePage(navHostController: NavHostController){
                                 val collectionDate= (it?.collectionDate?:EMPTY_STRING)
                                 val campaignType = it?.campaignType?.name
                                 val totalCollected=it?.total?:EMPTY_STRING
-                                val dateOnly=collectionDate.replaceAfterLast(" ",EMPTY_STRING)
+                                val dateOnly=collectionDate.replaceAfterLast(SPACE,EMPTY_STRING)
                                 Label(text="$code - $dateOnly - $campaignType \n مجمع: $totalCollected",textAlign = TextAlign.End, maximumLines = 2)
                             }
                         }
@@ -233,7 +239,7 @@ fun DailyBloodProcessingCreatePage(navHostController: NavHostController){
                                 val number=it.toIntOrNull()
                                 val collectionTotal=selectedBloodCollection.value?.total?: 0
                                 val isValid=number !=null && number <=collectionTotal
-                                if(isValid){total.value=it}})
+                                if(isValid){total.value=it} else total.value= EMPTY_STRING})
                         VerticalSpacer(10)
                         Row(modifier= Modifier.fillMaxWidth().padding(horizontal = 5.dp),
                             horizontalArrangement = Arrangement.SpaceBetween){
@@ -247,6 +253,12 @@ fun DailyBloodProcessingCreatePage(navHostController: NavHostController){
                                 if(processingDate.value.trim()!=EMPTY_STRING &&
                                     selectedBloodType.value!=null && selectedBloodCollection.value!=null &&
                                     total.value.trim()!= EMPTY_STRING && total.value.trim().toIntOrNull()!=null){
+                                    preSavedItem=DailyBloodProcessing(
+                                        unitType = selectedBloodType.value,
+                                        campaign = selectedBloodCollection.value,
+                                        processingDate = processingDate.value,
+                                        total = total.value.trim().toIntOrNull(),
+                                    )
                                     body.value = DailyBloodProcessingBody(
                                         id=if(old!=null && crudType==CrudType.UPDATE) old.id else null,
                                         hospitalId = hospital?.id,
@@ -277,13 +289,45 @@ fun DailyBloodProcessingCreatePage(navHostController: NavHostController){
     }
 }
 @Composable
-private fun SaveDialog(showDialog:MutableState<Boolean>,controller: BloodBankComponentDepartmentController,body: MutableState<DailyBloodProcessingBody?>){
+private fun SaveDialog(
+    showDialog:MutableState<Boolean>,
+    controller: BloodBankComponentDepartmentController,
+    body: MutableState<DailyBloodProcessingBody?>,
+    item:DailyBloodProcessing?,
+
+){
+    val campaignDateOnly=if(item?.campaign?.collectionDate!=null) item.campaign.collectionDate.replaceAfterLast(SPACE, EMPTY_STRING) else EMPTY_STRING
+    val processingDateOnly=if(item?.processingDate!=null) item.processingDate else EMPTY_STRING
+
     if(showDialog.value){
         Dialog(onDismissRequest = {showDialog.value=false}) {
             ColumnContainer {
                 Label(SAVE_PROMPT)
                 VerticalSpacer()
-                Row(modifier=Modifier.fillMaxWidth().padding(5.dp), verticalAlignment = Alignment.CenterVertically,
+                item?.let {
+                    Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 3.dp)){
+                        Label(label = CAMPAIGN_CODE_LABEL,text=it.campaign?.code?: EMPTY_STRING)
+                    }
+                    Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 3.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween){
+                        Label(label = CAMPAIGN_DATE_LABEL,text=campaignDateOnly)
+                        Label(label = COLLECTION_LABEL, text = "${it.campaign?.total}")
+                    }
+                    Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 3.dp)){
+                        Label(label= PROCESSING_DATE_LABEL,text=processingDateOnly)
+
+                    }
+                    Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 3.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween){
+                        Label(label = TOTAL_PROCESSED_LABEL,text="${it.total}")
+                        Label(label= UNIT_TYPE_LABEL,text="${it.unitType?.name}")
+                    }
+
+
+                }
+                VerticalSpacer()
+                Row(modifier=Modifier.fillMaxWidth().padding(5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween){
                     CustomButton(label = SAVE_CHANGES_LABEL,
                         buttonShadowElevation = 6, buttonShape = RectangleShape,

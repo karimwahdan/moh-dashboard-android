@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,7 +26,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -35,18 +33,18 @@ import com.kwdevs.hospitalsdashboard.R
 import com.kwdevs.hospitalsdashboard.app.retrofit.UiState
 import com.kwdevs.hospitalsdashboard.bodies.hospital.HospitalFilterBody
 import com.kwdevs.hospitalsdashboard.controller.AreaController
-import com.kwdevs.hospitalsdashboard.controller.hospital.HospitalController
 import com.kwdevs.hospitalsdashboard.controller.SettingsController
+import com.kwdevs.hospitalsdashboard.controller.hospital.HospitalController
 import com.kwdevs.hospitalsdashboard.models.hospital.Hospital
 import com.kwdevs.hospitalsdashboard.models.settings.area.AreaWithCount
 import com.kwdevs.hospitalsdashboard.models.settings.area.AreaWithCountResponse
 import com.kwdevs.hospitalsdashboard.models.settings.basicDepartments.BasicDepartment
 import com.kwdevs.hospitalsdashboard.models.settings.basicDepartments.BasicDepartmentResponse
 import com.kwdevs.hospitalsdashboard.models.settings.city.CityWithCount
-import com.kwdevs.hospitalsdashboard.models.settings.statuses.Status
-import com.kwdevs.hospitalsdashboard.models.settings.statuses.StatusResponse
 import com.kwdevs.hospitalsdashboard.models.settings.hospitalType.HospitalType
 import com.kwdevs.hospitalsdashboard.models.settings.sector.Sector
+import com.kwdevs.hospitalsdashboard.models.settings.statuses.Status
+import com.kwdevs.hospitalsdashboard.models.settings.statuses.StatusResponse
 import com.kwdevs.hospitalsdashboard.responses.HospitalsResponse
 import com.kwdevs.hospitalsdashboard.views.assets.AREA_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.CITY_LABEL
@@ -56,6 +54,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.CustomInput
 import com.kwdevs.hospitalsdashboard.views.assets.DEPARTMENT_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.DETAILED_FILTER_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.DEVICE_STATUS_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
 import com.kwdevs.hospitalsdashboard.views.assets.FILTER_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.FOLLOWS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HAS_BURNS_CU_LABEL
@@ -70,6 +69,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.HAS_ONCOLOGY_CU_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HAS_RENAL_DEVICES_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HAS_WARDS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HOSPITALS_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HorizontalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.IN_AREA_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.IN_CITY_LABEL
@@ -87,8 +87,8 @@ import com.kwdevs.hospitalsdashboard.views.assets.SELECT_DEVICE_STATUS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_SECTOR_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.Span
-import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
+import com.kwdevs.hospitalsdashboard.views.numericKeyBoard
 import com.kwdevs.hospitalsdashboard.views.rcs
 import com.kwdevs.hospitalsdashboard.views.rcsB
 import com.kwdevs.hospitalsdashboard.views.rcsT
@@ -322,26 +322,26 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                     if(selectedCity.value!=null){
                         Label(IN_CITY_LABEL)
                         HorizontalSpacer()
-                        Label(selectedCity.value?.name?:"")
+                        Label(selectedCity.value?.name?:EMPTY_STRING)
                     }
                     HorizontalSpacer()
                     if(selectedArea.value!=null){
                         Label(IN_AREA_LABEL)
                         HorizontalSpacer()
-                        Label(selectedArea.value?.name?:"")
+                        Label(selectedArea.value?.name?:EMPTY_STRING)
                     }
                 }
                 Row{
                     if(selectedCategory.value!=null){
                         Label(OF_TYPE_LABEL)
                         HorizontalSpacer()
-                        Label(selectedCategory.value?.name?:"")
+                        Label(selectedCategory.value?.name?:EMPTY_STRING)
                     }
                     HorizontalSpacer()
                     if(selectedType.value!=null){
                         Label(FOLLOWS_LABEL)
                         HorizontalSpacer()
-                        Label(selectedType.value?.name?:"")
+                        Label(selectedType.value?.name?:EMPTY_STRING)
                     }
                 }
                 VerticalSpacer()
@@ -353,11 +353,11 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                 ComboBox(title = CITY_LABEL, loadedItems = cities, selectedItem = selectedCity, selectedContent = {
                                     CustomInput(selectedCity.value?.name?: SELECT_CITY_LABEL)
                                 }) {
-                                    Label(it?.name?:"")
+                                    Label(it?.name?:EMPTY_STRING)
                                 }
 
                             }
-                            Column(){
+                            Column{
                                 VerticalSpacer(15)
                                 IconButton(icon= R.drawable.ic_cancel_red) {
                                     selectedCity.value=null
@@ -371,7 +371,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                     ComboBox(title = AREA_LABEL, loadedItems = areas, selectedItem = selectedArea, selectedContent = {
                                         CustomInput(selectedArea.value?.name?: SELECT_AREA_LABEL)
                                     }) {
-                                        Label(it?.name?:"")
+                                        Label(it?.name?:EMPTY_STRING)
                                     }
 
                                 }
@@ -390,7 +390,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                 ComboBox(title = SECTOR_LABEL, loadedItems = sectors, selectedItem = selectedCategory, selectedContent = {
                                     CustomInput(selectedCategory.value?.name?: SELECT_SECTOR_LABEL)
                                 }) {
-                                    Label(it?.name?:"")
+                                    Label(it?.name?:EMPTY_STRING)
                                 }
 
                             }
@@ -407,7 +407,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                 ComboBox(title = HOSPITAL_TYPE_LABEL, loadedItems = types, selectedItem = selectedType, selectedContent = {
                                     CustomInput(selectedType.value?.name?: SELECT_TYPE_LABEL)
                                 }) {
-                                    Label(it?.name?:"")
+                                    Label(it?.name?:EMPTY_STRING)
                                 }
                             }
                             Column {
@@ -445,7 +445,10 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeIcuBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        enabled = true,
+                                                        keyboardOptions = numericKeyBoard,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)minFreeIcuBeds.value=t else minFreeIcuBeds.value=
+                                                            EMPTY_STRING}
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -457,7 +460,9 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeIcuBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        enabled=true,
+                                                        keyboardOptions = numericKeyBoard,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null)maxFreeIcuBeds.value=t else maxFreeIcuBeds.value=EMPTY_STRING}
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -481,8 +486,10 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                             Row(modifier= Modifier.fillMaxWidth().padding(horizontal = 5.dp), verticalAlignment = Alignment.CenterVertically){
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeIcuBeds,
+                                                        enabled=true,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,
+                                                        onTextChange = {t->if(t.toIntOrNull()!=null) minFreeIcuBeds.value=t else minFreeIcuBeds.value=EMPTY_STRING}
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -494,7 +501,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeCcuBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -520,7 +527,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeNicuBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -533,7 +540,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeNicuBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -559,7 +566,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeOncologyCuBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -572,7 +579,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeOncologyCuBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -598,7 +605,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeBurnsCuBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -611,7 +618,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeBurnsCuBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -637,7 +644,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeNeurologyCuBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -650,7 +657,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeNeurologyCuBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -675,7 +682,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeMorgueBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -688,7 +695,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeMorgueBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -712,7 +719,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeRenalBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -725,7 +732,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeRenalBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -750,7 +757,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = minFreeBeds,
                                                         label = MIN_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -763,7 +770,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                 Box(modifier= Modifier.fillMaxWidth().weight(1f).padding(horizontal = 5.dp)){
                                                     CustomInput(value = maxFreeBeds,
                                                         label = MAX_FREE_BEDS_LABEL,
-                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                        keyboardOptions = numericKeyBoard,enabled=true
                                                     )
                                                 }
                                                 IconButton(icon = R.drawable.ic_cancel_red) {
@@ -789,7 +796,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                     ComboBox(title = DEVICE_STATUS_LABEL, loadedItems = deviceStatuses, selectedItem = selectedDeviceStatus, selectedContent = {
                                                         CustomInput(selectedDeviceStatus.value?.name?: SELECT_DEVICE_STATUS_LABEL)
                                                     }) {
-                                                        Label(it?.name?:"")
+                                                        Label(it?.name?:EMPTY_STRING)
                                                     }
                                                 }
                                                 Column {
@@ -818,7 +825,7 @@ fun HospitalsFilterDialog(showDialog: MutableState<Boolean>,
                                                     ComboBox(title = DEPARTMENT_LABEL, loadedItems = basicDepartments, selectedItem = selectedDepartment, selectedContent = {
                                                         CustomInput(selectedDeviceStatus.value?.name?: SELECT_DEPARTMENT_LABEL)
                                                     }) {
-                                                        Label(it?.name?:"")
+                                                        Label(it?.name?:EMPTY_STRING)
                                                     }
                                                 }
                                                 Column {

@@ -33,7 +33,7 @@ fun DailyBloodProcessingCard(item:DailyBloodProcessing){
                 Row(verticalAlignment = Alignment.CenterVertically){
                     Label(label = "Processing Date:",text=item.processingDate?:"N/A")
                     HorizontalSpacer()
-                    Label("${item.bloodType?.name}")
+                    Label("${item.unitType?.name}")
                     HorizontalSpacer()
                     Span(text="${item.total}", backgroundColor = if((item.total?:0)<(item.campaign?.total?:0)) Color.Red else GREEN, color = WHITE)
 

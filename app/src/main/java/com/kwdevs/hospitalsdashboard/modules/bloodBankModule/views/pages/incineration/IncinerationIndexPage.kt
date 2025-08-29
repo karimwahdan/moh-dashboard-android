@@ -47,6 +47,7 @@ import com.kwdevs.hospitalsdashboard.responses.PaginationData
 import com.kwdevs.hospitalsdashboard.routes.IssuingDepartmentHomeRoute
 import com.kwdevs.hospitalsdashboard.views.RIGHT_LAYOUT_DIRECTION
 import com.kwdevs.hospitalsdashboard.views.assets.ADD_NEW_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.BLOOD_GROUP_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.BLUE
 import com.kwdevs.hospitalsdashboard.views.assets.CAMPAIGN_CODE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.CAMPAIGN_LABEL
@@ -58,6 +59,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
 import com.kwdevs.hospitalsdashboard.views.assets.GRAY
 import com.kwdevs.hospitalsdashboard.views.assets.HorizontalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.INCINERATION_BLOOD_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.INCINERATION_DATE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.INCINERATION_INFO_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.INCINERATION_REASON_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.Icon
@@ -228,7 +230,8 @@ fun IncinerationIndexPage(navHostController: NavHostController){
                                                 Row(verticalAlignment = Alignment.CenterVertically){
                                                     Column(horizontalAlignment = Alignment.CenterHorizontally){
                                                         Label(it.bloodUnitType?.name?:EMPTY_STRING, fontSize = 12)
-                                                        Label(it.bloodGroup?.name?:EMPTY_STRING, fontSize = 12)
+                                                        Label(if(it.bloodUnitTypeId in listOf(3,4,5,6)) (it.bloodGroup?.name?: EMPTY_STRING).replace("pos",EMPTY_STRING)
+                                                        else it.bloodGroup?.name?:EMPTY_STRING, fontSize = 12)
                                                     }
                                                     HorizontalSpacer()
                                                     Span(text = "${it.value?:0}",
@@ -317,7 +320,10 @@ private fun IncinerationDetailsDialog(showDialog:MutableState<Boolean>,selectedI
                     val value=(item.value?:0)
                     val reason=item.reason
                     val maxPercent=item.reason?.maximumPercent?:0f
+                    val bloodGroup=item.bloodGroup
                     val campaign=item.campaign
+                    val unitTypeId=item.bloodUnitTypeId
+                    val unitType=item.bloodUnitType
                     val currentPercent=if(campaign!=null){
                         val totalCampUnits=(campaign.total?:0)
                         val result=(value.toFloat()/totalCampUnits.toFloat())
@@ -327,14 +333,19 @@ private fun IncinerationDetailsDialog(showDialog:MutableState<Boolean>,selectedI
                     //val bloodGroup=item.bloodGroup
                     //val unitType=item.bloodUnitType
                     Label(label = year?: EMPTY_STRING,text=monthName)
+                    Label(label=UNIT_TYPE_LABEL,text=unitType?.name?: EMPTY_STRING)
 
-                    Row(modifier= Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 5.dp),
+                    Row(modifier=Modifier.fillMaxWidth().padding(5.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically){
-                        Label(TOTAL_UNITS_LABEL)
-                        HorizontalSpacer()
-                        Span(text = "$value", backgroundColor = Color.Red, color = WHITE)
+
+                        Row(verticalAlignment = Alignment.CenterVertically){
+                            Label(TOTAL_UNITS_LABEL)
+                            HorizontalSpacer()
+                            Span(text = "$value", backgroundColor = Color.Red, color = WHITE)
+                        }
+                        Label(label= BLOOD_GROUP_LABEL,text=if(unitTypeId in listOf(3,4,5,6)) (bloodGroup?.name?: EMPTY_STRING).replace("pos",EMPTY_STRING)
+                        else bloodGroup?.name?:EMPTY_STRING, fontSize = 12)
                     }
                     VerticalSpacer()
 
@@ -382,7 +393,7 @@ private fun IncinerationDetailsDialog(showDialog:MutableState<Boolean>,selectedI
                         VerticalSpacer()
                         campaign.collectionDate?.let {
                             val dateOnly=it.replaceRange(10,it.length,EMPTY_STRING)
-                            Label(DATE_LABEL, dateOnly)
+                            Label(INCINERATION_DATE_LABEL, dateOnly)
                         }
 
 

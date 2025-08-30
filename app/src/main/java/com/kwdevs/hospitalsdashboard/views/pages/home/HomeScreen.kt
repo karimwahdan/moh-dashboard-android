@@ -1,7 +1,6 @@
 package com.kwdevs.hospitalsdashboard.views.pages.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,7 +44,6 @@ import com.kwdevs.hospitalsdashboard.controller.ModelConverter
 import com.kwdevs.hospitalsdashboard.models.Quadruple
 import com.kwdevs.hospitalsdashboard.models.hospital.Hospital
 import com.kwdevs.hospitalsdashboard.models.settings.BasicModel
-import com.kwdevs.hospitalsdashboard.models.settings.area.Area
 import com.kwdevs.hospitalsdashboard.models.settings.area.AreaWithCount
 import com.kwdevs.hospitalsdashboard.models.settings.city.CityWithCount
 import com.kwdevs.hospitalsdashboard.models.settings.hospitalType.HospitalType
@@ -59,16 +57,25 @@ import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_HO
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_HOSPITAL_TYPE
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_SECTOR
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.CREATE_HOSPITAL
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.EDIT_HOSPITAL_MODULES
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_AREA
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_CITY
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_HOSPITAL
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_HOSPITAL_TYPE
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_SECTOR
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.UPDATE_HOSPITAL
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_ALL_BLOOD_KPI
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_CERTAIN_DIRECTORATE_COLLECTIVE_BB_KPI
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_CURATIVE_BLOOD_KPI
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_DIRECTORATE_BLOOD_KPI
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_EDUCATIONAL_BLOOD_KPI
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_INSURANCE_BLOOD_KPI
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_NBTS_BLOOD_KPI
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_SPECIALIZED_BLOOD_KPI
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.citiesPermissions
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.models.superUser.SuperUser
 import com.kwdevs.hospitalsdashboard.responses.home.HomeResponse
 import com.kwdevs.hospitalsdashboard.routes.AdminHomeRoute
-import com.kwdevs.hospitalsdashboard.routes.AreaViewRoute
 import com.kwdevs.hospitalsdashboard.routes.ChangePasswordRoute
 import com.kwdevs.hospitalsdashboard.routes.HospitalModuleSelectorRoute
 import com.kwdevs.hospitalsdashboard.routes.HospitalsViewRoute
@@ -80,6 +87,8 @@ import com.kwdevs.hospitalsdashboard.views.assets.BOTTOM
 import com.kwdevs.hospitalsdashboard.views.assets.BarGraph
 import com.kwdevs.hospitalsdashboard.views.assets.ColumnContainer
 import com.kwdevs.hospitalsdashboard.views.assets.CustomButtonWithImage
+import com.kwdevs.hospitalsdashboard.views.assets.DIRECTORATE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
 import com.kwdevs.hospitalsdashboard.views.assets.ERROR_LOADING_DATA_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.GREEN
 import com.kwdevs.hospitalsdashboard.views.assets.HOME_LABEL
@@ -93,16 +102,17 @@ import com.kwdevs.hospitalsdashboard.views.assets.ORANGE
 import com.kwdevs.hospitalsdashboard.views.assets.PALE_ORANGE
 import com.kwdevs.hospitalsdashboard.views.assets.PieGraph
 import com.kwdevs.hospitalsdashboard.views.assets.Span
+import com.kwdevs.hospitalsdashboard.views.assets.TOTAL_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.WELCOME_USER_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.WHITE
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.FailScreen
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.LoadingScreen
 import com.kwdevs.hospitalsdashboard.views.assets.container.Container
-import com.kwdevs.hospitalsdashboard.views.cards.AreaCard
-import com.kwdevs.hospitalsdashboard.views.pages.home.homeCharts.bloodBankModule.general.CityBloodBankKpiSection
+import com.kwdevs.hospitalsdashboard.views.pages.home.homeCharts.bloodBankModule.general.CertainDirectorateCollectiveBBKpiSection
 import com.kwdevs.hospitalsdashboard.views.pages.home.homeCharts.bloodBankModule.general.ComparativeBloodBankKpiSection
 import com.kwdevs.hospitalsdashboard.views.pages.home.homeCharts.bloodBankModule.general.CurativeBloodBankKpiSection
+import com.kwdevs.hospitalsdashboard.views.pages.home.homeCharts.bloodBankModule.general.DirectoratesBloodBankKpiSection
 import com.kwdevs.hospitalsdashboard.views.pages.home.homeCharts.bloodBankModule.general.EducationalBloodBankKpiSection
 import com.kwdevs.hospitalsdashboard.views.pages.home.homeCharts.bloodBankModule.general.InsuranceBloodBankKpiSection
 import com.kwdevs.hospitalsdashboard.views.pages.home.homeCharts.bloodBankModule.general.NBTSBloodBankKpiSection
@@ -123,6 +133,9 @@ fun HomeScreen(navHostController: NavHostController){
     val userType    = Preferences.User().getType()
     val superUser   = userType?.let{ if(it==ViewType.SUPER_USER) Preferences.User().getSuper() else null}
     val normalUser = userType?.let{ if(it==ViewType.HOSPITAL_USER) Preferences.User().get() else null}
+    val isSuper=superUser?.isSuper?:false
+    val roles=superUser?.roles?: emptyList()
+    val permissions=roles.flatMap { it -> it.permissions.map { it.slug } }
     val controller : HomeController= viewModel()
     val state by controller.singleState.observeAsState()
     val showSheet = remember { mutableStateOf(false) }
@@ -141,6 +154,7 @@ fun HomeScreen(navHostController: NavHostController){
 
     var incinerationList        by remember { mutableStateOf<List<MonthlyIncineration>>(emptyList()) }
     val hospitals               =  remember { mutableStateOf<List<Hospital>>(emptyList())}
+    var directorateHospitals    by remember { mutableStateOf<List<Hospital>>(emptyList()) }
 
     val showFilterDialog        =  remember { mutableStateOf(false) }
     var loading                 by remember { mutableStateOf(true) }
@@ -151,113 +165,69 @@ fun HomeScreen(navHostController: NavHostController){
     var superUserRoles          by remember { mutableStateOf<List<String>>(emptyList()) }
 
     var canBrowseCities         by remember { mutableStateOf(false) }
-    var canReadCities           by remember { mutableStateOf(false) }
+    var canReadCities                            by remember { mutableStateOf(false) }
 
-    var canBrowseAreas          by remember { mutableStateOf(false) }
-    var canReadAreas            by remember { mutableStateOf(false) }
+    var canBrowseAreas                           by remember { mutableStateOf(false) }
+    var canReadAreas                             by remember { mutableStateOf(false) }
 
-    var canBrowseSectors        by remember { mutableStateOf(false) }
-    var canReadSectors          by remember { mutableStateOf(false) }
+    var canBrowseSectors                         by remember { mutableStateOf(false) }
+    var canReadSectors                           by remember { mutableStateOf(false) }
 
-    var canBrowseHospitalTypes  by remember { mutableStateOf(false) }
-    var canReadHospitalTypes    by remember { mutableStateOf(false) }
+    var canBrowseHospitalTypes                   by remember { mutableStateOf(false) }
+    var canReadHospitalTypes                     by remember { mutableStateOf(false) }
 
-    var canBrowseHospitals      by remember { mutableStateOf(false) }
-    var canReadHospitals        by remember { mutableStateOf(false) }
+    var canBrowseHospitals                       by remember { mutableStateOf(false) }
+    var canReadHospitals                         by remember { mutableStateOf(false) }
 
-    var canCreateHospital       by remember { mutableStateOf(false) }
-    var canUpdateHospital       by remember { mutableStateOf(false) }
+    var canCreateHospital                        by remember { mutableStateOf(false) }
+    var canUpdateHospital                        by remember { mutableStateOf(false) }
 
-    val keys                =   remember { mutableStateOf<List<String>>(emptyList()) }
-    val sectorKeys          =   remember { mutableStateOf<List<String>>(emptyList()) }
-    val hospitalTypeKeys    =   remember { mutableStateOf<List<String>>(emptyList()) }
+    var canViewAllBloodKpi                       by remember { mutableStateOf(false) }
+    var canViewDirectorateBloodKpi               by remember { mutableStateOf(false) }
+    var canViewSpecializedBloodKpi               by remember { mutableStateOf(false) }
+    var canViewEducationalBloodKpi               by remember { mutableStateOf(false) }
+    var canViewNBTSBloodKpi                      by remember { mutableStateOf(false) }
+    var canViewInsuranceBloodKpi                 by remember { mutableStateOf(false) }
+    var canViewCurativeBloodKpi                  by remember { mutableStateOf(false) }
+    var canViewCertainDirectorateCollectiveBBKpi by remember { mutableStateOf(false) }
+    val keys                                     =  remember { mutableStateOf<List<String>>(emptyList()) }
+    val sectorKeys                               =  remember { mutableStateOf<List<String>>(emptyList()) }
+    val hospitalTypeKeys                         =  remember { mutableStateOf<List<String>>(emptyList()) }
 
     LaunchedEffect(Unit) {
         if(superUser!=null){
-            val isSuper=superUser.isSuper
             if(!isSuper){
-                val roles=superUser.roles
                 superUserRoles=roles.map { it.slug }
+                canBrowseCities=permissions.contains(BROWSE_CITY)
+                canReadCities=permissions.contains(READ_CITY)
 
-                if(roles.isNotEmpty()){
-                    roles.forEach {role->
-                        val permissions=role.permissions.map { p->p.slug }
-                        canBrowseCities=permissions.contains(BROWSE_CITY)
-                        permissions.forEach {p->
-                            when(p){
-                                BROWSE_CITY->{canBrowseCities=true}
-                                BROWSE_SECTOR->{canBrowseSectors=true}
-                                BROWSE_AREA->{canBrowseAreas=true}
-                                BROWSE_HOSPITAL_TYPE->{canBrowseHospitalTypes=true}
-                            }
-                        }
+                canBrowseSectors=permissions.contains(BROWSE_SECTOR)
+                canReadSectors=permissions.contains(READ_SECTOR)
 
-                        canCreateHospital=permissions.contains(CREATE_HOSPITAL)
-                        canUpdateHospital=permissions.contains(UPDATE_HOSPITAL)
-                        canBrowseHospitals=permissions.contains(BROWSE_HOSPITAL)
-                        canReadHospitals=permissions.contains(READ_HOSPITAL)
+                canBrowseHospitalTypes=permissions.contains(BROWSE_HOSPITAL_TYPE)
+                canReadHospitalTypes=permissions.contains(READ_HOSPITAL_TYPE)
 
-                        canBrowseCities=permissions.contains(BROWSE_CITY)
-                        canReadCities=permissions.contains(READ_CITY)
+                canBrowseAreas=permissions.contains(BROWSE_AREA)
+                canReadAreas=permissions.contains(READ_AREA)
 
-                        canBrowseAreas=permissions.contains(BROWSE_AREA)
-                        canReadAreas=permissions.contains(READ_AREA)
+                canCreateHospital=permissions.contains(CREATE_HOSPITAL)
+                canUpdateHospital=permissions.contains(UPDATE_HOSPITAL)
+                canBrowseHospitals=permissions.contains(BROWSE_HOSPITAL)
+                canReadHospitals=permissions.contains(READ_HOSPITAL)
 
-                        canBrowseSectors=permissions.contains(BROWSE_SECTOR)
-                        canReadSectors=permissions.contains(READ_SECTOR)
-
-                        canBrowseHospitalTypes=permissions.contains(BROWSE_HOSPITAL_TYPE)
-                        canReadHospitalTypes=permissions.contains(READ_HOSPITAL_TYPE)
-
-                    }
-                }
-                else{
-                    canBrowseHospitals=false
-                    canReadHospitals=false
-                    canCreateHospital=false
-                    canUpdateHospital=false
-
-                    canBrowseCities=false
-                    canReadCities=false
-
-                    canBrowseAreas=false
-                    canReadAreas=false
-
-                    canBrowseSectors=false
-                    canReadSectors=false
-
-                    canBrowseHospitalTypes=false
-                    canReadHospitalTypes=false
-                }
-            }
-            else{
-
-                canBrowseHospitals=true
-                canReadHospitals=true
-                canCreateHospital=true
-                canUpdateHospital=true
-
-                canBrowseCities=true
-                canReadCities=true
-
-                canBrowseAreas=true
-                canReadAreas=true
-
-                canBrowseSectors=true
-                canReadSectors=true
-
-                canBrowseHospitalTypes=true
-                canReadHospitalTypes=true
-
-
-
+                canViewAllBloodKpi=permissions.contains(VIEW_ALL_BLOOD_KPI)
+                canViewDirectorateBloodKpi=permissions.contains(VIEW_DIRECTORATE_BLOOD_KPI)
+                canViewSpecializedBloodKpi=permissions.contains(VIEW_SPECIALIZED_BLOOD_KPI)
+                canViewEducationalBloodKpi=permissions.contains(VIEW_EDUCATIONAL_BLOOD_KPI)
+                canViewNBTSBloodKpi=permissions.contains(VIEW_NBTS_BLOOD_KPI)
+                canViewInsuranceBloodKpi=permissions.contains(VIEW_INSURANCE_BLOOD_KPI)
+                canViewCurativeBloodKpi=permissions.contains(VIEW_CURATIVE_BLOOD_KPI)
+                canViewCertainDirectorateCollectiveBBKpi=permissions.contains(VIEW_CERTAIN_DIRECTORATE_COLLECTIVE_BB_KPI)
             }
         }
     }
     when(state){
-        is UiState.Loading->{
-            loading=true;fail=false;success=false
-        }
+        is UiState.Loading->{ loading=true;fail=false;success=false }
         is UiState.Error->{
             LaunchedEffect(Unit) {
                 loading=false;fail=true;success=false
@@ -282,15 +252,16 @@ fun HomeScreen(navHostController: NavHostController){
                 keys.value=bloodStocks.value.mapNotNull { it.hospital?.name }
                 filteredBloodStocks.value=data.bloodStocksToday
                 filteredPRBcsStocks.value=data.bloodStocksToday.filter { it.bloodUnitTypeId==2 }
-                if(canBrowseSectors) sectorKeys.value=filteredBloodStocks.value.map { it.hospital?.sector?.name?:"" }
-                if(canBrowseHospitalTypes) hospitalTypeKeys.value=filteredBloodStocks.value.map { it.hospital?.type?.name?:"" }
+                if(canBrowseSectors || isSuper) sectorKeys.value=filteredBloodStocks.value.map { it.hospital?.sector?.name?:"" }
+                if(canBrowseHospitalTypes || isSuper) hospitalTypeKeys.value=filteredBloodStocks.value.map { it.hospital?.type?.name?:"" }
                 incinerationList=data.incinerations
+                val permissionCities=permissions.intersect(citiesPermissions.toSet())
+                val pcl=permissionCities.mapNotNull{it}
+                directorateHospitals=hospitals.value.filter {(it.city?.slug?:EMPTY_STRING) in pcl }
             }
 
         }
-        else->{
-            LaunchedEffect(Unit) {controller.getHome()}
-        }
+        else->{ LaunchedEffect(Unit) {controller.getHome()} }
     }
 
     HospitalsFilterDialog(
@@ -317,16 +288,16 @@ fun HomeScreen(navHostController: NavHostController){
                         Row(modifier=Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically){
-                            if(canCreateHospital){
+                            if(canCreateHospital || isSuper){
                                 Box(modifier=Modifier.padding(5.dp)){
                                     CustomButtonWithImage(
-                                        enabled = canCreateHospital,
+                                        enabled = canCreateHospital || isSuper,
                                         label = "Add new Hospital",
                                         maxWidth = 82,
                                         icon = R.drawable.ic_hospital_white,
                                         background = BLUE
                                     ) {
-                                        if(canCreateHospital){
+                                        if(canCreateHospital || isSuper){
                                             Preferences.CrudTypes().set(CrudType.CREATE)
                                             navHostController.navigate(HospitalGeneralCreateRoute.route)
                                         }
@@ -341,56 +312,23 @@ fun HomeScreen(navHostController: NavHostController){
                                     }
                                 }
                             }
-
                         }
 
                         VerticalSpacer()
-                        HomeSectorsSection(hasPermission=canBrowseSectors,sectors,navHostController)
-                        HomeHospitalTypesSection(hasPermission=canBrowseHospitalTypes,types,navHostController)
-                        HomeCitiesSection(hasPermission=canBrowseCities,superUser=superUser,items=cities,navHostController=navHostController)
-
-                        if(areas.isNotEmpty()){
-                            if(!canBrowseAreas){
-                                val areaHeads=areas.map { it.headId }
-                                if(areaHeads.isNotEmpty()){
-                                    Column(modifier= Modifier
-                                        .fillMaxWidth()
-                                        .border(width = 1.dp, color = Color.LightGray, shape = rcs(10)),)
-                                    {
-                                        VerticalSpacer()
-                                        Row(modifier=Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceAround,
-                                            verticalAlignment = Alignment.CenterVertically){
-                                            HorizontalSpacer()
-                                            areas.forEach {
-                                                if(it.headId==(superUser?.id?:0)){
-                                                    AreaCard(it, modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .weight(1f)){
-                                                        Preferences.Areas().set(Area(id=it.id, cityId = it.cityId,name=it.name, headId = it.headId))
-                                                        navHostController.navigate(AreaViewRoute.route)
-                                                    }
-                                                    HorizontalSpacer()
-                                                }
-                                            }
-                                        }
-                                        VerticalSpacer()
-                                    }
-                                }
-                            }
-                        }
+                        VerticalSpacer()
+                        HomeSectorsSection(hasPermission=canBrowseSectors || isSuper,sectors,navHostController)
+                        HomeHospitalTypesSection(hasPermission=canBrowseHospitalTypes|| isSuper,types,navHostController)
+                        HomeCitiesSection(hasPermission=canBrowseCities|| isSuper,superUser=superUser,items=cities,navHostController=navHostController)
                         VerticalSpacer()
                         val emptyBloodStocks = bloodStocks.value.isEmpty()
-                        val sectorHospitals  = sectors.sumOf { it.hospitalsCount?:0 }
-                        val stocksSize       = bloodStocks.value.groupBy { it.hospital }.size
 
-                        if(!emptyBloodStocks /*|| (sectorHospitals > stocksSize)*/){
+                        if(!emptyBloodStocks){
                             Row(modifier=Modifier.fillMaxWidth().background(BLACK),
                                 horizontalArrangement = Arrangement.Start,
                                 verticalAlignment = Alignment.CenterVertically,){
                                 Icon(R.drawable.ic_info_white, background = BLUE)
                                 Label(
-                                    text="اجمالى ${bloodStocks.value.filter{it.hospital?.isNbts==false}.groupBy { it.hospital }.size} مستشفى من ${sectors.sumOf { (it.hospitalsCount?:0)}-28}",
+                                    text="$TOTAL_LABEL ${bloodStocks.value.filter{it.hospital?.isNbts==false}.groupBy { it.hospital }.size} مستشفى من ${sectors.sumOf { (it.hospitalsCount?:0)}-28}",
                                     color = if((bloodStocks.value.filter{it.hospital?.isNbts==false}.groupBy { it.hospital }.size)<(sectors.sumOf { (it.hospitalsCount?:0) }-28)) Color.Red else GREEN,
                                     fontWeight = FontWeight.Bold,
                                     maximumLines = 2,
@@ -404,7 +342,7 @@ fun HomeScreen(navHostController: NavHostController){
                                 verticalAlignment = Alignment.CenterVertically){
                                 Icon(R.drawable.ic_info_white, background = BLUE)
                                 Label(
-                                    text="اجمالى ${bloodStocks.value.filter{it.hospital?.isNbts==true}.groupBy { it.hospital }.size} اقليمي من 28 ",
+                                    text="$TOTAL_LABEL ${bloodStocks.value.filter{it.hospital?.isNbts==true}.groupBy { it.hospital }.size} اقليمي من 28 ",
                                     color = if((bloodStocks.value.filter{it.hospital?.isNbts==true}.groupBy { it.hospital }.size)<28) Color.Red else GREEN,
                                     fontWeight = FontWeight.ExtraBold,
                                     maximumLines = 2,
@@ -413,7 +351,7 @@ fun HomeScreen(navHostController: NavHostController){
                             }
                         }
 
-                        BloodStockTable(bloodStocks)
+                        BloodStockSection(bloodStocks)
                         VerticalSpacer()
                         BloodStocksCharts(
                             bloodStocks         = bloodStocks.value,
@@ -423,28 +361,76 @@ fun HomeScreen(navHostController: NavHostController){
                             selectedBloodStocks = filteredPRBcsStocks,
                         )
                         if(!emptyBloodStocks) DailyBloodStockPieChart(bloodStocks.value)
-                        HorizontalDivider()
-                        VerticalSpacer()
-                        CityBloodBankKpiSection(controller)
-                        HorizontalDivider()
-                        VerticalSpacer()
-                        InsuranceBloodBankKpiSection(controller)
-                        HorizontalDivider()
-                        VerticalSpacer()
-                        EducationalBloodBankKpiSection(controller)
-                        HorizontalDivider()
-                        VerticalSpacer()
-                        CurativeBloodBankKpiSection(controller)
-                        HorizontalDivider()
-                        VerticalSpacer()
-                        SpecializedBloodBankKpiSection(controller)
-                        HorizontalDivider()
-                        VerticalSpacer()
-                        NBTSBloodBankKpiSection(controller)
-                        HorizontalDivider()
-                        VerticalSpacer()
-                        ComparativeBloodBankKpiSection(controller)
-                        HorizontalDivider()
+                        if(canViewDirectorateBloodKpi   || isSuper || canViewAllBloodKpi){
+                            HorizontalDivider()
+                            VerticalSpacer()
+                            DirectoratesBloodBankKpiSection(controller)
+                        }
+                        if(canViewCertainDirectorateCollectiveBBKpi   || isSuper || canViewDirectorateBloodKpi   || canViewAllBloodKpi ){
+                            HorizontalDivider()
+                            VerticalSpacer()
+                            CertainDirectorateCollectiveBBKpiSection(controller)
+                        }
+                        if(canViewInsuranceBloodKpi     || isSuper || canViewAllBloodKpi){
+                            HorizontalDivider()
+                            VerticalSpacer()
+                            InsuranceBloodBankKpiSection(controller)
+                        }
+                        if(canViewEducationalBloodKpi   || isSuper || canViewAllBloodKpi){
+                            HorizontalDivider()
+                            VerticalSpacer()
+                            EducationalBloodBankKpiSection(controller)
+                        }
+                        if(canViewCurativeBloodKpi      || isSuper || canViewAllBloodKpi){
+                            HorizontalDivider()
+                            VerticalSpacer()
+                            CurativeBloodBankKpiSection(controller)
+                        }
+                        if(canViewSpecializedBloodKpi   || isSuper || canViewAllBloodKpi){
+                            HorizontalDivider()
+                            VerticalSpacer()
+                            SpecializedBloodBankKpiSection(controller)
+                        }
+                        if(canViewNBTSBloodKpi          || isSuper || canViewAllBloodKpi){
+                            HorizontalDivider()
+                            VerticalSpacer()
+                            NBTSBloodBankKpiSection(controller)
+                        }
+                        if(isSuper || canViewAllBloodKpi){
+                            HorizontalDivider()
+                            VerticalSpacer()
+                            ComparativeBloodBankKpiSection(controller)
+                        }
+                        if(canViewCertainDirectorateCollectiveBBKpi){
+                            VerticalSpacer(10)
+                            HorizontalDivider()
+                            Label(DIRECTORATE_LABEL)
+                            directorateHospitals.chunked(2).forEach { l->
+                                if(l.size==2){
+                                    Row(modifier=Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween){
+
+                                        l.forEach { h->
+                                            Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(5.dp)){
+                                                SimpleHospitalCard(h,navHostController)
+
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    Row(modifier=Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween){
+                                        l.forEach { h->
+                                            Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(5.dp)){
+                                                SimpleHospitalCard(h,navHostController)
+                                            }
+                                        }
+                                        Box(modifier=Modifier.fillMaxWidth().weight(1f).padding(5.dp))
+                                    }
+                                }
+                            }
+                        }
+
                         VerticalSpacer()
                     }
                 }
@@ -519,8 +505,9 @@ private fun IncinerationCharts(incinerationData:List<MonthlyIncineration>){
     }
 }
 
-fun processForTodayByCityBarGraph(data: List<DailyBloodStock>,byCity:Boolean,byArea:Boolean,byHospital:Boolean,
-                                  byDate:Boolean,date:String?=null): Pair<List<String>, List<Int>> {
+@Suppress("unused")
+fun processForTodayByCityBarGraph(data: List<DailyBloodStock>, byCity:Boolean, byArea:Boolean, byHospital:Boolean,
+                                  byDate:Boolean, date:String?=null): Pair<List<String>, List<Int>> {
 
     //val formatter = DateTimeFormatter.ofLocalizedDate(MEDIUM).withLocale(getDefault())
     //val customFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy hh", ENGLISH)
@@ -569,6 +556,7 @@ fun processForTodayByCityBarGraph(data: List<DailyBloodStock>,byCity:Boolean,byA
     return Pair(cities, amounts)
 }
 
+@Suppress("unused")
 fun processGroupedDataByHospitalLocationLabeled(
     data: List<DailyBloodStock>,
     groupByCity: Boolean = false,
@@ -602,6 +590,7 @@ fun processGroupedDataByHospitalLocationLabeled(
         else "N/A"
     }.distinct()
 
+    @Suppress("UNUSED_VARIABLE")
     val groupedData = bloodGroupLabels.associateWith { group ->
         locationLabels.map { location ->
             data.filter {
@@ -830,6 +819,10 @@ fun getTimeBlock(timeBlock: String): String {
 
 @Composable
 private fun SimpleHospitalCard(item:Hospital,navHostController: NavHostController){
+    val user=Preferences.User().getSuper()
+    val isSuper=user?.isSuper?:false
+    val roles=user?.roles
+    val permissions=roles?.flatMap { it.permissions.map { p-> p.slug?: EMPTY_STRING } }?: emptyList()
     val name=item.name
     val sector=item.sector
     val type=item.type
@@ -838,6 +831,7 @@ private fun SimpleHospitalCard(item:Hospital,navHostController: NavHostControlle
     val city=item.city
     val address=item.address
     val isNBTS=item.isNBTS
+    val editHospitalModules=permissions.contains(EDIT_HOSPITAL_MODULES)
     Box(modifier=Modifier.fillMaxWidth().padding(5.dp)
         .clip(rcs(20))
         .background(color = WHITE,shape=rcs(20)).clickable {
@@ -855,10 +849,13 @@ private fun SimpleHospitalCard(item:Hospital,navHostController: NavHostControlle
                     Label(name, fontWeight = FontWeight.Bold, maximumLines = 5)
                 }
                 Icon(if (active==true) R.drawable.ic_check_circle_green else R.drawable.ic_cancel_red, containerSize = 26)
-                IconButton(R.drawable.ic_view_timeline_blue) {
-                    val simple=ModelConverter().convertHospitalToSimple(item)
-                    Preferences.Hospitals().set(simple)
-                    navHostController.navigate(HospitalModuleSelectorRoute.route)
+                if(editHospitalModules || isSuper){
+                    IconButton(R.drawable.ic_view_timeline_blue) {
+                        val simple=ModelConverter().convertHospitalToSimple(item)
+                        Preferences.Hospitals().set(simple)
+                        navHostController.navigate(HospitalModuleSelectorRoute.route)
+                    }
+
                 }
             }
             Row(modifier=Modifier.fillMaxWidth()){

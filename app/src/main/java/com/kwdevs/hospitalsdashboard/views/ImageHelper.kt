@@ -45,20 +45,7 @@ class ImageHelper {
         canvas.drawBitmap(bmp, 0f, 0f, paint)
         return gray
     }
-/*
-    fun otsuBinarize(srcGray: Bitmap): Bitmap {
-        val width = srcGray.width
-        val height = srcGray.height
-        val mat = Mat()
-        Utils.bitmapToMat(srcGray, mat)
-        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2GRAY)
-        Imgproc.threshold(mat, mat, 0.0, 255.0, Imgproc.THRESH_BINARY + Imgproc.THRESH_OTSU)
-        val dst = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        Utils.matToBitmap(mat, dst)
-        mat.release()
-        return dst
-    }
-*/
+
     fun normalizeArabicDigits(input: String): String {
         val builder = StringBuilder()
         for (char in input) {

@@ -8,7 +8,10 @@ data class City(
 
     @Json(name = "name")
     var name:String?=null,
+    @Json(name = "slug")
+    var slug:String?=null,
     @Json(name = "head_id")
     val headId:Int?=null,
+
 
 )

@@ -32,7 +32,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.BLUE
 import com.kwdevs.hospitalsdashboard.views.assets.CustomButton
 import com.kwdevs.hospitalsdashboard.views.assets.DATE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.ERROR_LOADING_DATA_LABEL
-import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.THE_HOSPITAL_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.IMPORTS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.Label
 import com.kwdevs.hospitalsdashboard.views.assets.QUANTITY_LABEL
@@ -109,7 +109,7 @@ fun BloodImportsIndexPage(navHostController: NavHostController){
                             Row(modifier=Modifier.fillMaxWidth()){
                                 Box(modifier=Modifier.fillMaxWidth().weight(1f),
                                     contentAlignment = Alignment.Center){
-                                    Label(HOSPITAL_LABEL)
+                                    Label(THE_HOSPITAL_LABEL)
                                 }
                                 Box(modifier=Modifier.fillMaxWidth().weight(1f),
                                     contentAlignment = Alignment.Center){

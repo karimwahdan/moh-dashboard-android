@@ -8,6 +8,8 @@ data class CityWithCount(
 
     @Json(name = "name")
     var name:String?=null,
+    @Json(name = "slug")
+    var slug:String?=null,
 
     @Json(name = "areas_count")
     var areasCount:Int?=0,

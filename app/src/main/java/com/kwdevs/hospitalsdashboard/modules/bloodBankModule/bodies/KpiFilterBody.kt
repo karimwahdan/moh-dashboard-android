@@ -7,4 +7,5 @@ data class KpiFilterBody(
     val yearTo:String?=null,
     val monthTo:String?=null,
     val dayTo:String?=null,
+    val citySlug:String?=null,
 )

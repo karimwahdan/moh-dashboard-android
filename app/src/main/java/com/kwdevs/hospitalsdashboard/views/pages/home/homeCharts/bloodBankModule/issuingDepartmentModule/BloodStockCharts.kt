@@ -58,7 +58,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.CustomInput
 import com.kwdevs.hospitalsdashboard.views.assets.DIRECTORATE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.GRAY
 import com.kwdevs.hospitalsdashboard.views.assets.GREEN
-import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.THE_HOSPITAL_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.IconButton
 import com.kwdevs.hospitalsdashboard.views.assets.Label
 import com.kwdevs.hospitalsdashboard.views.assets.ORANGE
@@ -414,7 +414,7 @@ fun BloodStocksCharts(
 
     //var newList by remember { mutableStateOf<List<DailyBloodStock>>(emptyList()) }
     var sortedByString by remember { mutableStateOf("") }
-    LaunchedEffect(Unit) {byHospital.value=true;sortedByString= HOSPITAL_LABEL}
+    LaunchedEffect(Unit) {byHospital.value=true;sortedByString= THE_HOSPITAL_LABEL}
 
     if(showFilterDialog.value){
         LaunchedEffect(Unit) {
@@ -546,7 +546,7 @@ fun BloodStocksCharts(
             if(byHospital.value){
                 byCity.value=false
                 byArea.value=false
-                sortedByString= HOSPITAL_LABEL
+                sortedByString= THE_HOSPITAL_LABEL
             }
         }
 

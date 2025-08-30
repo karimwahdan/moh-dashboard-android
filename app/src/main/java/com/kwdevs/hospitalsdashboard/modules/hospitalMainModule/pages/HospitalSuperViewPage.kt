@@ -25,7 +25,7 @@ import com.kwdevs.hospitalsdashboard.routes.HomeRoute
 import com.kwdevs.hospitalsdashboard.views.assets.BLUE
 import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
 import com.kwdevs.hospitalsdashboard.views.assets.HIDE_LABEL
-import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.THE_HOSPITAL_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.Icon
 import com.kwdevs.hospitalsdashboard.views.assets.Label
 import com.kwdevs.hospitalsdashboard.views.assets.ORANGE
@@ -39,7 +39,7 @@ fun HospitalSuperViewPage(navHostController: NavHostController){
     val showSheet = remember { mutableStateOf(false) }
     var showModal by remember { mutableStateOf(false) }
     Container(
-        title = "$HOSPITAL_LABEL ${hospital?.name?: EMPTY_STRING}",
+        title = "$THE_HOSPITAL_LABEL ${hospital?.name?: EMPTY_STRING}",
         showSheet = showSheet,
         headerShowBackButton = true,
         headerIconButtonBackground = BLUE,

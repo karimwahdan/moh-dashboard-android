@@ -41,7 +41,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.PLANNED_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SPACE
 import com.kwdevs.hospitalsdashboard.views.assets.STREET_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.Span
-import com.kwdevs.hospitalsdashboard.views.assets.TOTAL_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.THE_TOTAL_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.WHITE
 import java.time.LocalDate
@@ -88,7 +88,7 @@ fun BloodDonationStatisticsCard(items:List<DailyBloodCollection>){
             Row(modifier=Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically){
-                LabelSpan((total-totalApheresis).toString(), TOTAL_LABEL)
+                LabelSpan((total-totalApheresis).toString(), THE_TOTAL_LABEL)
                 LabelSpan(totalPlanned.toString(),PLANNED_LABEL)
                 LabelSpan(totalStreet.toString(),STREET_LABEL)
                 LabelSpan(totalInHouse.toString(), IN_PATIENT_LABEL)

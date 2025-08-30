@@ -27,6 +27,7 @@ import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.ISSUING_DEPA
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.ISSUING_REPORTS_PREFIX
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.MONTHLY_REPORTS_PREFIX
 import com.kwdevs.hospitalsdashboard.responses.ApiResponse
+import com.kwdevs.hospitalsdashboard.responses.HospitalsResponse
 import com.kwdevs.hospitalsdashboard.responses.PaginationData
 import com.kwdevs.hospitalsdashboard.routes.HOME_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.HOSPITALS_PREFIX

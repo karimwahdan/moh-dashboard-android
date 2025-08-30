@@ -194,8 +194,172 @@ fun DualTableColumn(
                     HorizontalDivider()
                 }
             }
-
         }
+    }
+}
 
+@Composable
+fun TripleTableColumn(
+    modifier: Modifier=Modifier,
+    header:String,
+    firstSubHeader:String,
+    secondSubHeader:String,
+    thirdSubHeader:String,
+    headFontSize:Int=12,
+    itemFontSize:Int=12,
+    itemPaddingTop:Int=5,
+    itemPaddingBottom:Int=5,
+    itemPaddingStart:Int=5,
+    headerPaddingStart:Int=5,
+    headerPaddingEnd:Int=5,
+    itemPaddingEnd:Int=5,
+    firstList:List<String>,
+    secondList: List<String>,
+    thirdList: List<String>,
+
+    ){
+    Column(modifier=modifier,
+        horizontalAlignment = Alignment.CenterHorizontally){
+        Column(modifier=Modifier.fillMaxWidth().background(color= colorResource(R.color.pale_orange)), horizontalAlignment = Alignment.CenterHorizontally){
+            Label(text=header, fontSize = headFontSize, maximumLines = 1, textOverflow = TextOverflow.Ellipsis, softWrap = true, paddingStart =headerPaddingStart, paddingEnd = headerPaddingEnd)
+            Row(modifier=Modifier.fillMaxWidth()){
+                Box(modifier=Modifier.fillMaxWidth().background(color= colorResource(R.color.yellow2)),
+                    contentAlignment = Alignment.Center){
+                    Label(text=firstSubHeader, fontSize = headFontSize, maximumLines = 3, paddingStart =2, paddingEnd = 2, paddingBottom = 6)
+
+                }
+                Box(modifier=Modifier.fillMaxWidth().background(color= colorResource(R.color.light_green)),
+                    contentAlignment = Alignment.Center){
+                    Label(text=secondSubHeader, fontSize = headFontSize, maximumLines = 3, paddingStart =2, paddingEnd = 2, paddingBottom = 6)
+
+                }
+                Box(modifier=Modifier.fillMaxWidth().background(color= colorResource(R.color.light_green)),
+                    contentAlignment = Alignment.Center){
+                    Label(text=thirdSubHeader, fontSize = headFontSize, maximumLines = 3, paddingStart =2, paddingEnd = 2, paddingBottom = 6)
+
+                }
+
+            }
+        }
+        HorizontalDivider()
+        Row(modifier=Modifier.widthIn(min=100.dp), horizontalArrangement = Arrangement.SpaceBetween){
+            Column(modifier=Modifier.width(35.dp).border(width = 1.dp, color = Color.LightGray), horizontalAlignment = Alignment.CenterHorizontally) {
+                firstList.forEach {Label(it, fontSize = itemFontSize, paddingTop = itemPaddingTop,
+                    paddingBottom = itemPaddingBottom,
+                    paddingStart = itemPaddingStart,
+                    paddingEnd = itemPaddingEnd)
+                    HorizontalDivider()
+                }
+            }
+            Column(modifier=Modifier.width(65.dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                secondList.forEach {
+                    Label(it, fontSize = itemFontSize, paddingTop = itemPaddingTop,
+                        paddingBottom = itemPaddingBottom,
+                        paddingStart = itemPaddingStart,
+                        paddingEnd = itemPaddingEnd)
+                    HorizontalDivider()
+                }
+            }
+            Column(modifier=Modifier.width(65.dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                thirdList.forEach {
+                    Label(it, fontSize = itemFontSize, paddingTop = itemPaddingTop,
+                        paddingBottom = itemPaddingBottom,
+                        paddingStart = itemPaddingStart,
+                        paddingEnd = itemPaddingEnd)
+                    HorizontalDivider()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun QuadrableTableColumn(
+    modifier: Modifier=Modifier,
+    header:String,
+    firstSubHeader:String,
+    secondSubHeader:String,
+    thirdSubHeader:String,
+    fourthSubHeader:String,
+    colWidth:Int=65,
+    headFontSize:Int=12,
+    itemFontSize:Int=12,
+    itemPaddingTop:Int=5,
+    itemPaddingBottom:Int=5,
+    itemPaddingStart:Int=5,
+    headerPaddingStart:Int=5,
+    headerPaddingEnd:Int=5,
+    itemPaddingEnd:Int=5,
+    firstList:List<String>,
+    secondList: List<String>,
+    thirdList: List<String>,
+    fourthList: List<String>
+
+    ){
+    Column(modifier=modifier,
+        horizontalAlignment = Alignment.CenterHorizontally){
+        Column(modifier=Modifier.width((colWidth*4).dp).background(color= colorResource(R.color.pale_orange)), horizontalAlignment = Alignment.CenterHorizontally){
+            Label(text=header, fontSize = headFontSize, maximumLines = 1, textOverflow = TextOverflow.Ellipsis, softWrap = true, paddingStart =headerPaddingStart, paddingEnd = headerPaddingEnd)
+        }
+        HorizontalDivider()
+        Row(modifier=Modifier.widthIn(min=100.dp), horizontalArrangement = Arrangement.SpaceBetween){
+            Column(modifier=Modifier.width(colWidth.dp).border(width = 1.dp, color = Color.LightGray),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(modifier=Modifier.fillMaxWidth().background(color= colorResource(R.color.yellow2)),
+                    contentAlignment = Alignment.Center){
+                    Label(text=firstSubHeader, fontSize = headFontSize, maximumLines = 3, paddingStart =2, paddingEnd = 2, paddingBottom = 6)
+                }
+                firstList.forEach {Label(it, fontSize = itemFontSize, paddingTop = itemPaddingTop,
+                    paddingBottom = itemPaddingBottom,
+                    paddingStart = itemPaddingStart,
+                    paddingEnd = itemPaddingEnd)
+                    HorizontalDivider()
+                }
+            }
+            Column(modifier=Modifier.width(colWidth.dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(modifier=Modifier.fillMaxWidth().background(color= colorResource(R.color.yellow2)),
+                    contentAlignment = Alignment.Center){
+                    Label(text=secondSubHeader, fontSize = headFontSize, maximumLines = 3, paddingStart =2, paddingEnd = 2, paddingBottom = 6)
+                }
+                secondList.forEach {
+                    Label(it, fontSize = itemFontSize, paddingTop = itemPaddingTop,
+                        paddingBottom = itemPaddingBottom,
+                        paddingStart = itemPaddingStart,
+                        paddingEnd = itemPaddingEnd)
+                    HorizontalDivider()
+                }
+            }
+            Column(modifier=Modifier.width(colWidth.dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(modifier=Modifier.fillMaxWidth().background(color= colorResource(R.color.yellow2)),
+                    contentAlignment = Alignment.Center){
+                    Label(text=thirdSubHeader, fontSize = headFontSize, maximumLines = 3, paddingStart =2, paddingEnd = 2, paddingBottom = 6)
+                }
+                thirdList.forEach {
+                    Label(it, fontSize = itemFontSize, paddingTop = itemPaddingTop,
+                        paddingBottom = itemPaddingBottom,
+                        paddingStart = itemPaddingStart,
+                        paddingEnd = itemPaddingEnd)
+                    HorizontalDivider()
+                }
+            }
+            Column(modifier=Modifier.width(colWidth.dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(modifier=Modifier.fillMaxWidth().background(color= colorResource(R.color.yellow2)),
+                    contentAlignment = Alignment.Center){
+                    Label(text=fourthSubHeader, fontSize = headFontSize, maximumLines = 3, paddingStart =2, paddingEnd = 2, paddingBottom = 6)
+                }
+                fourthList.forEach {
+                    Label(it, fontSize = itemFontSize, paddingTop = itemPaddingTop,
+                        paddingBottom = itemPaddingBottom,
+                        paddingStart = itemPaddingStart,
+                        paddingEnd = itemPaddingEnd)
+                    HorizontalDivider()
+                }
+            }
+        }
     }
 }

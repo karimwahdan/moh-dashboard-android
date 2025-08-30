@@ -24,8 +24,11 @@ class HomeController : ViewModel() {
     private val datum = MutableLiveData<UiState<HomeResponse>>()
     val singleState: LiveData<UiState<HomeResponse>> get() = datum
 
-    private val cityKpiDatum=MutableLiveData<UiState<CityBloodBankKpiResponse>>()
-    val cityKpiState: LiveData<UiState<CityBloodBankKpiResponse>> get() = cityKpiDatum
+    private val certainDirectorateKpiDatum=MutableLiveData<UiState<HospitalBloodBankKpiResponse>>()
+    val certainDirectorateState: LiveData<UiState<HospitalBloodBankKpiResponse>> get() = certainDirectorateKpiDatum
+
+    private val citiesKpiDatum=MutableLiveData<UiState<CityBloodBankKpiResponse>>()
+    val citiesKpiState: LiveData<UiState<CityBloodBankKpiResponse>> get() = citiesKpiDatum
 
     private val specializedKpiDatum=MutableLiveData<UiState<HospitalBloodBankKpiResponse>>()
     val specializedKpiState: LiveData<UiState<HospitalBloodBankKpiResponse>> get() = specializedKpiDatum
@@ -44,17 +47,31 @@ class HomeController : ViewModel() {
 
     private val nBTSKpiDatum=MutableLiveData<UiState<HospitalBloodBankKpiResponse>>()
     val nBTSKpiState: LiveData<UiState<HospitalBloodBankKpiResponse>> get() = nBTSKpiDatum
-
-    fun getCityCharts(kpiBody: KpiFilterBody){
+    fun getCertainDirectorateCharts(kpiBody: KpiFilterBody){
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                withContext(Dispatchers.Main){cityKpiDatum.value = UiState.Loading}
-                val response = api.cityCharts(kpiBody)
-                withContext(Dispatchers.Main) {cityKpiDatum.value = UiState.Success(response) }
+                withContext(Dispatchers.Main){certainDirectorateKpiDatum.value = UiState.Loading}
+                val response = api.certainDirectorateCharts(kpiBody)
+                withContext(Dispatchers.Main) {certainDirectorateKpiDatum.value = UiState.Success(response) }
 
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    cityKpiDatum.value = UiState.Error(error(e))
+                    certainDirectorateKpiDatum.value = UiState.Error(error(e))
+                }
+            }
+        }
+    }
+
+    fun getDirectoratesCharts(kpiBody: KpiFilterBody){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main){citiesKpiDatum.value = UiState.Loading}
+                val response = api.cityCharts(kpiBody)
+                withContext(Dispatchers.Main) {citiesKpiDatum.value = UiState.Success(response) }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    citiesKpiDatum.value = UiState.Error(error(e))
                 }
             }
         }

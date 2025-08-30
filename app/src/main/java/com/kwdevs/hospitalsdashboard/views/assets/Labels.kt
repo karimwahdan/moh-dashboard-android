@@ -32,6 +32,7 @@ fun monthName(month:String?): String {
 const val ADD_MULTIPLE_ITEMS_LABEL              =   "اضغط هنا للإضافة,\n يمكنك إضافة اكثر من صنف"
 const val AREA_LABEL                            =   "الحى"
 const val ACTIVE_LABEL                          =   "فعال"
+const val ACHIEVEMENT_LABEL                     =   "التحقيق"
 const val ACCOUNT_TYPE_LABEL                    =   "نوع الحساب"
 const val ADD_NEW_LABEL                         =   "إدخال جديد"
 const val ACTION_TYPE_LABEL                     =   "العملية"
@@ -73,10 +74,12 @@ const val BLOOD_STOCK_LABEL                     =   "مخزون الدم"
 //C
 const val CAMPAIGNS_LABEL                       =   "حملات"
 const val CURRENT_PERCENT_LABEL                 =   "النسبة الحالية"
+const val CURATIVE_SECTOR_LABEL                 =   "م.علاجية"
 const val CAMPAIGN_CODE_LABEL                   =   "كود الحملة"
 const val CCU_LABEL                             =   "رعاية القلب"
 const val CITY_LABEL                            =   "المدينة"
 const val SECTOR_LABEL                          =   "القطاع"
+const val COMPLETE_BLOOD_KPI_COMPARISON_LABEL   =   "مقارنة شاملة لمؤشرات أداء بنوك الدم"
 const val CREATE_NEW_HOSPITAL_LABEL             =   "إدخال بيانات مستشفى جديدة"
 const val CANCEL_LABEL                          =   "إلغاء"
 const val CLOSE_LABEL                           =   "إغلاق"
@@ -95,10 +98,12 @@ const val CAMPAIGN_LOCATION_LABEL               =   "مكان الحملة"
 const val CAMPAIGN_TYPE_LABEL                   =   "نوع الحملة"
 const val COLLECTION_LABEL                      =   "التجميع"
 const val CAMPAIGN_DATE_LABEL                   =   "تاريخ الحملة"
+const val COLLECTED_ISSUED_B_C_I_SYPHILIS_LABEL =   "المجمع/المنصرف/التهاب بي/التهاب سي/ايدز/زهرى"
 //D
 const val DAILY_BLOOD_COLLECTION_LABEL          =   "التجميع اليومى"
 const val DETAILED_FILTER_LABEL                 =   "تصفية تفصيلية"
 const val DETAILED_DATA_LABEL                   =   "بيانات تفصيلية"
+const val DEFICIT_LABEL                        =   "العجز"
 const val DEPARTMENTS_LABEL                     =   "الأقسام"
 const val DELETE_LABEL                          =   "حذف"
 const val DIRECTORATE_LABEL                     =   "المديرية"
@@ -131,6 +136,8 @@ const val DATA_LOADED_LABEL                     =   "تم استيراد الب�
 //E
 const val EMPTY_STRING                          =   ""
 const val EMERGENCY_STOCK_LABEL                 =   "طواريء"
+const val EXPIRED_LABEL                         =   "منتهى الصلاحية"
+const val EDUCATIONAL_SECTOR_LABEL              =   "تعليمى"
 const val EXPIRY_DATE_LABEL                     =   "تاريخ انتهاء الصلاحية"
 const val ERROR_COLLECTION_DATE_REQUIRED_LABEL  =   "تاريخ التبرع مطلوب"
 const val ERROR_RE_LOGIN_LABEL                  =   "من فضلك اعد تسجيل الدخول"
@@ -173,6 +180,12 @@ const val FOR_LABEL                             =   "الى"
 const val FEMALE_LABEL                          =   "انثى"
 const val FFP_LABEL                             =   "بلازما طازجة"
 const val FP_LABEL                              =   "بلازما مجمدة"
+const val FOR_FIRST_QUARTER_LABEL               =   "عن الربع الاول"
+const val FOR_SECOND_QUARTER_LABEL              =   "عن الربع الثانى"
+const val FOR_THIRD_QUARTER_LABEL               =   "عن الربع الثالث"
+const val FOR_FOURTH_QUARTER_LABEL              =   "عن الربع الرابع"
+const val FOR_FIRST_HALF_LABEL                  =   "عن النصف الاول"
+const val FOR_SECOND_HALF_LABEL                 =   "عن النصف الثانى"
 
 //G
 const val GENERAL_CU_LABEL                      =   "الرعايات"
@@ -182,6 +195,10 @@ const val GOVERNMENTAL_LABEL                    =   "حكومى"
 
 //H
 const val HOSPITAL_TYPE_LABEL                   =   "التصنيف"
+const val HCV_LABEL                             =   "فيروس سى"
+const val HBV_LABEL                             =   "فيروس بى"
+const val HIV_LABEL                             =   "ايدز"
+const val SYPHILIS_LABEL                        =   "زهرى"
 const val HAS_ICU_DEPARTMENTS_LABEL             =   "بها اقسام رعاية"
 const val HAS_ICU_LABEL                         =   "بها غرف رعاية مركزة"
 const val HAS_CCU_LABEL                         =   "بها غرف رعاية قلب"
@@ -195,17 +212,19 @@ const val HAS_DEPARTMENTS_LABEL                 =   "بها اقسام"
 const val HAS_WARDS_LABEL                       =   "بها غرف داخلى"
 const val HAS_RENAL_DEVICES_LABEL               =   "بها اجهزة غسيل كلوى"
 const val HOME_LABEL                            =   "الرئيسية"
-const val HOSPITAL_LABEL                        =   "المستشفى"
 const val HOSPITALS_LABEL                       =   "مستشفيات"
 const val HOSPITAL_NAME_LABEL                   =   "اسم المستشفى"
 const val HOSPITAL_ADDRESS_LABEL                =   "عنوان المستشفى"
 const val HIDE_LABEL                            =   "إخفاء"
 
 //I
+const val ISSUING_LABEL                         =   "الصرف"
+const val INSURANCE_SECTOR_LABEL                =   "ت.صحى"
 const val INCINERATION_DATE_LABEL               =   "تاريخ الاعدام"
 const val INCINERATION_REASON_LABEL             =   "سبب الإعدام"
 const val INCINERATION_BLOOD_LABEL              =   "إعدام دم"
 const val INCINERATION_INFO_LABEL               =   "تفاصيل الإعدامات"
+const val INCOMPLETE_LABEL                      =   "لم يتم"
 const val IN_CITY_LABEL                         =   "بمدينة"
 const val IN_AREA_LABEL                         =   "بحى/منطقة"
 const val IN_PATIENT_LABEL                      =   "الداخلى"
@@ -263,6 +282,7 @@ const val MISSING_PLASMA_DATA                   =   "بعض بيانات الب�
 //N
 const val NEW_INCINERATION_ITEM_LABEL           =   "إعدام وحدات"
 const val NO_DATA_LABEL                         =   "لا يوجد بيانات"
+const val NUMBER_LABEL                          =   "العدد"
 const val NAME_LABEL                            =   "الاسم"
 const val NICU_LABEL                            =   "رعاية الأطفال"
 const val NEUROLOGY_CU_LABEL                    =   "رعاية المخ والاعصاب"
@@ -300,6 +320,7 @@ const val OTHER_HOSPITAL_LABEL                  =   "مستشفيات اخرى"
 //P
 const val PLANNED_LABEL                         =   "منظم"
 const val PROCESSING_DATE_LABEL                 =   "تاريخ الفصل"
+const val PERCENT_LESS_THAN_LABEL               =   "النسبة <"
 const val PERCENT_LABEL                         =   "النسبة"
 const val PLASMA_LABEL                          =   "بلازما"
 const val PASSWORD_LABEL                        =   "كلمة المرور"
@@ -326,7 +347,7 @@ const val QUANTITY_LABEL                        =   "الكمية"
 
 //R
 const val RANDOM_DONOR_PLATELETS_LABEL          =   "صفائح دموية (متبرع عشوائى)"
-
+const val REACTIVE_INCINERATED_LABEL            =   "إعدام إيجابى"
 const val RENAL_DEVICE_LABEL                    =   "جهاز غسيل الكلى"
 const val RENAL_DEVICES_LABEL                   =   "اجهزة غسيل الكلى"
 const val RESTORE_LABEL                         =   "استعادة"
@@ -342,6 +363,7 @@ const val RECIPIENT_TYPE_LABEL                  =   "نوع المستلم"
 //S
 const val SPACE                                 =   " "
 const val STREET_LABEL                          =   "شارع"
+const val SPECIALIZED_SECTOR_LABEL              =   "امانة"
 const val STATUS_LABEL                          =   "الحالة"
 const val SHOW_LABEL                            =   "إظهار"
 const val SEARCH_BY_CAMPAIGN_CODE               =   "بحث بكود الحملة"
@@ -403,7 +425,11 @@ const val SINGLE_DONOR_PLATELETS_LABEL          =   "صفائح دموية (مت
 
 //T
 const val TO_LABEL                              =   "الى"
-const val TOTAL_LABEL                           =   "الاجمالى"
+const val THE_TOTAL_LABEL                       =   "الاجمالى"
+const val THE_HOSPITAL_LABEL                    =   "المستشفى"
+const val THE_DIRECORATE_LABEL                  =   "المديرية"
+const val TOTAL_LABEL                           =   "اجمالى"
+const val TARGET_LABEL                          =   "المستهدف"
 const val TOTAL_INCINERATED_ITEMS               =   "إجمالى وحدات الإعدام"
 const val TOTAL_PROCESSED_LABEL                 =   "إجمالى الفصل"
 const val TOTAL_UNITS_LABEL                     =   "إجمالى الوحدات"

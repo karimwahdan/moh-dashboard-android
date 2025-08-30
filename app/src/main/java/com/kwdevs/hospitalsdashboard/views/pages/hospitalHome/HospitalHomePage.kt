@@ -153,7 +153,7 @@ fun HospitalHomePage(navHostController: NavHostController){
                         latitude    = it.latitude,
                         active      = it.active,
                         isNbts      = it.isNBTS,
-                        city        = City(id=it.city?.id,it.city?.name,it.city?.headId),
+                        city        = City(id=it.city?.id,name=it.city?.name,headId=it.city?.headId,slug=it.city?.slug),
                         area        = Area(id=it.areaId,cityId=it.area?.cityId, name = it.area?.name, headId = it.area?.headId),
                         sector      = it.sector,
                         type        = it.type,

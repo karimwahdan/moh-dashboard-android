@@ -24,6 +24,7 @@ import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.responses.issuingDe
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.responses.issuingDepartment.MonthlyIssuingReportSingleResponse
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.BloodBankCaller
 import com.kwdevs.hospitalsdashboard.responses.ApiResponse
+import com.kwdevs.hospitalsdashboard.responses.HospitalsResponse
 import com.kwdevs.hospitalsdashboard.responses.PaginationData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

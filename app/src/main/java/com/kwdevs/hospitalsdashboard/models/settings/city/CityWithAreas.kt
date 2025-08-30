@@ -13,6 +13,9 @@ data class CityWithAreas(
     @Json(name = "name")
     var name:String,
 
+    @Json(name = "slug")
+    var slug:String,
+
     @Json(name = "areas")
     var areas:List<AreaWithCount>? = emptyList(),
 

@@ -76,6 +76,9 @@ interface SettingsApi {
     @POST("$HOSPITALS_PREFIX/$BLOOD_BANKS_PREFIX/insurance-chart")
     suspend fun insuranceCharts(@Body body: KpiFilterBody): HospitalBloodBankKpiResponse
 
+    @POST("$HOSPITALS_PREFIX/$BLOOD_BANKS_PREFIX/certain-directorate-kpi")
+    suspend fun certainDirectorateCharts(@Body body: KpiFilterBody): HospitalBloodBankKpiResponse
+
     @POST("$HOSPITALS_PREFIX/$BLOOD_BANKS_PREFIX/educational-chart")
     suspend fun educationalCharts(@Body body: KpiFilterBody): HospitalBloodBankKpiResponse
 
@@ -95,9 +98,7 @@ interface SettingsApi {
     suspend fun comparativeDirectorateWithNBTSCharts(@Body body: KpiFilterBody): ComparativeBloodBankKpiResponse
 
     @GET("$HOME_PREFIX/$HOME_PREFIX")
-    suspend fun home(
-        @Query("userId")userId:Int,
-    ):HomeResponse
+    suspend fun home(@Query("userId")userId:Int,):HomeResponse
 
     @GET("$CITY_DETAILS_PREFIX/$INDEX_PREFIX")
     suspend fun citiesWithCount():CityWithCountResponse

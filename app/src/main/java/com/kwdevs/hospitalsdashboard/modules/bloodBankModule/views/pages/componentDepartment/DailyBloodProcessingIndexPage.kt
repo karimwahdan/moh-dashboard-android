@@ -48,7 +48,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.Label
 import com.kwdevs.hospitalsdashboard.views.assets.PROCESSING_DATE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SPACE
 import com.kwdevs.hospitalsdashboard.views.assets.Span
-import com.kwdevs.hospitalsdashboard.views.assets.TOTAL_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.THE_TOTAL_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.WHITE
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.LoadingScreen
@@ -159,7 +159,7 @@ fun DailyBloodProcessingIndexPage(navHostController: NavHostController){
                                     }
                                 }
                                 Column(modifier=Modifier.fillMaxWidth().weight(0.5f).border(1.dp, Color.LightGray),horizontalAlignment = Alignment.CenterHorizontally){
-                                    Label(TOTAL_LABEL, fontSize = 12)
+                                    Label(THE_TOTAL_LABEL, fontSize = 12)
                                     Label(EMPTY_STRING, fontSize = 12)
                                     HorizontalDivider()
                                     byCampaign.forEach { (campaign, processes) ->

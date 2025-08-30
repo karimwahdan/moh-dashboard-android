@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -38,23 +39,16 @@ import com.kwdevs.hospitalsdashboard.models.hospital.HospitalWard
 import com.kwdevs.hospitalsdashboard.models.hospital.hospitalDevices.HospitalDevice
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.models.BloodBankKpi
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.kpis.KpiTable
-import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_AREA
-import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_CITY
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_HOSPITAL
-import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_HOSPITAL_TYPE
-import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_SECTOR
-import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.CITY_HEAD
-import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_AREA
-import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_CITY
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_HOSPITAL
-import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_HOSPITAL_TYPE
-import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_SECTOR
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_CERTAIN_DIRECTORATE
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_HOSPITAL_BLOOD_MODULE
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_HOSPITAL_DEPARTMENT_MODULE
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_HOSPITAL_DEVICE_MODULE
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_HOSPITAL_WARD_MODULE
 import com.kwdevs.hospitalsdashboard.responses.HospitalSingleResponse
 import com.kwdevs.hospitalsdashboard.routes.AreaViewRoute
+import com.kwdevs.hospitalsdashboard.routes.HomeRoute
 import com.kwdevs.hospitalsdashboard.routes.HospitalDepartmentCreateRoute
 import com.kwdevs.hospitalsdashboard.routes.HospitalDeviceCreateRoute
 import com.kwdevs.hospitalsdashboard.routes.HospitalsIndexRoute
@@ -77,6 +71,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.FailScreen
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.LoadingScreen
 import com.kwdevs.hospitalsdashboard.views.assets.container.Container
+import com.kwdevs.hospitalsdashboard.views.assets.toast
 import com.kwdevs.hospitalsdashboard.views.cards.hospitals.HospitalDepartmentCard
 import com.kwdevs.hospitalsdashboard.views.cards.hospitals.WardCard
 import com.kwdevs.hospitalsdashboard.views.cards.hospitals.devices.HospitalDeviceCard
@@ -85,27 +80,20 @@ import com.kwdevs.hospitalsdashboard.views.cards.hospitals.devices.HospitalDevic
 @SuppressLint("ViewModelConstructorInComposable")
 @Composable
 fun HospitalViewPage(navHostController: NavHostController){
+    val context=LocalContext.current
     val savedItem=Preferences.Hospitals().get()
     val area=Preferences.Areas().get()
     val userType = Preferences.User().getType()
     val superUser = userType?.let{ if(it== ViewType.SUPER_USER) Preferences.User().getSuper() else null}
+    val isSuper=superUser?.isSuper?:false
     val roles=superUser?.roles
     val permissions= roles?.flatMap { r-> r.permissions}?.map { p-> p.slug?: EMPTY_STRING }?: emptyList()
     if(userType==ViewType.SUPER_USER) {if(superUser==null)navHostController.navigate(LoginRoute.route)}
     var superUserRoles by remember { mutableStateOf<List<String>>(emptyList()) }
-    var canBrowseCities by remember { mutableStateOf(false) }
-    var canReadCities by remember { mutableStateOf(false) }
-    var canBrowseAreas by remember { mutableStateOf(false) }
-    var canReadAreas by remember { mutableStateOf(false) }
-    var canBrowseSectors by remember { mutableStateOf(false) }
-    var canReadSectors by remember { mutableStateOf(false) }
-
-    var canBrowseHospitalTypes by remember { mutableStateOf(false) }
-    var canReadHospitalTypes by remember { mutableStateOf(false) }
 
     var canBrowseHospitals by remember { mutableStateOf(false) }
     var canReadHospitals by remember { mutableStateOf(false) }
-
+    var canReadCertainDirectorate by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
     var success by remember { mutableStateOf(false) }
     var fail    by remember{ mutableStateOf(false)}
@@ -125,42 +113,17 @@ fun HospitalViewPage(navHostController: NavHostController){
     val showSheet = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         if(superUser!=null){
-            val isSuper=superUser.isSuper
             if(!isSuper){
                 superUserRoles=roles?.map { it.slug }?: emptyList()
-                canBrowseCities=superUserRoles.contains(CITY_HEAD)
                 canBrowseHospitals=permissions.contains(BROWSE_HOSPITAL)
                 canReadHospitals=permissions.contains(READ_HOSPITAL)
-
-                canBrowseCities=permissions.contains(BROWSE_CITY)
-                canReadCities=permissions.contains(READ_CITY)
-
-                canBrowseAreas=permissions.contains(BROWSE_AREA)
-                canReadAreas=permissions.contains(READ_AREA)
-
-                canBrowseSectors=permissions.contains(BROWSE_SECTOR)
-                canReadSectors=permissions.contains(READ_SECTOR)
-
-                canBrowseHospitalTypes=permissions.contains(BROWSE_HOSPITAL_TYPE)
-                canReadHospitalTypes=permissions.contains(READ_HOSPITAL_TYPE)
-
+                canReadCertainDirectorate=permissions.contains(VIEW_CERTAIN_DIRECTORATE)
             }
             else{
 
                 canBrowseHospitals=true
                 canReadHospitals=true
 
-                canBrowseCities=true
-                canReadCities=true
-
-                canBrowseAreas=true
-                canReadAreas=true
-
-                canBrowseSectors=true
-                canReadSectors=true
-
-                canBrowseHospitalTypes=true
-                canReadHospitalTypes=true
             }
         }
     }
@@ -184,7 +147,12 @@ fun HospitalViewPage(navHostController: NavHostController){
         }
         else->{
             if(savedItem!=null)controller.view()
-            else navHostController.navigate(HospitalsIndexRoute.route)
+            else {
+                toast(context,"Please select a hospital")
+                navHostController.navigate( if((canBrowseHospitals || isSuper) && area!=null ) AreaViewRoute.route
+                else if(canReadCertainDirectorate) HomeRoute.route
+                else HospitalsIndexRoute.route )
+            }
         }
     }
 
@@ -194,7 +162,9 @@ fun HospitalViewPage(navHostController: NavHostController){
         showSheet = showSheet,
         headerIconButtonBackground = BLUE,
         headerOnClick = {
-            navHostController.navigate( if(canBrowseHospitals && area!=null ) AreaViewRoute.route  else HospitalsIndexRoute.route )
+            navHostController.navigate( if((canBrowseHospitals || isSuper) && area!=null ) AreaViewRoute.route
+            else if(canReadCertainDirectorate) HomeRoute.route
+            else HospitalsIndexRoute.route )
         }
     ) {
         if(loading) LoadingScreen(modifier=Modifier.fillMaxSize())

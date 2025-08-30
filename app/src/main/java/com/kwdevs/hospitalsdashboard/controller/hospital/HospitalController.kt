@@ -72,7 +72,7 @@ class HospitalController : ViewModel() {
     fun view(){
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                //withContext(Dispatchers.Main){datum.value=UiState.Loading}
+                withContext(Dispatchers.Main){datum.value=UiState.Loading}
                 val response = api.view(id=saved?.id?:0)
                 withContext(Dispatchers.Main) {datum.value = UiState.Success(response)}
 

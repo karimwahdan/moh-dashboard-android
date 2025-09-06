@@ -62,7 +62,7 @@ import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_AR
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_CITY
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_HOSPITAL
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_HOSPITAL_TYPE
-import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_SECTOR
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_SECTORS
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.CITY_HEAD
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.CREATE_HOSPITAL
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_AREA
@@ -75,7 +75,7 @@ import com.kwdevs.hospitalsdashboard.responses.HospitalsResponse
 import com.kwdevs.hospitalsdashboard.responses.PaginationData
 import com.kwdevs.hospitalsdashboard.routes.HomeRoute
 import com.kwdevs.hospitalsdashboard.routes.HospitalModuleSelectorRoute
-import com.kwdevs.hospitalsdashboard.routes.HospitalsViewRoute
+import com.kwdevs.hospitalsdashboard.routes.HospitalViewRoute
 import com.kwdevs.hospitalsdashboard.routes.LoginRoute
 import com.kwdevs.hospitalsdashboard.views.assets.AREA_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.BLACK
@@ -199,12 +199,12 @@ fun HospitalsIndexPage(navHostController: NavHostController){
             if(bySector){
                 val sector=Preferences.Sectors().getItem()
                 sector?.let {
-                    controller.bySector(page = currentPage.intValue, sectorId = sector.id)
+                    controller.paginateBySector(page = currentPage.intValue, sectorId = sector.id)
                 }
             }
             else if(byType){
                 val type = Preferences.HospitalTypes().getItem()
-                type?.let{controller.byType(page = currentPage.intValue, typeId = type.id)}
+                type?.let{controller.paginateByType(page = currentPage.intValue, typeId = type.id)}
             }
         }
     }
@@ -214,12 +214,12 @@ fun HospitalsIndexPage(navHostController: NavHostController){
         if(bySector){
             val sector=Preferences.Sectors().getItem()
             sector?.let {
-                controller.bySector(page = currentPage.intValue, sectorId = sector.id)
+                controller.paginateBySector(page = currentPage.intValue, sectorId = sector.id)
             }
         }
         else if(byType){
             val type = Preferences.HospitalTypes().getItem()
-            type?.let{controller.byType(page = currentPage.intValue, typeId = type.id)}
+            type?.let{controller.paginateByType(page = currentPage.intValue, typeId = type.id)}
         }
     }
 
@@ -243,7 +243,7 @@ fun HospitalsIndexPage(navHostController: NavHostController){
                         canBrowseAreas=permissions.contains(BROWSE_AREA)
                         canReadAreas=permissions.contains(READ_AREA)
 
-                        canBrowseSectors=permissions.contains(BROWSE_SECTOR)
+                        canBrowseSectors=permissions.contains(BROWSE_SECTORS)
                         canReadSectors=permissions.contains(READ_SECTOR)
 
                         canBrowseHospitalTypes=permissions.contains(BROWSE_HOSPITAL_TYPE)
@@ -347,7 +347,7 @@ private fun SimpleHospitalCard(item: Hospital, navHostController: NavHostControl
         .background(color = WHITE,shape=rcs(20)).clickable {
             val simple= ModelConverter().convertHospitalToSimple(item)
             Preferences.Hospitals().set(simple)
-            navHostController.navigate(HospitalsViewRoute.route)
+            navHostController.navigate(HospitalViewRoute.route)
         }){
         ColumnContainer(
             background = if(isNBTS==true) PALE_ORANGE else WHITE
@@ -356,12 +356,12 @@ private fun SimpleHospitalCard(item: Hospital, navHostController: NavHostControl
 
 
             Row(modifier=Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically){
-                Span(sector?.name?:EMPTY_STRING, fontSize = 12, color = WHITE, backgroundColor = BLUE, startPadding = 5, endPadding = 5)
+                Span(sector?.name?:EMPTY_STRING, fontSize = 12, color = WHITE, backgroundColor = BLUE, paddingStart = 5, paddingEnd = 5)
                 if(item.isNBTS==true) Icon(R.drawable.ic_blood_drop)
                 Row(modifier=Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween){
-                    Span(type?.name?:EMPTY_STRING, fontSize = 12, color = WHITE, backgroundColor = ORANGE, startPadding = 5, endPadding = 5)
+                    Span(type?.name?:EMPTY_STRING, fontSize = 12, color = WHITE, backgroundColor = ORANGE, paddingStart = 5, paddingEnd = 5)
                     Row(verticalAlignment = Alignment.CenterVertically){
                         Icon(if (active==true) R.drawable.ic_check_circle_green else R.drawable.ic_cancel_red, containerSize = 26)
                         if(user?.isSuper==true || permissions?.contains("browse.modules")==true){

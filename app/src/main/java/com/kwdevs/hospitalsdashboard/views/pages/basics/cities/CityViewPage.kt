@@ -44,7 +44,7 @@ import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_AR
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_CITY
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_HOSPITAL
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_HOSPITAL_TYPE
-import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_SECTOR
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_SECTORS
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.CITY_HEAD
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_AREA
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_CITY
@@ -54,7 +54,7 @@ import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_SECT
 import com.kwdevs.hospitalsdashboard.routes.AreaViewRoute
 import com.kwdevs.hospitalsdashboard.routes.HomeRoute
 import com.kwdevs.hospitalsdashboard.routes.HospitalModuleSelectorRoute
-import com.kwdevs.hospitalsdashboard.routes.HospitalsViewRoute
+import com.kwdevs.hospitalsdashboard.routes.HospitalViewRoute
 import com.kwdevs.hospitalsdashboard.routes.LoginRoute
 import com.kwdevs.hospitalsdashboard.views.assets.BLACK
 import com.kwdevs.hospitalsdashboard.views.assets.BLUE
@@ -149,7 +149,7 @@ fun CityViewPage(navHostController: NavHostController){
                         canBrowseAreas=permissions.contains(BROWSE_AREA)
                         canReadAreas=permissions.contains(READ_AREA)
 
-                        canBrowseSectors=permissions.contains(BROWSE_SECTOR)
+                        canBrowseSectors=permissions.contains(BROWSE_SECTORS)
                         canReadSectors=permissions.contains(READ_SECTOR)
 
                         canBrowseHospitalTypes=permissions.contains(BROWSE_HOSPITAL_TYPE)
@@ -331,7 +331,7 @@ private fun SimpleHospitalCard(item: Hospital, navHostController: NavHostControl
         .background(color = WHITE,shape=rcs(20)).clickable {
             val simple= ModelConverter().convertHospitalToSimple(item)
             Preferences.Hospitals().set(simple)
-            navHostController.navigate(HospitalsViewRoute.route)
+            navHostController.navigate(HospitalViewRoute.route)
         }){
         ColumnContainer(
             background = if(isNBTS==true) PALE_ORANGE else WHITE
@@ -347,8 +347,8 @@ private fun SimpleHospitalCard(item: Hospital, navHostController: NavHostControl
                 }
             }
             Row(modifier=Modifier.fillMaxWidth()){
-                Span(sector?.name?:EMPTY_STRING, fontSize = 14, color = WHITE, backgroundColor = BLUE, startPadding = 5, endPadding = 5)
-                Span(type?.name?:EMPTY_STRING, fontSize = 14, color = WHITE, backgroundColor = ORANGE, startPadding = 5, endPadding = 5)
+                Span(sector?.name?:EMPTY_STRING, fontSize = 14, color = WHITE, backgroundColor = BLUE, paddingStart = 5, paddingEnd = 5)
+                Span(type?.name?:EMPTY_STRING, fontSize = 14, color = WHITE, backgroundColor = ORANGE, paddingStart = 5, paddingEnd = 5)
 
             }
             VerticalSpacer()

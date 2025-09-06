@@ -39,7 +39,7 @@ import com.kwdevs.hospitalsdashboard.models.hospital.hospitalDevices.HospitalDev
 import com.kwdevs.hospitalsdashboard.models.hospital.hospitalDevices.HospitalDeviceSingleResponse
 import com.kwdevs.hospitalsdashboard.models.hospital.hospitalDevices.HospitalDeviceUsageSingleResponse
 import com.kwdevs.hospitalsdashboard.routes.HospitalHomeRoute
-import com.kwdevs.hospitalsdashboard.routes.HospitalsViewRoute
+import com.kwdevs.hospitalsdashboard.routes.HospitalViewRoute
 import com.kwdevs.hospitalsdashboard.views.assets.BLUE
 import com.kwdevs.hospitalsdashboard.views.assets.ColumnContainer
 import com.kwdevs.hospitalsdashboard.views.assets.CustomButton
@@ -153,7 +153,7 @@ fun HospitalDevicesUsagePage(navHostController: NavHostController){
         headerFontWeight = FontWeight.Bold,
         headerShowBackButton = true,
         headerOnClick = {
-            if(userType==ViewType.SUPER_USER) navHostController.navigate(HospitalsViewRoute.route)
+            if(userType==ViewType.SUPER_USER) navHostController.navigate(HospitalViewRoute.route)
             else navHostController.navigate(HospitalHomeRoute.route) },
         headerIconButtonBackground = BLUE
     ) {

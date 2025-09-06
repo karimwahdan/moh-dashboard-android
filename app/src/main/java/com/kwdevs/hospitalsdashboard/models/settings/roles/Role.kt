@@ -14,5 +14,5 @@ data class Role(
     val slug:String,
 
     @Json(name = "permissions")
-    val permissions:List<Permission>
+    val permissions:List<Permission> = emptyList()
 )

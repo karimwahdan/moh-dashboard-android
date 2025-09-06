@@ -36,7 +36,7 @@ object DailyBloodCollectionIndexRoute:Destination{override val route="DailyBlood
 object HomeRoute: Destination {override val route="HomeRoute"}
 object HospitalsIndexRoute: Destination {override val route="HospitalsIndexRoute"}
 object HospitalsStoreRoute: Destination {override val route="HospitalsStoreRoute"}
-object HospitalsViewRoute: Destination {override val route="HospitalViewRoute"}
+object HospitalViewRoute: Destination {override val route="HospitalViewRoute"}
 object HospitalDepartmentCreateRoute:Destination{override val route="HospitalDepartmentCreateRoute"}
 object HospitalDeviceCreateRoute: Destination {override val route="HospitalDeviceCreateRoute"}
 object HospitalHomeRoute:Destination {override val route="HospitalHomeRoute"}
@@ -82,6 +82,9 @@ object ReceptionBedsIndexRoute: Destination {override val route="ReceptionBedsIn
 object RenalDevicesIndexRoute: Destination {override val route="RenalDevicesIndexRoute"}
 
 //S
+object SettingsRoute:Destination{override val route="SettingsRoute"}
+object SuperBloodStocksRoute:Destination{override val route="SuperBloodStocksRoute"}
+object SuperBloodKpiRoute:Destination{override val route="SuperBloodKpiRoute"}
 
 //T
 

@@ -5,24 +5,21 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kwdevs.hospitalsdashboard.app.Preferences
-import com.kwdevs.hospitalsdashboard.app.retrofit.ErrorParser
 import com.kwdevs.hospitalsdashboard.app.retrofit.UiState
 import com.kwdevs.hospitalsdashboard.bodies.control.HospitalModuleBody
+import com.kwdevs.hospitalsdashboard.bodies.control.SlugListBody
 import com.kwdevs.hospitalsdashboard.bodies.hospital.HospitalBody
 import com.kwdevs.hospitalsdashboard.bodies.hospital.HospitalFilterBody
 import com.kwdevs.hospitalsdashboard.controller.error
-import com.kwdevs.hospitalsdashboard.controller.serverError
 import com.kwdevs.hospitalsdashboard.models.hospital.Hospital
 import com.kwdevs.hospitalsdashboard.responses.ApiResponse
 import com.kwdevs.hospitalsdashboard.responses.HospitalSingleResponse
 import com.kwdevs.hospitalsdashboard.responses.HospitalsResponse
 import com.kwdevs.hospitalsdashboard.responses.PaginationData
-import com.kwdevs.hospitalsdashboard.responses.errors.ErrorResponse
 import com.kwdevs.hospitalsdashboard.routes.Callers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.HttpException
 
 class HospitalController : ViewModel() {
 
@@ -58,11 +55,22 @@ class HospitalController : ViewModel() {
             }
         }
     }
-    fun indexOptions(){
+    fun indexAllHospitals(){
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 withContext(Dispatchers.Main){data.value=UiState.Loading}
-                val response = api.indexOptions()
+                val response = api.indexAllHospitals()
+                withContext(Dispatchers.Main) {data.value = UiState.Success(response)}
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {data.value = UiState.Error(error(e))}
+            }
+        }
+    }
+    fun indexDirectorateHospitals(){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main){data.value=UiState.Loading}
+                val response = api.indexDirectorateHospitals()
                 withContext(Dispatchers.Main) {data.value = UiState.Success(response)}
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {data.value = UiState.Error(error(e))}
@@ -72,7 +80,7 @@ class HospitalController : ViewModel() {
     fun view(){
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                withContext(Dispatchers.Main){datum.value=UiState.Loading}
+                withContext(Dispatchers.Main){datum.value=UiState.Reload}
                 val response = api.view(id=saved?.id?:0)
                 withContext(Dispatchers.Main) {datum.value = UiState.Success(response)}
 
@@ -83,12 +91,26 @@ class HospitalController : ViewModel() {
             }
         }
     }
+    fun indexBySector(sectorId:Int){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main){data.value=UiState.Loading}
+                val response = api.indexBySector(sectorId = sectorId)
+                withContext(Dispatchers.Main) {data.value = UiState.Success(response)}
 
-    fun bySector(page:Int, sectorId:Int){
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    paginatedData.value = UiState.Error(error(e))
+                }
+            }
+        }
+    }
+
+    fun paginateBySector(page:Int, sectorId:Int){
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 withContext(Dispatchers.Main){paginatedData.value=UiState.Loading}
-                val response = api.indexBySector(page=page, sectorId = sectorId)
+                val response = api.paginateBySector(page=page, sectorId = sectorId)
                 withContext(Dispatchers.Main) {paginatedData.value = UiState.Success(response)}
 
             } catch (e: Exception) {
@@ -99,7 +121,7 @@ class HospitalController : ViewModel() {
         }
     }
 
-    fun byType(page:Int, typeId:Int){
+    fun paginateByType(page:Int, typeId:Int){
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 withContext(Dispatchers.Main) {paginatedData.value = UiState.Reload}
@@ -107,6 +129,28 @@ class HospitalController : ViewModel() {
                 withContext(Dispatchers.Main) {paginatedData.value = UiState.Success(response)}
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {paginatedData.value = UiState.Error(error(e))}
+            }
+        }
+    }
+    fun byCity(citySlug:String){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main){data.value=UiState.Loading}
+                val response = api.indexByCitySlug(citySlug)
+                withContext(Dispatchers.Main) {data.value = UiState.Success(response)}
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {data.value = UiState.Error(error(e))}
+            }
+        }
+    }
+    fun indexByCitySlugList(slugs:SlugListBody){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main){data.value=UiState.Loading}
+                val response = api.indexByCitySlugList(slugs)
+                withContext(Dispatchers.Main) {data.value = UiState.Success(response)}
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {data.value = UiState.Error(error(e))}
             }
         }
     }

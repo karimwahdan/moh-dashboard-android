@@ -13,7 +13,6 @@ import com.kwdevs.hospitalsdashboard.bodies.control.UserRoleBody
 import com.kwdevs.hospitalsdashboard.controller.error
 import com.kwdevs.hospitalsdashboard.models.settings.permissions.PermissionsResponse
 import com.kwdevs.hospitalsdashboard.models.users.normal.HospitalUserSSResponse
-import com.kwdevs.hospitalsdashboard.modules.hospitalMainModule.subModules.hospitalUserSubModule.responses.HospitalUsersSimpleResponse
 import com.kwdevs.hospitalsdashboard.responses.settings.PermissionDataResponse
 import com.kwdevs.hospitalsdashboard.responses.settings.SinglePermissionResponse
 import com.kwdevs.hospitalsdashboard.responses.settings.RoleSingleResponse
@@ -41,12 +40,16 @@ class PermissionsController : ViewModel() {
     private val singlePermission = MutableLiveData<UiState<SinglePermissionResponse>>()
     val singlePermissionState: LiveData<UiState<SinglePermissionResponse>> get() = singlePermission
 
+    private val singleSuperPermission = MutableLiveData<UiState<SinglePermissionResponse>>()
+    val singleSuperPermissionState: LiveData<UiState<SinglePermissionResponse>> get() = singleSuperPermission
+
     fun reload(){
         viewModelScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
                 data.value=UiState.Reload
                 singleRole.value=UiState.Loading
                 singlePermission.value=UiState.Reload
+                singleSuperPermission.value=UiState.Reload
             }
         }
     }
@@ -57,7 +60,7 @@ class PermissionsController : ViewModel() {
             }
         }
     }
-    fun updateRoles(roleBody: UserRoleBody){
+    fun updateHospitalUserRoles(roleBody: UserRoleBody){
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 withContext(Dispatchers.Main) { singleUserDatum.value = UiState.Reload }
@@ -69,6 +72,7 @@ class PermissionsController : ViewModel() {
             }
         }
     }
+
 
     fun index() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -84,6 +88,9 @@ class PermissionsController : ViewModel() {
             }
         }
     }
+
+    //Super
+
     fun addRoleToSuperUser(userId: Int,roleId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -112,7 +119,97 @@ class PermissionsController : ViewModel() {
             }
         }
     }
-    fun addRoleToUser(userId:Int,roleId:Int) {
+
+    fun storeSingleSuperPermission(input:PermissionBody){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main) { singleSuperPermission.value=UiState.Loading }
+                val response = api.storeSuperPermission(input)
+                withContext(Dispatchers.Main) {singleSuperPermission.value = UiState.Success(response)}
+            }
+            catch (e: Exception) {
+                withContext(Dispatchers.Main) { singleSuperPermission.value = UiState.Error(error(e)) }
+            }
+        }
+    }
+    fun updateSingleSuperPermission(input:PermissionBody){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main) { singleSuperPermission.value=UiState.Loading }
+                val response = api.updateSuperPermission(input)
+                withContext(Dispatchers.Main) {singleSuperPermission.value = UiState.Success(response)}
+            }
+            catch (e: Exception) {
+                withContext(Dispatchers.Main) { singleSuperPermission.value = UiState.Error(error(e)) }
+            }
+        }
+    }
+    fun updateSuperUserRolePermissions(input: RolePermissionsBody){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main) { singleRole.value=UiState.Loading }
+                val response = api.updateSuperRolePermissions(input)
+                withContext(Dispatchers.Main) {singleRole.value = UiState.Success(response)}
+            }
+            catch (e: Exception) {
+                withContext(Dispatchers.Main) { singleRole.value = UiState.Error(error(e)) }
+            }
+        }
+    }
+
+
+
+    fun permissionsList(){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main) { permissionsData.value=UiState.Loading }
+                val response = api.permissionsList()
+                withContext(Dispatchers.Main) {permissionsData.value = UiState.Success(response)}
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    permissionsData.value = UiState.Error(error(e))
+                }
+            }
+
+        }
+    }
+
+    //Hospital Users
+    fun storeHospitalUserRole(input:RoleBody){
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main) { singleRole.value=UiState.Loading }
+                val response = api.storeHospitalUserRole(input)
+                withContext(Dispatchers.Main) {singleRole.value = UiState.Success(response)}
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    singleRole.value = UiState.Error(error(e))
+                }
+            }
+
+        }
+    }
+    fun updateHospitalUserRole(input:RoleBody){
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                //withContext(Dispatchers.Main) { singleRole.value=UiState.Loading }
+                val response = api.updateRole(input)
+                withContext(Dispatchers.Main) {singleRole.value = UiState.Success(response)}
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    singleRole.value = UiState.Error(error(e))
+                }
+            }
+
+        }
+    }
+
+    fun addRoleToHospitalUser(userId:Int, roleId:Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 withContext(Dispatchers.Main) { data.value=UiState.Loading }
@@ -126,7 +223,7 @@ class PermissionsController : ViewModel() {
             }
         }
     }
-    fun removeRoleFromUser(userId:Int,roleId:Int) {
+    fun removeRoleFromHospitalUser(userId:Int, roleId:Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 withContext(Dispatchers.Main) { data.value=UiState.Loading }
@@ -140,6 +237,45 @@ class PermissionsController : ViewModel() {
             }
         }
     }
+
+    fun storeSingleHospitalUserPermission(input:PermissionBody){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main) { singlePermission.value=UiState.Loading }
+                val response = api.storePermission(input)
+                withContext(Dispatchers.Main) {singlePermission.value = UiState.Success(response)}
+            }
+            catch (e: Exception) {
+                withContext(Dispatchers.Main) { singlePermission.value = UiState.Error(error(e)) }
+            }
+        }
+    }
+    fun updateSingleHospitalUserPermission(input:PermissionBody){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main) { singlePermission.value=UiState.Loading }
+                val response = api.updatePermission(input)
+                withContext(Dispatchers.Main) {singlePermission.value = UiState.Success(response)}
+            }
+            catch (e: Exception) {
+                withContext(Dispatchers.Main) { singlePermission.value = UiState.Error(error(e)) }
+            }
+        }
+    }
+
+    fun updateHospitalUserRolePermissions(input: RolePermissionsBody){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main) { singleRole.value=UiState.Loading }
+                val response = api.updateRolePermissions(input)
+                withContext(Dispatchers.Main) {singleRole.value = UiState.Success(response)}
+            }
+            catch (e: Exception) {
+                withContext(Dispatchers.Main) { singleRole.value = UiState.Error(error(e)) }
+            }
+        }
+    }
+
     fun addSectorHead(userId:Int,sectorId:Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -165,81 +301,6 @@ class PermissionsController : ViewModel() {
                 withContext(Dispatchers.Main) {
                     data.value = UiState.Error(error(e))
                 }
-            }
-        }
-    }
-
-    fun storeNewRole(input:RoleBody){
-
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                //withContext(Dispatchers.Main) { singleRole.value=UiState.Loading }
-                val response = api.storeRole(input)
-                withContext(Dispatchers.Main) {singleRole.value = UiState.Success(response)}
-
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    singleRole.value = UiState.Error(error(e))
-                }
-            }
-
-        }
-    }
-    fun updateRole(input:RoleBody){
-
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                //withContext(Dispatchers.Main) { singleRole.value=UiState.Loading }
-                val response = api.updateRole(input)
-                withContext(Dispatchers.Main) {singleRole.value = UiState.Success(response)}
-
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    singleRole.value = UiState.Error(error(e))
-                }
-            }
-
-        }
-    }
-
-    fun permissionsList(){
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                withContext(Dispatchers.Main) { permissionsData.value=UiState.Loading }
-                val response = api.permissionsList()
-                withContext(Dispatchers.Main) {permissionsData.value = UiState.Success(response)}
-
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    permissionsData.value = UiState.Error(error(e))
-                }
-            }
-
-        }
-    }
-
-    fun storeNewPermission(input:PermissionBody){
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                withContext(Dispatchers.Main) { singlePermission.value=UiState.Loading }
-                val response = api.storePermission(input)
-                withContext(Dispatchers.Main) {singlePermission.value = UiState.Success(response)}
-            }
-            catch (e: Exception) {
-                withContext(Dispatchers.Main) { singlePermission.value = UiState.Error(error(e)) }
-            }
-        }
-    }
-
-    fun editRolePermissions(input: RolePermissionsBody){
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                withContext(Dispatchers.Main) { singleRole.value=UiState.Loading }
-                val response = api.updateRolePermissions(input)
-                withContext(Dispatchers.Main) {singleRole.value = UiState.Success(response)}
-            }
-            catch (e: Exception) {
-                withContext(Dispatchers.Main) { singleRole.value = UiState.Error(error(e)) }
             }
         }
     }

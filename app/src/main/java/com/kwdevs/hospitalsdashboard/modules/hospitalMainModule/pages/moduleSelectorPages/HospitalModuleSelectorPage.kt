@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,10 +21,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +44,7 @@ import com.kwdevs.hospitalsdashboard.app.retrofit.UiState
 import com.kwdevs.hospitalsdashboard.bodies.control.HospitalModuleBody
 import com.kwdevs.hospitalsdashboard.controller.SettingsController
 import com.kwdevs.hospitalsdashboard.controller.hospital.HospitalController
+import com.kwdevs.hospitalsdashboard.models.hospital.SimpleHospital
 import com.kwdevs.hospitalsdashboard.models.settings.modules.Module
 import com.kwdevs.hospitalsdashboard.responses.HospitalSingleResponse
 import com.kwdevs.hospitalsdashboard.responses.ModulesResponse
@@ -50,20 +52,18 @@ import com.kwdevs.hospitalsdashboard.routes.HomeRoute
 import com.kwdevs.hospitalsdashboard.views.LEFT_LAYOUT_DIRECTION
 import com.kwdevs.hospitalsdashboard.views.assets.BLACK
 import com.kwdevs.hospitalsdashboard.views.assets.BLUE
-import com.kwdevs.hospitalsdashboard.views.assets.ComboBox
 import com.kwdevs.hospitalsdashboard.views.assets.CustomButton
-import com.kwdevs.hospitalsdashboard.views.assets.CustomInput
+import com.kwdevs.hospitalsdashboard.views.assets.CustomCheckbox
+import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
 import com.kwdevs.hospitalsdashboard.views.assets.GREEN
 import com.kwdevs.hospitalsdashboard.views.assets.HorizontalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.Icon
-import com.kwdevs.hospitalsdashboard.views.assets.IconButton
 import com.kwdevs.hospitalsdashboard.views.assets.Label
 import com.kwdevs.hospitalsdashboard.views.assets.SAVE_CHANGES_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.Span
 import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.WHITE
 import com.kwdevs.hospitalsdashboard.views.assets.container.Container
-import com.kwdevs.hospitalsdashboard.views.assets.toast
 import com.kwdevs.hospitalsdashboard.views.rcs
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,16 +76,14 @@ fun HospitalModuleSelectorPage(navHostController: NavHostController){
     val state by controller.singleState.observeAsState()
     val settingsController:SettingsController= viewModel()
     val optionsState by settingsController.moduleOptionsState.observeAsState()
-    val hospitalOptionsState by settingsController.hospitalOptionsState.observeAsState()
     var modules by remember { mutableStateOf<List<Module>>(emptyList()) }
-    val selectedModule = remember { mutableStateOf<Module?>(null) }
     var selectedModules by remember { mutableStateOf<List<Module>>(emptyList()) }
     val showSheet = remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var success by remember { mutableStateOf(false) }
     var fail by remember { mutableStateOf(false) }
     val showNotes = remember { mutableStateOf(true) }
-    val showFields = remember { mutableStateOf(false) }
+    //val showFields = remember { mutableStateOf(false) }
     val showConfirmatoryButtons= remember { mutableStateOf(true) }
     when(optionsState){
         is UiState.Loading->{}
@@ -95,6 +93,7 @@ fun HospitalModuleSelectorPage(navHostController: NavHostController){
             val r = s.data
             val data=r.data
             modules=data
+            selectedModules=hospital?.modules?:emptyList()
 
         }
         else->{ settingsController.modulesOptions() }
@@ -127,6 +126,7 @@ fun HospitalModuleSelectorPage(navHostController: NavHostController){
                 val s = state as UiState.Success<HospitalSingleResponse>
                 val r = s.data
                 val data=r.data
+
 
             }
         }
@@ -162,85 +162,8 @@ fun HospitalModuleSelectorPage(navHostController: NavHostController){
                         }
 
                     }
-                    Box(modifier=Modifier.fillMaxWidth().background(WHITE), contentAlignment = Alignment.TopStart){
-                        Label("Here, you can select what modules you want to add to the hospital,",
-                            textAlign = TextAlign.Start,
-                            color = BLACK, fontSize = 14,
-                            maximumLines = 2,
-                            fontWeight = FontWeight.Bold,
-                            paddingStart = 5)
-                    }
-                    Row(modifier=Modifier.padding(horizontal = 5.dp),verticalAlignment = Alignment.CenterVertically){
-                        Label("Form Helper notes")
-                        HorizontalSpacer()
-                        Box(modifier=Modifier.clickable { showNotes.value=!showNotes.value }){
-                            Span(text= "Click To See/Hide", color=WHITE , backgroundColor = BLUE)
-                        }
+                  NotesSection(hospital,visible=showNotes)
 
-                    }
-
-                    Box(modifier=Modifier.fillMaxWidth().background(WHITE), contentAlignment = Alignment.TopStart){
-                        Label("Your Current Hospital is ${hospital?.name?:""}",
-                            textAlign = TextAlign.Start,
-                            color = BLACK, fontSize = 14,
-                            maximumLines = 2,
-                            fontWeight = FontWeight.Bold,
-                            paddingStart = 5)
-                    }
-
-                    AnimatedVisibility(visible = showNotes.value,
-                        enter= fadeIn() + expandVertically(),
-                        exit = shrinkOut() + fadeOut(),) {
-                        Column(){
-                            LazyRow(modifier=Modifier.fillMaxWidth()){
-                                item{
-                                    Column(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp).background(WHITE).padding(horizontal = 5.dp),
-                                        horizontalAlignment = Alignment.Start){
-                                        Label(label = "Module:",
-                                            "Is a Sub System to manage certain sector \nin the hospital",
-                                            textAlign = TextAlign.Start,
-                                            maximumLines = 2)
-                                        Label("Each module has a unique name,\n which is in the blue box",
-                                            maximumLines = 2,
-                                            textAlign = TextAlign.Start)
-                                        VerticalSpacer()
-                                        Row(verticalAlignment = Alignment.CenterVertically){
-                                            Label("The red trash button next to module \nwill remove it from hospital,",
-                                                maximumLines = 2,
-                                                textAlign = TextAlign.Start)
-                                            Icon(icon= R.drawable.ic_delete_red)
-                                        }
-                                        VerticalSpacer()
-                                        Row(verticalAlignment = Alignment.CenterVertically){
-                                            Label("After selecting the module click on \n the  add button to add it to the hospital",
-                                                maximumLines = 2,
-                                                textAlign = TextAlign.Start)
-                                            Icon(icon= R.drawable.ic_add_circle_green)
-                                        }
-                                        Label("when the module is removed from the hospital,\n users will not be able to use it",
-                                            color = Color.Red,
-                                            maximumLines = 2,
-                                            textAlign = TextAlign.Start)
-                                        VerticalSpacer()
-                                        Label("You can scroll down/up to view other mandatory fields", color = BLUE, fontWeight = FontWeight.Bold)
-                                        VerticalSpacer()
-                                        Label("Once you complete the form,", color = BLUE, fontWeight = FontWeight.Bold)
-                                        Row(){
-                                            Label("press the", color = BLUE, fontWeight = FontWeight.Bold)
-                                            HorizontalSpacer(2)
-                                            Label("Green Save Changes Button", color = GREEN, fontWeight = FontWeight.Bold)
-                                        }
-                                        VerticalSpacer()
-                                        Label("If data is saved successfully, a small green bar will appear,\nat the bottom of screen confirming changes",
-                                            color = BLUE, fontWeight = FontWeight.Bold,
-                                            maximumLines = 2,
-                                            textAlign = TextAlign.Start)
-                                        VerticalSpacer()
-                                    }
-                                }
-                            }
-                        }
-                    }
                     VerticalSpacer()
                     if(showConfirmatoryButtons.value){
                         Row(modifier=Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
@@ -252,7 +175,7 @@ fun HospitalModuleSelectorPage(navHostController: NavHostController){
                             Row(modifier=Modifier.fillMaxWidth().padding(vertical = 5.dp, horizontal = 10.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween){
                                 CustomButton(label = "Yes, lets proceed", buttonShadowElevation = 5, buttonShape = RectangleShape) {
-                                    showFields.value=true
+                                    //showFields.value=true
                                     showNotes.value=false
                                     showConfirmatoryButtons.value=false
                                 }
@@ -267,124 +190,51 @@ fun HospitalModuleSelectorPage(navHostController: NavHostController){
 
                     }
 
-                    AnimatedVisibility(visible = showFields.value,
+                    AnimatedVisibility(
+                        visible = !showNotes.value,
                         enter= fadeIn() + expandVertically(),
-                        exit = shrinkOut() + fadeOut(),) {
-                        Column(){
-                            val chucked=selectedModules.chunked(3)
-                            chucked.forEach { list->
-                                if(list.size==3){
-                                    Row(modifier=Modifier.fillMaxWidth()){
-                                        list.forEach { module->
-                                            Row(modifier=Modifier
-                                                .fillMaxWidth()
-                                                .weight(1f)
-                                                .padding(5.dp)
-                                                .border(width = 1.dp, shape = rcs(5), color = BLUE),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.SpaceBetween){
-                                                Column(modifier=Modifier.fillMaxWidth().weight(1f).padding(5.dp),verticalArrangement = Arrangement.Center,
-                                                    horizontalAlignment = Alignment.CenterHorizontally) {
-                                                    Label(module.name?:"")
-                                                    VerticalSpacer()
-                                                    Span(module.slug?:"", backgroundColor = BLUE, color = WHITE,
-                                                        maximumLines = Int.MAX_VALUE)
-                                                }
-                                                IconButton(R.drawable.ic_delete_red) {
-                                                    selectedModules=selectedModules.filter { it!=module }
-                                                }
-                                            }
+                        exit = shrinkOut() + fadeOut()) {
+                        Column(modifier=Modifier.fillMaxSize()){
+                            Column(modifier=Modifier.fillMaxSize()) {
+                                modules.forEach { module->
+                                    var state by rememberSaveable { mutableStateOf(module in selectedModules) }
+                                    CustomCheckbox(
+                                        label={
+                                        Row(modifier=Modifier.fillMaxWidth()){
+                                            Label(module.name?: EMPTY_STRING)
                                         }
-                                    }
-                                }
-                                else if(list.size==2){
-                                    Row(modifier=Modifier.fillMaxWidth()){
-                                        list.forEach { module->
-                                            Row(modifier=Modifier
-                                                .fillMaxWidth()
-                                                .weight(1f)
-                                                .padding(5.dp)
-                                                .border(width = 1.dp, shape = rcs(5), color = BLUE),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.SpaceBetween){
-                                                Column(modifier=Modifier.padding(5.dp),verticalArrangement = Arrangement.Center,
-                                                    horizontalAlignment = Alignment.CenterHorizontally) {
-                                                    Label(module.name?:"")
-                                                    VerticalSpacer()
-                                                    Span(module.slug?:"", backgroundColor = BLUE, color = WHITE,
-                                                        maximumLines = Int.MAX_VALUE)
-                                                }
-                                                IconButton(R.drawable.ic_delete_red) {
-                                                    selectedModules=selectedModules.filter { it!=module }
-                                                }
-                                            }
+                                    },
+                                        active=state,
+                                        onCheckChange = {value->
+                                        if(value){
+                                            val newList=mutableListOf<Module>()
+                                            newList.addAll(selectedModules.filter { it!=module })
+                                            newList.add(module)
+                                            selectedModules=newList
                                         }
-                                        Box(modifier=Modifier.fillMaxWidth().weight(1f)){}
-                                    }
-                                }
-                                else if(list.size==1){
-                                    Row(modifier=Modifier.fillMaxWidth()){
-                                        list.forEach { module->
-                                            Row(modifier=Modifier
-                                                .fillMaxWidth()
-                                                .weight(1f)
-                                                .padding(5.dp)
-                                                .border(width = 1.dp, shape = rcs(5), color = BLUE),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.SpaceBetween){
-                                                Column(modifier=Modifier.padding(5.dp),verticalArrangement = Arrangement.Center,
-                                                    horizontalAlignment = Alignment.CenterHorizontally) {
-                                                    Label(module.name?:"")
-                                                    VerticalSpacer()
-                                                    Span(module.slug?:"", backgroundColor = BLUE, color = WHITE,
-                                                    maximumLines = Int.MAX_VALUE)
-                                                }
-                                                IconButton(R.drawable.ic_delete_red) {
-                                                    selectedModules=selectedModules.filter { it!=module }
-                                                }
-                                            }
-                                        }
-                                        Box(modifier=Modifier.fillMaxWidth().weight(1f)){}
-                                        Box(modifier=Modifier.fillMaxWidth().weight(1f)){}
+                                        else {selectedModules=selectedModules.filter { it!=module }}
 
-                                    }
+                                        state= module in selectedModules
+
+                                    })
+                                    VerticalSpacer()
                                 }
 
-
-                            }
-                            selectedModules.forEach {module->
-                            }
-
-                            VerticalSpacer()
-                            Row(modifier=Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically){
-                                Box(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp).weight(1f)){
-                                    ComboBox(
-                                        hasTitle = false,
-                                        loadedItems = modules,
-                                        selectedItem = selectedModule,
-                                        selectedContent = { CustomInput(selectedModule.value?.name?:"Select Module")}
-                                    ) {
-                                        Label("${it?.name?:""} - ${it?.slug?:""}")
-                                    }
-                                }
-                                IconButton(R.drawable.ic_add_circle_green) {
-                                    if(hospital?.bloodBank==null && selectedModule.value?.slug?.contains("blood")==true){
-                                       toast(context,"This hospital Doesn't contain blood bank, if you want to add modules for blood banks please add Blood Bank to the hospital first")
-                                    }else{
-                                        val newModules= mutableListOf<Module>()
-                                        selectedModule.value?.let{newModules.add(it)}
-                                        val oldModules=selectedModules.filter { it!=selectedModule.value }
-                                        newModules.addAll(oldModules)
-                                        selectedModules=newModules
-                                    }
-
-                                }
                             }
                             VerticalSpacer()
                             Row(modifier=Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.Center){
-                                CustomButton(label=SAVE_CHANGES_LABEL) {
+                                CustomButton(label=SAVE_CHANGES_LABEL,
+                                    enabledBackgroundColor = Color.Transparent,
+                                    disabledBackgroundColor = Color.Transparent,
+                                    enabledFontColor = GREEN,
+                                    borderColor = GREEN,
+                                    hasBorder = true, icon = R.drawable.ic_wand_stars_green,
+                                    buttonShadowElevation = 6,
+                                    buttonShape = rcs(5),
+                                    horizontalPadding = 10,
+                                )
+                                {
                                     val bodies= mutableListOf<HospitalModuleBody>()
                                     selectedModules.forEach {
                                         val body=HospitalModuleBody(
@@ -406,3 +256,84 @@ fun HospitalModuleSelectorPage(navHostController: NavHostController){
     }
 
 }
+
+@Composable
+fun NotesSection(hospital: SimpleHospital?, visible: MutableState<Boolean>) {
+    Box(modifier=Modifier.fillMaxWidth().background(WHITE), contentAlignment = Alignment.TopStart){
+        Label("Here, you can select what modules you want to add to the hospital,",
+            textAlign = TextAlign.Start,
+            color = BLACK, fontSize = 14,
+            maximumLines = 2,
+            fontWeight = FontWeight.Bold,
+            paddingStart = 5)
+    }
+    Row(modifier=Modifier.padding(horizontal = 5.dp),verticalAlignment = Alignment.CenterVertically){
+        Label("Form Helper notes")
+        HorizontalSpacer()
+        Box(modifier=Modifier.clickable { visible.value=!visible.value }){
+            Span(text= "Click To See/Hide", color=WHITE , backgroundColor = BLUE)
+        }
+
+    }
+    Box(modifier=Modifier.fillMaxWidth().background(WHITE), contentAlignment = Alignment.TopStart){
+        Label("Your Current Hospital is ${hospital?.name?:""}",
+            textAlign = TextAlign.Start,
+            color = BLACK, fontSize = 14,
+            maximumLines = 2,
+            fontWeight = FontWeight.Bold,
+            paddingStart = 5)
+    }
+
+    AnimatedVisibility(visible = visible.value,
+        enter= fadeIn() + expandVertically(),
+        exit = shrinkOut() + fadeOut(),) {
+        Column(){
+            LazyRow(modifier=Modifier.fillMaxWidth()){
+                item{
+                    Column(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp).background(WHITE).padding(horizontal = 5.dp),
+                        horizontalAlignment = Alignment.Start){
+                        Label(label = "Module:",
+                            "Is a Sub System to manage certain sector \nin the hospital",
+                            textAlign = TextAlign.Start,
+                            maximumLines = 2)
+                        Label("Each module has a unique name,\n which is in the blue box",
+                            maximumLines = 2,
+                            textAlign = TextAlign.Start)
+                        VerticalSpacer()
+                        Row(verticalAlignment = Alignment.CenterVertically){
+                            Label("The red trash button next to module \nwill remove it from hospital,",
+                                maximumLines = 2,
+                                textAlign = TextAlign.Start)
+                            Icon(icon= R.drawable.ic_delete_red)
+                        }
+                        VerticalSpacer()
+                        Row(verticalAlignment = Alignment.CenterVertically){
+                            Label("After selecting the module click on \n the  add button to add it to the hospital",
+                                maximumLines = 2,
+                                textAlign = TextAlign.Start)
+                            Icon(icon= R.drawable.ic_add_circle_green)
+                        }
+                        Label("when the module is removed from the hospital,\n users will not be able to use it",
+                            color = Color.Red,
+                            maximumLines = 2,
+                            textAlign = TextAlign.Start)
+                        VerticalSpacer()
+                        Label("You can scroll down/up to view other mandatory fields", color = BLUE, fontWeight = FontWeight.Bold)
+                        VerticalSpacer()
+                        Label("Once you complete the form,", color = BLUE, fontWeight = FontWeight.Bold)
+                        Row(){
+                            Label("press the", color = BLUE, fontWeight = FontWeight.Bold)
+                            HorizontalSpacer(2)
+                            Label("Green Save Changes Button", color = GREEN, fontWeight = FontWeight.Bold)
+                        }
+                        VerticalSpacer()
+                        Label("If data is saved successfully, a small green bar will appear,\nat the bottom of screen confirming changes",
+                            color = BLUE, fontWeight = FontWeight.Bold,
+                            maximumLines = 2,
+                            textAlign = TextAlign.Start)
+                        VerticalSpacer()
+                    }
+                }
+            }
+        }
+    }}

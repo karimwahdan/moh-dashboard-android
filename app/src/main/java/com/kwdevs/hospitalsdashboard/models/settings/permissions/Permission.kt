@@ -1,7 +1,6 @@
 package com.kwdevs.hospitalsdashboard.models.settings.permissions
 
 import com.kwdevs.hospitalsdashboard.bodies.control.ConditionBody
-import com.kwdevs.hospitalsdashboard.bodies.control.PermissionBody
 import com.kwdevs.hospitalsdashboard.models.settings.CustomModel
 import com.kwdevs.hospitalsdashboard.models.settings.actionTypes.ActionType
 import com.squareup.moshi.Json

@@ -29,8 +29,8 @@ interface UsersApi {
 
     @POST("$USER_PREFIX/view-normal")
     suspend fun viewNormal(
-        @Query("username") username:String,
-        @Query("password") password:String
+        @Query("username") username:String?,
+        @Query("password") password:String?
     ):HospitalUserSingleResponse
 
     @POST("$USER_PREFIX/store")

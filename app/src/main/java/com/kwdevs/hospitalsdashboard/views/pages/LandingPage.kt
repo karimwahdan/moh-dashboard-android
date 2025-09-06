@@ -63,7 +63,10 @@ fun LandingPage(navHostController: NavHostController){
             }
 
         }
-        is UiState.Error->{loading=false;success=false;fail=true}
+        is UiState.Error->{
+            loading=false;success=false;fail=true
+            navHostController.navigate(LoginRoute.route)
+        }
         else->{}
     }
     when(superUserState){
@@ -78,7 +81,10 @@ fun LandingPage(navHostController: NavHostController){
                 else navHostController.navigate(HomeRoute.route)
             }
         }
-        is UiState.Error->{loading=false;success=false;fail=true}
+        is UiState.Error->{
+            loading=false;success=false;fail=true
+            navHostController.navigate(LoginRoute.route)
+        }
 
         else->{}
     }

@@ -4,5 +4,5 @@ import com.squareup.moshi.Json
 
 data class PermissionsResponse(
     @Json(name = "data")
-    var data:List<Permission>
+    var data:PermissionsData
 )

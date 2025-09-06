@@ -66,7 +66,7 @@ const val HOSPITAL_STORE_PREFIX         =   "$HOSPITALS_PREFIX/$STORE_PREFIX"
 const val HOSPITAL_UPDATE_PREFIX        =   "$HOSPITALS_PREFIX/$UPDATE_PREFIX"
 
 const val HOSPITAL_CATEGORY_PREFIX      =   "hospital-categories"
-const val HOSPITALS_BY_SECTOR_PREFIX    =   "$HOSPITALS_PREFIX/by-sector/{id}"
+const val HOSPITALS_PAGINATE_BY_SECTOR_PREFIX    =   "$HOSPITALS_PREFIX/paginate-by-sector/{id}"
 const val HOSPITALS_BY_TYPE_PREFIX      =   "$HOSPITALS_PREFIX/by-type/{id}"
 
 //I
@@ -80,6 +80,7 @@ const val MODULES_PREFIX                =   "modules"
 
 //N
 const val NATIONALITIES_PREFIX          =   "nationalities"
+const val NOTIFICATIONS_PREFIX          =   "notifications"
 
 //O
 const val OPERATIONS_PREFIX             =   "operations"

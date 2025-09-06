@@ -37,30 +37,29 @@ fun RoleCard(item: Role, onEditClick: () -> Unit={}, onPermissionsClick:()->Unit
     val permissions=item.permissions
     var open by remember { mutableStateOf(false) }
 
-    ColumnContainer {
-        Row(modifier = Modifier.fillMaxWidth().clip(rcs(20))
-            .background(color = BLUE, shape = rcs(20))
+    ColumnContainer(shape = rcs(5)) {
+        Row(modifier = Modifier.fillMaxWidth().clip(rcs(5))
+            .background(color = BLUE, shape = rcs(5))
+            .padding(horizontal = 5.dp)
             .clickable { if(permissions.isNotEmpty())open=!open },
             horizontalArrangement = if(permissions.isNotEmpty()) Arrangement.SpaceBetween else Arrangement.Start ) {
-            Row(verticalAlignment = Alignment.CenterVertically){
-                Label(name, paddingStart = 5, paddingEnd = 5, color = WHITE)
-                HorizontalSpacer()
+            Row(modifier=Modifier.fillMaxWidth().weight(1f),verticalAlignment = Alignment.CenterVertically){
+                Box(modifier=Modifier.fillMaxWidth().weight(1f)){
+                    Label(name, paddingStart = 5, paddingEnd = 5, color = WHITE, maximumLines = 3)
+                }
+
                 IconButton(R.drawable.ic_edit_blue, paddingTop = 5, paddingBottom = 5, onClick = onEditClick)
                 HorizontalSpacer()
                 IconButton(R.drawable.ic_lock_person_blue, paddingTop = 5, paddingBottom = 5, onClick = onPermissionsClick)
-
+                HorizontalSpacer(10)
             }
-            if(permissions.isNotEmpty()){
-                Box(modifier= Modifier.padding(vertical = 5.dp,horizontal = 10.dp), contentAlignment = Alignment.Center){
-                    Icon(if (open) R.drawable.ic_arrow_up_white else R.drawable.ic_arrow_down_white, containerSize = 26, background = BLUE)
-                }
-
+            Box(modifier= Modifier.padding(vertical = 5.dp,horizontal = 10.dp), contentAlignment = Alignment.Center){
+                Icon(if (open) R.drawable.ic_arrow_up_white else R.drawable.ic_arrow_down_white, containerSize = 26, background = BLUE)
             }
         }
         AnimatedVisibility(visible = open) {
             Column{
                 if (permissions.isNotEmpty()){
-                    HorizontalDivider()
                     Label(PERMISSIONS_LABEL)
                     Column(modifier= Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.Center){

@@ -2,28 +2,21 @@ package com.kwdevs.hospitalsdashboard.routes.interfaces
 
 import com.kwdevs.hospitalsdashboard.bodies.hospital.HospitalFilterBody
 import com.kwdevs.hospitalsdashboard.bodies.hospital.HospitalWardBody
-import com.kwdevs.hospitalsdashboard.bodies.hospital.HospitalBody
 import com.kwdevs.hospitalsdashboard.models.hospital.Hospital
 import com.kwdevs.hospitalsdashboard.models.hospital.HospitalWard
 import com.kwdevs.hospitalsdashboard.models.hospital.wards.HospitalWardsResponse
-import com.kwdevs.hospitalsdashboard.models.settings.city.CityWithAreaSingleResponse
 import com.kwdevs.hospitalsdashboard.responses.ApiResponse
-import com.kwdevs.hospitalsdashboard.responses.HospitalSingleResponse
 import com.kwdevs.hospitalsdashboard.responses.HospitalWardSingleResponse
 import com.kwdevs.hospitalsdashboard.responses.HospitalsResponse
 import com.kwdevs.hospitalsdashboard.responses.PaginationData
-import com.kwdevs.hospitalsdashboard.routes.CITY_DETAILS_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.FILTER_HOSPITALS
-import com.kwdevs.hospitalsdashboard.routes.HOSPITALS_BY_SECTOR_PREFIX
+import com.kwdevs.hospitalsdashboard.routes.HOSPITALS_PAGINATE_BY_SECTOR_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.HOSPITALS_BY_TYPE_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.HOSPITALS_PREFIX
-import com.kwdevs.hospitalsdashboard.routes.HOSPITAL_STORE_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.INDEX_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.NORMAL_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.STORE_PREFIX
-import com.kwdevs.hospitalsdashboard.routes.VIEW_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.WARDS_PREFIX
-import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -42,7 +35,7 @@ interface HospitalWardApi {
     suspend fun indexByTypeAndHospital(@Query("hospitalId") hospitalId: Int,
                                 @Query("wardTypeId")typeId:Int):HospitalWardsResponse
 
-    @GET(HOSPITALS_BY_SECTOR_PREFIX)
+    @GET(HOSPITALS_PAGINATE_BY_SECTOR_PREFIX)
     suspend fun indexBySector(
         @Path("id")sectorId:Int,
         @Query("page")page:Int,

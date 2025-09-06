@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "72471627028",
+    "firebase_url": "https://moh-dashboard-default-rtdb.firebaseio.com",
+    "project_id": "moh-dashboard",
+    "storage_bucket": "moh-dashboard.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:72471627028:android:6c11d45143539d81d1ae01",
+        "android_client_info": {
+          "package_name": "com.kwdevs.hospitalsdashboard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTXzbyOEDvlRYMM14WtQnNnwxfQNTjIVw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,9 @@
 package com.kwdevs.hospitalsdashboard.modules
 
+import com.kwdevs.hospitalsdashboard.models.hospital.Hospital
+
+
+
 const val BLOOD_BANK_MODULE                        =   "blood-bank"
 const val BLOOD_BANK_DONATION_DEPARTMENT_MODULE    =   "blood-bank.department.donation"
 const val BLOOD_BANK_ISSUING_DEPARTMENT_MODULE     =   "blood-bank.department.issuing"

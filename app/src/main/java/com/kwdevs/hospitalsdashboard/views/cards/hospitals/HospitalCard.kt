@@ -34,7 +34,7 @@ import com.kwdevs.hospitalsdashboard.models.hospital.IntensiveCare
 import com.kwdevs.hospitalsdashboard.models.hospital.morgues.Morgue
 import com.kwdevs.hospitalsdashboard.models.hospital.hospitalDevices.HospitalDevice
 import com.kwdevs.hospitalsdashboard.routes.HospitalDeviceCreateRoute
-import com.kwdevs.hospitalsdashboard.routes.HospitalsViewRoute
+import com.kwdevs.hospitalsdashboard.routes.HospitalViewRoute
 import com.kwdevs.hospitalsdashboard.views.assets.ADD_NEW_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.BLACK
 import com.kwdevs.hospitalsdashboard.views.assets.BLUE
@@ -108,7 +108,7 @@ fun HospitalCard(item:Hospital,navHostController: NavHostController){
                 Box(modifier = Modifier.clickable {
                     val simple=ModelConverter().convertHospitalToSimple(item)
                     Preferences.Hospitals().set(simple)
-                    navHostController.navigate(HospitalsViewRoute.route)
+                    navHostController.navigate(HospitalViewRoute.route)
                 }){ Label(name) }
                 HorizontalSpacer()
                 Span(sector?.name?:"", color = WHITE, backgroundColor = BLUE)

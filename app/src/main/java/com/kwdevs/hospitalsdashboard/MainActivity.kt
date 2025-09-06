@@ -37,10 +37,10 @@ import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.MonthlyIssui
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.MonthlyIssuingReportsIndexRoute
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.NearExpiredCreateRoute
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.NearExpiredIndexRoute
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.BloodBankHomePage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.componentDepartment.ComponentDepartmentHomePage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.componentDepartment.DailyBloodProcessingCreatePage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.componentDepartment.DailyBloodProcessingIndexPage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.BloodBankHomePage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.component.views.pages.ComponentDepartmentHomePage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.component.views.pages.DailyBloodProcessingCreatePage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.component.views.pages.DailyBloodProcessingIndexPage
 import com.kwdevs.hospitalsdashboard.routes.AdmissionCreateRoute
 import com.kwdevs.hospitalsdashboard.routes.AreaViewRoute
 import com.kwdevs.hospitalsdashboard.routes.BabyBirthCreateRoute
@@ -59,7 +59,7 @@ import com.kwdevs.hospitalsdashboard.routes.HospitalHomeRoute
 import com.kwdevs.hospitalsdashboard.routes.HospitalUserViewRoute
 import com.kwdevs.hospitalsdashboard.routes.HospitalsIndexRoute
 import com.kwdevs.hospitalsdashboard.routes.HospitalsStoreRoute
-import com.kwdevs.hospitalsdashboard.routes.HospitalsViewRoute
+import com.kwdevs.hospitalsdashboard.routes.HospitalViewRoute
 import com.kwdevs.hospitalsdashboard.routes.IncubatorIndexRoute
 import com.kwdevs.hospitalsdashboard.routes.LabTestIndexRoute
 import com.kwdevs.hospitalsdashboard.routes.LandingRoute
@@ -94,22 +94,22 @@ import com.kwdevs.hospitalsdashboard.views.pages.home.HomeScreen
 import com.kwdevs.hospitalsdashboard.views.pages.hospitalHome.HospitalHomePage
 import com.kwdevs.hospitalsdashboard.views.pages.hospitals.HospitalViewPage
 import com.kwdevs.hospitalsdashboard.views.pages.hospitals.HospitalsIndexPage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.donationDepartment.DailyBloodCollectionCreatePage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.donationDepartment.DailyBloodCollectionIndexPage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.donationDepartment.DonationDepartmentHomePage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.issuingDepartment.stocks.BloodStockCreatePage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.issuingDepartment.stocks.BloodStockIndexPage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.issuingDepartment.IssuingDepartmentHomePage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.incineration.IncinerationCreatePage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.incineration.IncinerationIndexPage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.issuingDepartment.expiries.NearExpiryCreatePage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.issuingDepartment.expiries.NearExpiryIndexPage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.issuingDepartment.imports.BloodImportCreatePage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.issuingDepartment.imports.BloodImportsIndexPage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.issuingDepartment.reports.monthlyIssuingReports.MonthlyIssuingReportsCreatePage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.issuingDepartment.reports.monthlyIssuingReports.MonthlyIssuingReportsIndexPage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.kpis.KpiCreatePage
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.kpis.KpiIndexPage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.donation.views.pages.DailyBloodCollectionCreatePage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.donation.views.pages.DailyBloodCollectionIndexPage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.donation.views.pages.DonationDepartmentHomePage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.issuing.views.pages.stocks.BloodStockCreatePage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.issuing.views.pages.stocks.BloodStockIndexPage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.issuing.views.pages.IssuingDepartmentHomePage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.incineration.views.pages.IncinerationCreatePage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.incineration.views.pages.IncinerationIndexPage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.issuing.views.pages.expiries.NearExpiryCreatePage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.issuing.views.pages.expiries.NearExpiryIndexPage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.issuing.views.pages.imports.BloodImportCreatePage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.issuing.views.pages.imports.BloodImportsIndexPage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.issuing.views.pages.reports.monthlyIssuingReports.MonthlyIssuingReportsCreatePage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.issuing.views.pages.reports.monthlyIssuingReports.MonthlyIssuingReportsIndexPage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.kpis.views.pages.KpiCreatePage
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.kpis.views.pages.KpiIndexPage
 import com.kwdevs.hospitalsdashboard.modules.hospitalMainModule.pages.createBloodBank.AdminCreateBloodBankPage
 import com.kwdevs.hospitalsdashboard.modules.hospitalMainModule.pages.createPage.HospitalGeneralCreatePage
 import com.kwdevs.hospitalsdashboard.modules.hospitalMainModule.pages.createUser.CreateUserPage
@@ -161,6 +161,16 @@ import com.kwdevs.hospitalsdashboard.views.pages.patients.operations.OperationCr
 import com.kwdevs.hospitalsdashboard.views.pages.patients.operations.OperationsIndexPage
 import com.kwdevs.hospitalsdashboard.views.pages.patients.preterms.PretermAdmissionCreatePage
 import com.kwdevs.hospitalsdashboard.modules.physicalTherapyModule.PhysicalTherapyIndexPage
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.routes.NotificationCreateRoute
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.routes.NotificationIndexRoute
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.views.notifications.NotificationCreatePage
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.views.notifications.NotificationIndexPage
+import com.kwdevs.hospitalsdashboard.routes.SettingsRoute
+import com.kwdevs.hospitalsdashboard.routes.SuperBloodKpiRoute
+import com.kwdevs.hospitalsdashboard.routes.SuperBloodStocksRoute
+import com.kwdevs.hospitalsdashboard.views.pages.home.SuperBloodKpiPage
+import com.kwdevs.hospitalsdashboard.views.pages.home.SuperBloodStocksPage
+import com.kwdevs.hospitalsdashboard.views.pages.settings.SettingsPage
 import com.kwdevs.hospitalsdashboard.views.pages.user.ChangePasswordPage
 import com.kwdevs.hospitalsdashboard.views.pages.user.HospitalUserPage
 import com.kwdevs.hospitalsdashboard.views.pages.user.login.LoginPage
@@ -246,7 +256,7 @@ fun View(navHostController: NavHostController) {
         composable(HospitalsIndexRoute.route){ HospitalsIndexPage(navHostController) }
         composable(HospitalsStoreRoute.route){ HospitalCreatePage(navHostController) }
         composable(HospitalDeviceCreateRoute.route){ HospitalDeviceCreatePage(navHostController)}
-        composable(HospitalsViewRoute.route){HospitalViewPage(navHostController)}
+        composable(HospitalViewRoute.route){HospitalViewPage(navHostController)}
         composable(HospitalDeviceUsagesRoute.route){ HospitalDevicesUsagePage(navHostController)}
         composable(HospitalHomeRoute.route){ HospitalHomePage(navHostController) }
         composable(HospitalDevicesRoute.route){HospitalDevicesPage(navHostController)}
@@ -282,6 +292,8 @@ fun View(navHostController: NavHostController) {
         composable(NationalIdScannerRoute.route){ NationalIdScannerPage(navHostController)}
         composable(NearExpiredIndexRoute.route){ NearExpiryIndexPage(navHostController) }
         composable(NearExpiredCreateRoute.route){ NearExpiryCreatePage(navHostController)}
+        composable(NotificationIndexRoute.route){ NotificationIndexPage(navHostController) }
+        composable(NotificationCreateRoute.route){ NotificationCreatePage(navHostController) }
 
         //O (4)
         composable(OperationsIndexRoute.route){ OperationsIndexPage(navHostController) }
@@ -304,6 +316,12 @@ fun View(navHostController: NavHostController) {
         //R (2)
         composable(RenalDevicesIndexRoute.route){ RenalDevicesIndexPage(navHostController) }
         composable(ReceptionBedsIndexRoute.route){ ReceptionBedsIndexPage(navHostController) }
+
+        //S
+        composable(SettingsRoute.route){ SettingsPage(navHostController)}
+        composable(SuperBloodStocksRoute.route){ SuperBloodStocksPage(navHostController) }
+        composable(SuperBloodKpiRoute.route){ SuperBloodKpiPage(navHostController)}
+        //SuperBloodStocksRoute
 
         //U (1)
         composable(UserControlRoute.route){ UserControlPage(navHostController) }

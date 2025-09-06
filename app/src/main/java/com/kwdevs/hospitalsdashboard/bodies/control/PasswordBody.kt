@@ -5,4 +5,5 @@ data class PasswordBody(
     val username:String?=null,
     val oldPassword:String?=null,
     val newPassword:String?=null,
+
 )

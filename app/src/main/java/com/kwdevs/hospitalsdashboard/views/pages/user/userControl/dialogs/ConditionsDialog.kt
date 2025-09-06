@@ -28,6 +28,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.ColumnContainer
 import com.kwdevs.hospitalsdashboard.views.assets.ComboBox
 import com.kwdevs.hospitalsdashboard.views.assets.CustomButton
 import com.kwdevs.hospitalsdashboard.views.assets.CustomInput
+import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
 import com.kwdevs.hospitalsdashboard.views.assets.GRAY
 import com.kwdevs.hospitalsdashboard.views.assets.IconButton
 import com.kwdevs.hospitalsdashboard.views.assets.Label
@@ -55,10 +56,10 @@ fun ConditionsDialog(showDialog: MutableState<Boolean>,
         Pair("<=" , "Less than or Equal To")
     )
     val mainWheres= listOf(WHERE_EN_LABEL, WHERE_OR_EN_LABEL, WHERE_IN_EN_LABEL)
-    val selectedColumn = remember { mutableStateOf("") }
+    val selectedColumn = remember { mutableStateOf(EMPTY_STRING) }
     val selectedOperator = remember { mutableStateOf<Pair<String,String>?>(null) }
-    val selectedCondition = remember { mutableStateOf("") }
-    val condVal = remember { mutableStateOf("") }
+    val selectedCondition = remember { mutableStateOf(EMPTY_STRING) }
+    val condVal = remember { mutableStateOf(EMPTY_STRING) }
 
     val operatorNeeded=selectedCondition.value in listOf(WHERE_EN_LABEL, WHERE_OR_EN_LABEL) && selectedOperator.value!=null
     val noOperatorNeeded = selectedCondition.value== WHERE_OR_EN_LABEL && selectedOperator.value==null
@@ -74,7 +75,7 @@ fun ConditionsDialog(showDialog: MutableState<Boolean>,
                 if(result.value.isNotEmpty()){
                     ConditionsPreview(result)
                 }
-                Label("${selectedCondition.value} ${selectedColumn.value} ${selectedOperator.value?.second?:""} ${condVal.value}")
+                Label("${selectedCondition.value} ${selectedColumn.value} ${selectedOperator.value?.second?:EMPTY_STRING} ${condVal.value}")
                 Box(modifier= Modifier.fillMaxWidth().padding(5.dp)){
                     ComboBox(hasTitle = false, loadedItems = mainWheres,
                         selectedItem = selectedCondition,
@@ -95,7 +96,7 @@ fun ConditionsDialog(showDialog: MutableState<Boolean>,
                         ComboBox(hasTitle = false, loadedItems = operators,
                             selectedItem = selectedOperator,
                             selectedContent = {
-                                CustomInput(readOnly = true,value=selectedOperator.value?.second?:"",label="Operator")
+                                CustomInput(readOnly = true,value=selectedOperator.value?.second?:EMPTY_STRING,label="Operator")
                             })
                         { Label(it?.second?:"Select Operator") }
                     }
@@ -117,10 +118,10 @@ fun ConditionsDialog(showDialog: MutableState<Boolean>,
                 Row(modifier= Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround){
                     CustomButton(label = SAVE_CHANGES_LABEL,
-                        enabled = (operatorNeeded || noOperatorNeeded) && condVal.value!="",
+                        enabled = (operatorNeeded || noOperatorNeeded) && condVal.value!=EMPTY_STRING,
                         buttonShape = rcs(5),) {
-                        if(selectedCondition.value!="" && selectedColumn.value!="" && condVal.value!="" ){
-                            if(operatorNeeded || noOperatorNeeded && condVal.value!=""){
+                        if(selectedCondition.value!=EMPTY_STRING && selectedColumn.value!=EMPTY_STRING && condVal.value!=EMPTY_STRING ){
+                            if(operatorNeeded || noOperatorNeeded && condVal.value!=EMPTY_STRING){
                                 val b= ConditionBody(
                                     clause = selectedCondition.value,
                                     columnName = selectedColumn.value,
@@ -130,10 +131,10 @@ fun ConditionsDialog(showDialog: MutableState<Boolean>,
                                 val newConditions= mutableListOf(b)
                                 newConditions.addAll(result.value.filter { it!=b })
                                 result.value=newConditions
-                                selectedCondition.value=""
+                                selectedCondition.value=EMPTY_STRING
                                 selectedOperator.value=null
-                                selectedColumn.value=""
-                                condVal.value=""
+                                selectedColumn.value=EMPTY_STRING
+                                condVal.value=EMPTY_STRING
                             }
 
                         }
@@ -161,7 +162,7 @@ private fun ConditionItemCard(
     )
         .padding(5.dp),verticalAlignment = Alignment.CenterVertically){
         Label(item.columnName)
-        Label(item.operator?:"")
+        Label(item.operator?:EMPTY_STRING)
         Label(item.value)
         IconButton(R.drawable.ic_delete_red) {
             val newMainList= mutableListOf<ConditionBody>()

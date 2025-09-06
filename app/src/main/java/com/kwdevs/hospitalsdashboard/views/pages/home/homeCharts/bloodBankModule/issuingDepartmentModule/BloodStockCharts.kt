@@ -879,26 +879,6 @@ fun BloodStocksCharts(
                             showFilterDialog.value=false
                         }
                     }
-                    /*
-Row(modifier=Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-    CustomCheckbox("By Blood Group",byBloodGroup)
-    //CustomCheckbox("By Unit Type",byUnitType)
-}
-if(byBloodGroup.value){
-    Row(modifier=Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically){
-        Box(modifier= Modifier
-            .fillMaxWidth()){
-            ComboBox(
-                selectedItem = selectedBloodGroup,
-                loadedItems = bloodGroups,
-                selectedContent = { CustomInput(selectedBloodGroup.value?.name?:"Select Blood Group") }) {
-                Label(it?.name?:"")
-            }
-        }
-    }
-}
- */
 
                 }
             }

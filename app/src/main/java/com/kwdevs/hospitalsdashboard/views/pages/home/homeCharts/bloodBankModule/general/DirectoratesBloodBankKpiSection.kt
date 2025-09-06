@@ -53,12 +53,16 @@ import com.kwdevs.hospitalsdashboard.views.assets.ComboBox
 import com.kwdevs.hospitalsdashboard.views.assets.CustomButton
 import com.kwdevs.hospitalsdashboard.views.assets.CustomInput
 import com.kwdevs.hospitalsdashboard.views.assets.DualTableColumn
+import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
 import com.kwdevs.hospitalsdashboard.views.assets.GRAY
 import com.kwdevs.hospitalsdashboard.views.assets.IconButton
 import com.kwdevs.hospitalsdashboard.views.assets.Label
 import com.kwdevs.hospitalsdashboard.views.assets.MONTH_FROM_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.MONTH_TO_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.NAME_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.ORANGE
+import com.kwdevs.hospitalsdashboard.views.assets.SAVE_CHANGES_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SAVE_PROMPT
 import com.kwdevs.hospitalsdashboard.views.assets.TableColumn
 import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.YEAR_FROM_LABEL
@@ -125,6 +129,29 @@ fun DirectoratesBloodBankKpiSection(controller:HomeController){
     val issuingDepartmentController:BloodBankIssuingDepartmentController= viewModel()
     val exportState by issuingDepartmentController.directorateKpiExcelState.observeAsState()
 
+    val excelFileName       = remember { mutableStateOf("kpis") }
+    var showSaveExcelDialog by remember { mutableStateOf(false) }
+    if(showSaveExcelDialog){
+        Dialog(onDismissRequest = {showSaveExcelDialog=false}) {
+            ColumnContainer {
+                VerticalSpacer()
+                Label(SAVE_PROMPT)
+                CustomInput(excelFileName, NAME_LABEL)
+                CustomButton(label = SAVE_CHANGES_LABEL,
+                    enabled = excelFileName.value!= EMPTY_STRING
+                ) {
+                    if(excelFileName.value!= EMPTY_STRING){
+                        val b=kpiBody.value
+                        b?.let{
+                            issuingDepartmentController.saveKpiExcelFile(KpiType.DIRECTORATE,it)
+                        }
+                    }
+                    showSaveExcelDialog=false
+                }
+                VerticalSpacer()
+            }
+        }
+    }
     LaunchedEffect(exportState) {
         when (exportState) {
             is UiState.Loading->{downloading=true}
@@ -161,7 +188,7 @@ fun DirectoratesBloodBankKpiSection(controller:HomeController){
             color = BLUE)
         if(kpiBody.value!=null && items.isNotEmpty()){
             IconButton(R.drawable.ic_save_blue) {
-                if(!downloading){ kpiBody.value?.let{issuingDepartmentController.saveKpiExcelFile(KpiType.DIRECTORATE,it)} }
+                if(!downloading){ kpiBody.value?.let{showSaveExcelDialog=true} }
             }
         }else{
             Box{}

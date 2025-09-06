@@ -12,7 +12,9 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kwdevs.hospitalsdashboard.R
+import com.kwdevs.hospitalsdashboard.app.Preferences
 import com.kwdevs.hospitalsdashboard.models.patients.Patient
+import com.kwdevs.hospitalsdashboard.routes.LoginRoute
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -28,7 +30,9 @@ val LEFT_DIRECTION = LayoutDirection.Ltr
 val RIGHT_LAYOUT_DIRECTION = LocalLayoutDirection provides RIGHT_DIRECTION
 val LEFT_LAYOUT_DIRECTION = LocalLayoutDirection provides LEFT_DIRECTION
 
-
+fun rcs(topStart:Int=5,topEnd:Int=5,bottomStart:Int=5,bottomEnd:Int=5): RoundedCornerShape {
+    return RoundedCornerShape(topStart =topStart.dp,topEnd=topEnd.dp, bottomStart = bottomStart.dp, bottomEnd = bottomEnd.dp )
+}
 fun rcs(corners:Int=5): RoundedCornerShape {
     return RoundedCornerShape(corners.dp)
 }
@@ -37,6 +41,47 @@ fun rcsB(corners: Int=5): RoundedCornerShape {
 }
 fun rcsT(corners: Int=5): RoundedCornerShape {
     return RoundedCornerShape(topStart = corners.dp, topEnd = corners.dp)
+}
+
+fun deleteData(){
+    //A
+    Preferences.Areas().delete()
+    //B
+    Preferences.BloodBanks().delete()
+    //C
+    Preferences.Cities().delete()
+    Preferences.CrudTypes().delete()
+    //H
+    Preferences.Hospitals().delete()
+    Preferences.HospitalTypes().delete()
+    Preferences.Hospitals().deleteTypeOption()
+    Preferences.Hospitals().deleteSectorOption()
+    Preferences.HospitalDevices().delete()
+    //O
+    Preferences.OperationRooms().delete()
+
+    //P
+    Preferences.Patients().delete()
+
+    //R
+    Preferences.Roles().delete()
+    Preferences.RenalDevices().delete()
+
+    //S
+    Preferences.Sectors().delete()
+
+    //U
+    Preferences.User().delete()
+    Preferences.User().deleteSuper()
+    Preferences.User().deleteType()
+
+    //V
+    Preferences.ViewTypes().delete()
+    Preferences.ViewTypes().deletePatientViewType()
+
+    //W
+    Preferences.Wards().delete()
+
 }
 
 fun hexToComposeColor(hex: String): Color {

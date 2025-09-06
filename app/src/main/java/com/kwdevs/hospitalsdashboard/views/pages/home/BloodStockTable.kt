@@ -1,6 +1,7 @@
 package com.kwdevs.hospitalsdashboard.views.pages.home
 
 import android.os.Environment
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,10 +20,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -46,7 +51,9 @@ import com.kwdevs.hospitalsdashboard.R
 import com.kwdevs.hospitalsdashboard.app.BloodFilterBy
 import com.kwdevs.hospitalsdashboard.app.Preferences
 import com.kwdevs.hospitalsdashboard.app.retrofit.UiState
+import com.kwdevs.hospitalsdashboard.controller.ModelConverter
 import com.kwdevs.hospitalsdashboard.controller.SettingsController
+import com.kwdevs.hospitalsdashboard.controller.hospital.HospitalController
 import com.kwdevs.hospitalsdashboard.models.hospital.Hospital
 import com.kwdevs.hospitalsdashboard.models.hospital.SimpleHospital
 import com.kwdevs.hospitalsdashboard.models.settings.BasicModel
@@ -94,18 +101,23 @@ import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_SECT
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_SPECIALIZED_BLOOD_STOCKS
 import com.kwdevs.hospitalsdashboard.responses.HospitalsResponse
 import com.kwdevs.hospitalsdashboard.responses.options.BloodOptionsData
-import com.kwdevs.hospitalsdashboard.views.assets.AT_12_PM_LABEL
-import com.kwdevs.hospitalsdashboard.views.assets.AT_6_AM_LABEL
-import com.kwdevs.hospitalsdashboard.views.assets.AT_6_PM_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.AB_NEG
+import com.kwdevs.hospitalsdashboard.views.assets.AB_POS
+import com.kwdevs.hospitalsdashboard.views.assets.A_NEG
+import com.kwdevs.hospitalsdashboard.views.assets.A_POS
+import com.kwdevs.hospitalsdashboard.views.assets.BLACK
 import com.kwdevs.hospitalsdashboard.views.assets.BLOOD_BANK_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.BLOOD_GROUP_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.BLOOD_STOCK_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.BLUE
+import com.kwdevs.hospitalsdashboard.views.assets.B_NEG
+import com.kwdevs.hospitalsdashboard.views.assets.B_POS
 import com.kwdevs.hospitalsdashboard.views.assets.CANCEL_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.CURATIVE_SECTOR_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.ColumnContainer
 import com.kwdevs.hospitalsdashboard.views.assets.ComboBox
 import com.kwdevs.hospitalsdashboard.views.assets.CustomButton
+import com.kwdevs.hospitalsdashboard.views.assets.CustomCheckbox
 import com.kwdevs.hospitalsdashboard.views.assets.CustomInput
 import com.kwdevs.hospitalsdashboard.views.assets.DATA_LOADED_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.DATE_FROM_LABEL
@@ -116,8 +128,11 @@ import com.kwdevs.hospitalsdashboard.views.assets.DatePickerWidget
 import com.kwdevs.hospitalsdashboard.views.assets.EDUCATIONAL_SECTOR_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
 import com.kwdevs.hospitalsdashboard.views.assets.ERROR_LOADING_DATA_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.ERROR_SAVE_EXCEL_FILE_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.FILE_SAVED_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.FILTER_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.FROM_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.GREEN
 import com.kwdevs.hospitalsdashboard.views.assets.HOSPITALS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.INSURANCE_SECTOR_LABEL
@@ -125,13 +140,17 @@ import com.kwdevs.hospitalsdashboard.views.assets.IS_NBTS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.IconButton
 import com.kwdevs.hospitalsdashboard.views.assets.Label
 import com.kwdevs.hospitalsdashboard.views.assets.LabelSpan
-import com.kwdevs.hospitalsdashboard.views.assets.MIDNIGHT_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.NEW_LINE
+import com.kwdevs.hospitalsdashboard.views.assets.NO_DATA_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.OK_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.ORANGE
+import com.kwdevs.hospitalsdashboard.views.assets.O_NEG
+import com.kwdevs.hospitalsdashboard.views.assets.O_POS
 import com.kwdevs.hospitalsdashboard.views.assets.SECTORS_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SECTOR_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_BLOOD_BANK_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_BLOOD_GROUP_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SELECT_DATE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_HOSPITAL_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_HOSPITAL_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_SECTOR_LABEL
@@ -139,8 +158,8 @@ import com.kwdevs.hospitalsdashboard.views.assets.SELECT_TIME_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_UNIT_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SPECIALIZED_SECTOR_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.Span
-import com.kwdevs.hospitalsdashboard.views.assets.THE_DIRECORATE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.THE_HOSPITAL_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.THIS_DIRECTORATE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.TIME_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.TO_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.UNDER_INSPECTION_LABEL
@@ -151,6 +170,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.FailScreen
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.LoadingScreen
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.SuccessScreen
 import com.kwdevs.hospitalsdashboard.views.assets.montaserFont
+import com.kwdevs.hospitalsdashboard.views.assets.timeBlocks
 import com.kwdevs.hospitalsdashboard.views.rcs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -158,8 +178,6 @@ import okhttp3.ResponseBody
 import retrofit2.Response
 import java.io.File
 import java.io.FileOutputStream
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 data class HospitalBloodSummary(
     val hospital: SimpleHospital?,
@@ -184,6 +202,93 @@ data class HospitalBloodSummary(
     val oNegStrategic: Int = 0,
     val underInspection: Int = 0
 )
+fun List<Hospital>.toBloodStockSummaries():List<HospitalBloodSummary>{
+    val summaries= mutableListOf<HospitalBloodSummary>()
+    this.forEach {hospital->
+        val stocks=hospital.stocks
+            .sortedWith(compareByDescending<DailyBloodStock> { it.entryDate }
+            .thenByDescending { it.hospital?.cityId ?: Int.MIN_VALUE}
+            .thenByDescending { it.hospital?.areaId ?: Int.MIN_VALUE }
+            .thenByDescending { it.hospitalId ?: Int.MIN_VALUE }
+            .thenBy { it.timeBlock})
+        if (stocks.isEmpty()) {
+            summaries.add(
+                HospitalBloodSummary(
+                    hospital = ModelConverter().convertHospitalToSimple(hospital),
+                    bloodType = null,
+                    date = NO_DATA_LABEL,
+                    timeBlock = NO_DATA_LABEL,
+                )
+            )
+            return@forEach
+        }
+        else{
+            val grouped=stocks.groupBy { Triple(it.hospitalId, it.entryDate, it.timeBlock) }
+            grouped.map { (_, entries) ->
+
+                val bloodType = entries.firstOrNull()?.bloodUnitType
+                val date = entries.firstOrNull()?.entryDate.orEmpty()
+                val timeBlock = entries.firstOrNull()?.timeBlock.orEmpty()
+
+                // Create mutable holders
+                var aPos = 0; var aPosStrategic = 0
+                var aNeg = 0; var aNegStrategic = 0
+                var bPos = 0; var bPosStrategic = 0
+                var bNeg = 0; var bNegStrategic = 0
+                var abPos = 0; var abPosStrategic = 0
+                var abNeg = 0; var abNegStrategic = 0
+                var oPos = 0; var oPosStrategic = 0
+                var oNeg = 0; var oNegStrategic = 0
+                var underInspectionAmount = 0
+
+                for (e in entries) {
+                    when (e.bloodGroupId) {
+                        1 -> { aPos = e.amount ?: 0; aPosStrategic = e.emergency ?: 0 }
+                        2 -> { aNeg = e.amount ?: 0; aNegStrategic = e.emergency ?: 0 }
+                        3 -> { bPos = e.amount ?: 0; bPosStrategic = e.emergency ?: 0 }
+                        4 -> { bNeg = e.amount ?: 0; bNegStrategic = e.emergency ?: 0 }
+                        5 -> { oPos = e.amount ?: 0; oPosStrategic = e.emergency ?: 0 }
+                        6 -> { oNeg = e.amount ?: 0; oNegStrategic = e.emergency ?: 0 }
+                        7 -> { abPos = e.amount ?: 0; abPosStrategic = e.emergency ?: 0 }
+                        8 -> { abNeg = e.amount ?: 0; abNegStrategic = e.emergency ?: 0 }
+                        else -> {/* if (e.underInspection == true) underInspectionAmount = e.amount ?:0 */}
+                    }
+                    when(e.underInspection?:false){
+                        true->{underInspectionAmount = e.amount ?: 0}
+                        false->{}
+                    }
+                }
+                val s=HospitalBloodSummary(
+                    hospital = ModelConverter().convertHospitalToSimple(hospital),
+                    bloodType = bloodType,
+                    date = date.replaceRange(5,date.length,EMPTY_STRING),
+                    timeBlock = timeBlock,
+                    aPos = aPos,
+                    aPosStrategic = aPosStrategic,
+                    aNeg = aNeg,
+                    aNegStrategic = aNegStrategic,
+                    bPos = bPos,
+                    bPosStrategic = bPosStrategic,
+                    bNeg = bNeg,
+                    bNegStrategic = bNegStrategic,
+                    abPos = abPos,
+                    abPosStrategic = abPosStrategic,
+                    abNeg = abNeg,
+                    abNegStrategic = abNegStrategic,
+                    oPos = oPos,
+                    oPosStrategic = oPosStrategic,
+                    oNeg = oNeg,
+                    oNegStrategic = oNegStrategic,
+                    underInspection = underInspectionAmount
+                )
+                summaries.add(s)
+            }
+        }
+    }
+    return summaries
+}
+
+
 fun List<DailyBloodStock>.toHospitalSummaries(): List<HospitalBloodSummary> {
     return this
         .groupBy { Triple(it.hospitalId, it.entryDate, it.timeBlock) }
@@ -275,7 +380,7 @@ fun BloodStockTable(data: List<HospitalBloodSummary>) {
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(0.9f).padding(8.dp), textAlign = TextAlign.Center)
-                        Text((summary.hospital?.name ?: EMPTY_STRING)+"\n",
+                        Text((summary.hospital?.name ?: EMPTY_STRING)+NEW_LINE,
                             fontFamily = montaserFont,
                             fontSize = 10.sp,
                             modifier = Modifier.weight(1.2f).padding(8.dp),
@@ -291,41 +396,9 @@ fun BloodStockTable(data: List<HospitalBloodSummary>) {
             // ======= (Scrollable) =======
             LazyRow(modifier = Modifier.fillMaxWidth().background(Color.White)) {
                 item {
-                    Column {
-                        // Header Blood Groups
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            BloodGroupHeader(DATE_LABEL,width=55, fontSize = 12)
-                            BloodGroupHeader(TIME_LABEL,width=45, fontSize = 12)
-                            BloodGroupHeader(UNDER_INSPECTION_LABEL,width=65, fontSize = 10)
-
-                            BloodGroupHeader("A+" )
-                            BloodGroupHeader("A−" )
-                            BloodGroupHeader("B+" )
-                            BloodGroupHeader("B−" )
-                            BloodGroupHeader("O+" )
-                            BloodGroupHeader("O−" )
-                            BloodGroupHeader("AB+")
-                            BloodGroupHeader("AB−")
-                        }
-                        HorizontalDivider(color = WHITE)
-                        // Data
-                        data.forEach { summary ->
-                            Row(modifier=Modifier.height(70.dp),verticalAlignment = Alignment.CenterVertically) {
-                                BloodGroupCell(summary.date.replaceRange(5,summary.date.length,EMPTY_STRING), null, width = 55)
-                                BloodGroupCell(summary.timeBlock, null, width = 45)
-                                BloodGroupCell(summary.underInspection.toString(),null, width = 60)
-
-                                BloodGroupCell(summary.aPos.toString(), summary.aPosStrategic.toString())
-                                BloodGroupCell(summary.aNeg.toString(), summary.aNegStrategic.toString())
-                                BloodGroupCell(summary.bPos.toString(), summary.bPosStrategic.toString())
-                                BloodGroupCell(summary.bNeg.toString(), summary.bNegStrategic.toString())
-                                BloodGroupCell(summary.oPos.toString(), summary.oPosStrategic.toString())
-                                BloodGroupCell(summary.oNeg.toString(), summary.oNegStrategic.toString())
-                                BloodGroupCell(summary.abPos.toString(), summary.abPosStrategic.toString())
-                                BloodGroupCell(summary.abNeg.toString(), summary.abNegStrategic.toString())
-                            }
-                        }
-                        HorizontalDivider(color = Color.Black)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        BloodStockSummaryHeader()
+                        BloodStockSummaryBody(data)
 
                     }
                 }
@@ -335,6 +408,53 @@ fun BloodStockTable(data: List<HospitalBloodSummary>) {
     }
 }
 
+@Composable
+fun BloodStockSummaryHeader(){
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        BloodGroupHeader(DATE_LABEL,width=55, fontSize = 12)
+        BloodGroupHeader(TIME_LABEL,width=45, fontSize = 12)
+        BloodGroupHeader(UNDER_INSPECTION_LABEL,width=65, fontSize = 10)
+
+        BloodGroupHeader(A_POS );BloodGroupHeader(A_NEG )
+        BloodGroupHeader(B_POS );BloodGroupHeader(B_NEG )
+        BloodGroupHeader(O_POS );BloodGroupHeader(O_NEG )
+        BloodGroupHeader(AB_POS);BloodGroupHeader(AB_NEG)
+    }
+}
+@Composable
+fun BloodStockSummaryRow(summary:HospitalBloodSummary){
+    val noDateData=summary.date== NO_DATA_LABEL
+    val noTimeData=summary.timeBlock== NO_DATA_LABEL
+    val date=summary.date
+    val timeBlock=summary.timeBlock
+    val underInspection=summary.underInspection.toString()
+    if(!noDateData){
+        Row(modifier=Modifier.height(70.dp),verticalAlignment = Alignment.CenterVertically) {
+            BloodGroupCell(amount=date, null, width = 55, amountColor = BLACK)
+            BloodGroupCell(amount=timeBlock, null, width = 55, amountColor = if(noTimeData) Color.Red else BLACK)
+            BloodGroupCell(underInspection,null, width = 60)
+
+            BloodGroupCell(summary.aPos.toString(), summary.aPosStrategic.toString())
+            BloodGroupCell(summary.aNeg.toString(), summary.aNegStrategic.toString())
+            BloodGroupCell(summary.bPos.toString(), summary.bPosStrategic.toString())
+            BloodGroupCell(summary.bNeg.toString(), summary.bNegStrategic.toString())
+            BloodGroupCell(summary.oPos.toString(), summary.oPosStrategic.toString())
+            BloodGroupCell(summary.oNeg.toString(), summary.oNegStrategic.toString())
+            BloodGroupCell(summary.abPos.toString(), summary.abPosStrategic.toString())
+            BloodGroupCell(summary.abNeg.toString(), summary.abNegStrategic.toString())
+        }
+    }
+    else{
+        Row(modifier=Modifier.height(70.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center) { Label(NO_DATA_LABEL, color = Color.Red, fontWeight = FontWeight.Bold) }
+    }
+
+}
+@Composable
+fun BloodStockSummaryBody(data:List<HospitalBloodSummary>){
+    data.forEach { summary -> BloodStockSummaryRow(summary) }
+}
 @Composable
 fun HospitalBloodStockTable(data: List<HospitalBloodSummary>) {
     if(data.isNotEmpty()){
@@ -361,7 +481,7 @@ fun HospitalBloodStockTable(data: List<HospitalBloodSummary>) {
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(0.9f).padding(8.dp), textAlign = TextAlign.Center)
-                        Text((summary.hospital?.name ?: EMPTY_STRING)+"\n",
+                        Text((summary.hospital?.name ?: EMPTY_STRING)+NEW_LINE,
                             fontFamily = montaserFont,
                             fontSize = 10.sp,
                             modifier = Modifier.weight(1.2f).padding(8.dp),
@@ -384,14 +504,14 @@ fun HospitalBloodStockTable(data: List<HospitalBloodSummary>) {
                             BloodGroupHeader(TIME_LABEL,width=45, fontSize = 12)
                             BloodGroupHeader(UNDER_INSPECTION_LABEL,width=65, fontSize = 10)
 
-                            BloodGroupHeader("A+" )
-                            BloodGroupHeader("A−" )
-                            BloodGroupHeader("B+" )
-                            BloodGroupHeader("B−" )
-                            BloodGroupHeader("O+" )
-                            BloodGroupHeader("O−" )
-                            BloodGroupHeader("AB+")
-                            BloodGroupHeader("AB−")
+                            BloodGroupHeader(A_POS )
+                            BloodGroupHeader(A_NEG )
+                            BloodGroupHeader(B_POS )
+                            BloodGroupHeader(B_NEG )
+                            BloodGroupHeader(O_POS )
+                            BloodGroupHeader(O_NEG )
+                            BloodGroupHeader(AB_POS)
+                            BloodGroupHeader(AB_NEG)
                         }
                         HorizontalDivider(color = WHITE)
                         // Data
@@ -435,30 +555,69 @@ fun BloodGroupHeader(name: String,width:Int=40,fontSize: Int=14) {
 
 // (amount و strategic)
 @Composable
-fun BloodGroupCell(amount: String, strategic: String?,width:Int=40) {
+fun BloodGroupCell(amount: String,
+                   strategic: String?,
+                   width:Int=40,amountColor: Color= BLACK,strategicColor: Color= BLACK) {
     Column(
         modifier = Modifier.width(width.dp).padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(amount, fontWeight = FontWeight.Bold)
-        strategic?.let{Text(strategic, color = Color.Gray)}
+        Label(text=amount, fontWeight = FontWeight.Bold, color = amountColor)
+        strategic?.let{Label(text=strategic, color = strategicColor)}
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BloodStockSection(records:MutableState<List<DailyBloodStock>>){
-    val context= LocalContext.current
-    val showFilterDialog = remember { mutableStateOf(false) }
     val controller:BloodBankIssuingDepartmentController= viewModel()
-    val body = remember { mutableStateOf<DailyBloodStockFilterBody?>(null) }
-    val exportState by controller.stockExcelState.observeAsState()
+    val exportState         by controller.stockExcelState.observeAsState()
+    val state               by controller.state.observeAsState()
+    val context             =  LocalContext.current
+    val showFilterDialog    =  remember { mutableStateOf(false) }
+    val body                =  remember { mutableStateOf<DailyBloodStockFilterBody?>(null) }
+    var sortedBloodRecords  by remember { mutableStateOf<List<DailyBloodStock>>(emptyList()) }
 
+    var loadingExport       by remember { mutableStateOf(false) }
+    var failExport          by remember { mutableStateOf(false) }
+    var successExport       by remember { mutableStateOf(false) }
+    var loading             by remember { mutableStateOf(false) }
+    var fail                by remember { mutableStateOf(false) }
+    var success             by remember { mutableStateOf(false) }
+
+    val drawerState         =  rememberDrawerState(initialValue = DrawerValue.Closed)
+
+    LaunchedEffect(state) {
+        when(state){
+            is UiState.Loading->{loading=true;fail=false;success=false}
+            is UiState.Error->{loading=false;fail=true;success=false}
+            is UiState.Success->{loading=false;fail=false;success=true
+                sortedBloodRecords=records.value.sortedByDescending { it.entryDate }
+                .filter { it.bloodUnitTypeId in listOf(null,1,2) }
+                .sortedWith(compareByDescending<DailyBloodStock> { it.entryDate }
+                    .thenByDescending { it.hospital?.cityId ?: Int.MIN_VALUE}
+                    .thenByDescending { it.hospital?.areaId ?: Int.MIN_VALUE }
+                    .thenByDescending { it.hospitalId ?: Int.MIN_VALUE }
+                    .thenBy { it.timeBlock})
+            }
+            else->{}
+        }
+
+    }
     LaunchedEffect(exportState) {
         when (exportState) {
+            is UiState.Loading->{loadingExport=true;failExport=false;successExport=false}
+            is UiState.Error -> {
+                loadingExport=false;failExport=true;successExport=false
+                val message = (exportState as UiState.Error).exception.message ?: ERROR_LOADING_DATA_LABEL
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+            }
             is UiState.Success<*> -> {
+                loadingExport=false;failExport=false
                 val response = (exportState as UiState.Success<Response<ResponseBody>>).data
                 if (response.isSuccessful) {
+                    successExport=true
                     val saved = saveExcelFile(
                         //context = context,
                         responseBody = response.body()!!,
@@ -466,53 +625,74 @@ fun BloodStockSection(records:MutableState<List<DailyBloodStock>>){
                     )
                     Toast.makeText(
                         context,
-                        if (saved) "Downloaded to Downloads folder" else "Failed to save file",
+                        if (saved) FILE_SAVED_LABEL else ERROR_SAVE_EXCEL_FILE_LABEL,
                         Toast.LENGTH_LONG
                     ).show()
                 } else {
                     Toast.makeText(context, "Download failed: ${response.code()}", Toast.LENGTH_LONG).show()
                 }
             }
-
-            is UiState.Error -> {
-                val message = (exportState as UiState.Error).exception.message ?: ERROR_LOADING_DATA_LABEL
-                Toast.makeText(context, "Error: $message", Toast.LENGTH_LONG).show()
-            }
-
             else -> {}
         }
     }
 
-    val filteredRecords = records.value.sortedByDescending { it.entryDate }.filter { it.bloodUnitTypeId in listOf(null,1,2) }
-        .sortedWith(compareByDescending<DailyBloodStock> { it.entryDate }
-            .thenByDescending { it.hospital?.cityId ?: Int.MIN_VALUE}
-            .thenByDescending { it.hospital?.areaId ?: Int.MIN_VALUE }
-            .thenByDescending { it.hospitalId ?: Int.MIN_VALUE }
-            .thenBy { it.timeBlock})
+    val startDateState      =  rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
+    val startDate           =  remember { mutableStateOf(EMPTY_STRING) }
+    val showStartDatePicker =  remember { mutableStateOf(false) }
 
+    val endDateState        =  rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
+    val endDate             =  remember { mutableStateOf(EMPTY_STRING) }
+    val showEndDatePicker   =  remember { mutableStateOf(false) }
+    val hasDateTo           =  remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth().scrollable(state = rememberScrollState(),orientation = Orientation.Horizontal))
-    {
-        // Header Row
-        Row(modifier=Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically){
-            IconButton(R.drawable.ic_filter_blue) {
-                controller.reload()
-                showFilterDialog.value=true
-            }
-            Box(modifier=Modifier.fillMaxWidth().weight(1f),
-                contentAlignment = Alignment.Center){
-                Label(text=BLOOD_STOCK_LABEL,
-                    fontSize = 12, fontWeight = FontWeight.Bold,
-                    color = BLUE
-                )
-            }
+    DatePickerWidget(showEndDatePicker,endDateState,endDate)
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            Column(modifier=Modifier.width(250.dp).fillMaxHeight().background(Color.LightGray)){
+                    VerticalSpacer(10)
+                    CustomCheckbox(label = DATE_TO_LABEL,hasDateTo)
+                    if(hasDateTo.value){
+                        CustomButton(label = SELECT_DATE_LABEL, enabledBackgroundColor = if(endDate.value!= EMPTY_STRING) ORANGE else GREEN) {
+                            showEndDatePicker.value=true
+                        }
+                        if(endDate.value!= EMPTY_STRING){
+                            Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 5.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween){
+                                Label(label= DATE_TO_LABEL,endDate.value,)
+                                IconButton(R.drawable.ic_cancel_red) {endDate.value= EMPTY_STRING }
+                            }
 
-            body.value?.let { if(filteredRecords.isNotEmpty())IconButton(R.drawable.ic_save_blue) { controller.saveStockExcelFile(it) } }
+                        }
+                    }
+                }
+
         }
-        if(filteredRecords.isNotEmpty()) BloodStockTable(filteredRecords.toHospitalSummaries())
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()
+            .scrollable(state = rememberScrollState(),
+                orientation = Orientation.Horizontal))
+        {
+            // Header Row
+            Row(modifier=Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically){
+                IconButton(R.drawable.ic_filter_blue) {controller.reload();showFilterDialog.value=true}
+                Box(modifier=Modifier.fillMaxWidth().weight(1f),
+                    contentAlignment = Alignment.Center){
+                    Label(text=BLOOD_STOCK_LABEL,fontSize = 12, fontWeight = FontWeight.Bold,color = BLUE)
+                }
+                body.value?.let { if(sortedBloodRecords.isNotEmpty())IconButton(R.drawable.ic_save_blue) { controller.saveStockExcelFile(it) } }
+            }
+            if(loading) LoadingScreen()
+            else{
+                if(success)if(sortedBloodRecords.isNotEmpty()) BloodStockTable(sortedBloodRecords.toHospitalSummaries())
+                if(fail) FailScreen()
+            }
 
+        }
     }
+
     FilterDialog(showDialog=showFilterDialog,records=records,controller,body)
 }
 
@@ -562,26 +742,20 @@ private fun FilterDialog(showDialog: MutableState<Boolean>,
             VIEW_EDUCATIONAL_BLOOD_STOCKS) }){
         Pair(BloodFilterBy.NBTS_SECTOR, EDUCATIONAL_SECTOR_LABEL)
     }else null
-    val viewCertainDirectorate=if(isSuper || permissions.any { it in listOf(VIEW_ALL_BLOOD_STOCKS,
+    val viewCertainDirectorate=if(permissions.any { it in listOf(VIEW_ALL_BLOOD_STOCKS,
             VIEW_CERTAIN_DIRECTORATE_BLOOD_STOCKS) }){
-        Pair(BloodFilterBy.CERTAIN_DIRECTORATE, THE_DIRECORATE_LABEL)
+        Pair(BloodFilterBy.CERTAIN_DIRECTORATE, THIS_DIRECTORATE_LABEL)
     }else null
     val filterByList = listOf(
-        viewByHospital,
-        viewBySector,
-        viewByHospitalType,
-        viewByDirectorate,
-        viewByNbts,
-        viewBySpecialized,
-        viewByEducational,
-        viewByInsurance,
+        viewByHospital,viewBySector,
+        viewByHospitalType,viewByDirectorate,
+        viewByNbts,viewBySpecialized,viewByEducational,viewByInsurance,
         viewByCurative,
         viewCertainDirectorate
         ).mapNotNull { it }
     if(showDialog.value){
         val selectByBloodGroups by remember { mutableStateOf(false) }
-        val timeBlocks = listOf(Pair("00", MIDNIGHT_LABEL),Pair("06", AT_6_AM_LABEL),Pair("12",
-            AT_12_PM_LABEL),Pair("18", AT_6_PM_LABEL))
+
         val selectedTimeBlock = remember { mutableStateOf<Pair<String,String>?>(null) }
 
         var hospitals           by remember { mutableStateOf<List<SimpleHospital>>(emptyList()) }
@@ -616,6 +790,7 @@ private fun FilterDialog(showDialog: MutableState<Boolean>,
         val endDateState        =  rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
         val endDate             =  remember { mutableStateOf(EMPTY_STRING) }
         val showEndDatePicker   =  remember { mutableStateOf(false) }
+
         val selectedFilterBy    =  remember { mutableStateOf<Pair<BloodFilterBy,String>?>(null) }
         when(state){
             is UiState.Loading->{ LaunchedEffect(Unit) {loading=true;success=false;fail=false} }
@@ -644,6 +819,21 @@ private fun FilterDialog(showDialog: MutableState<Boolean>,
             }
             else->{}
         }
+        val hController:HospitalController=viewModel()
+        val hospState by hController.state.observeAsState()
+        when(hospState){
+            is UiState.Success->{
+                LaunchedEffect(Unit) {
+                    val s =hospState as UiState.Success<HospitalsResponse>
+                    val r = s.data
+                    val data=r.data
+                    hospitals=data.map{ ModelConverter().convertHospitalToSimple(it)}
+                }
+
+
+            }
+            else->{}
+        }
         when(optionsState){
             is UiState.Loading->{}
             is UiState.Error->{}
@@ -658,7 +848,8 @@ private fun FilterDialog(showDialog: MutableState<Boolean>,
                     sectors=data.sectors
                     hospitalTypes=data.hospitalTypes
                     hospitals=data.hospitals
-                    data.hospitals.map { it.city }
+                    Log.e("Option Hospitals","${hospitals.size}")
+                    //data.hospitals.map { it.city }
                 }
 
             }
@@ -686,56 +877,89 @@ private fun FilterDialog(showDialog: MutableState<Boolean>,
             }
         }
 
-        LaunchedEffect(selectedFilterBy.value,permissions) {
-            if(selectedFilterBy.value!=null){
-                val i=selectedFilterBy.value
-                i?.let {
-                    when(i.first){
-                        BloodFilterBy.CURATIVE_SECTOR    ->{filteredHospitals=hospitals.filter { it.isNbts==false && it.sectorId==1};bloodBanks=emptyList()}
-                        BloodFilterBy.INSURANCE_SECTOR   ->{filteredHospitals=hospitals.filter { it.isNbts==false && it.sectorId==2};bloodBanks=emptyList()}
-                        BloodFilterBy.EDUCATIONAL_SECTOR ->{filteredHospitals=hospitals.filter { it.isNbts==false && it.sectorId==3};bloodBanks=emptyList()}
-                        BloodFilterBy.SPECIALIZED_SECTOR ->{filteredHospitals=hospitals.filter { it.isNbts==false && it.sectorId==4 };bloodBanks=emptyList()}
-                        BloodFilterBy.DIRECTORATE_SECTOR ->{filteredHospitals=hospitals.filter { it.isNbts==false && it.sectorId==5};bloodBanks=emptyList()}
-                        BloodFilterBy.NBTS_SECTOR        ->{bloodBanks=hospitals.filter { it.isNbts==true && it.sectorId==6 };filteredHospitals= emptyList()}
-                        BloodFilterBy.HOSPITAL           ->{filteredHospitals=hospitals.filter { it.isNbts==false };bloodBanks=emptyList()}
-                        BloodFilterBy.CERTAIN_DIRECTORATE->{
-                            if(isSuper || permissions.contains(VIEW_ALL_BLOOD_STOCKS)){filteredHospitals=hospitals}
-                            if(isSuper || permissions.contains(VIEW_NBTS_BLOOD_STOCKS)){bloodBanks=hospitals.filter { it.isNbts==true && it.sectorId==6 }}
-                            if(isSuper || permissions.contains(VIEW_CERTAIN_DIRECTORATE_BLOOD_STOCKS)){
+        LaunchedEffect(selectedFilterBy.value) {
+            val mainFilter=selectedFilterBy.value
+            if(mainFilter!=null && permissions.isNotEmpty()){
+                when(mainFilter.first){
+                    BloodFilterBy.CURATIVE_SECTOR    ->{filteredHospitals=hospitals.filter { it.isNbts==false && it.sectorId==1};bloodBanks=emptyList()}
+                    BloodFilterBy.INSURANCE_SECTOR   ->{filteredHospitals=hospitals.filter { it.isNbts==false && it.sectorId==2};bloodBanks=emptyList()}
+                    BloodFilterBy.EDUCATIONAL_SECTOR ->{filteredHospitals=hospitals.filter { it.isNbts==false && it.sectorId==3};bloodBanks=emptyList()}
+                    BloodFilterBy.SPECIALIZED_SECTOR ->{filteredHospitals=hospitals.filter { it.isNbts==false && it.sectorId==4 };bloodBanks=emptyList()}
+                    BloodFilterBy.DIRECTORATE_SECTOR ->{filteredHospitals=hospitals.filter { it.isNbts==false };bloodBanks=emptyList()}
+                    BloodFilterBy.NBTS_SECTOR        ->{bloodBanks=hospitals.filter { it.isNbts==true && it.sectorId==6 };filteredHospitals= emptyList()}
+                    BloodFilterBy.HOSPITAL           ->{filteredHospitals=hospitals.filter { it.isNbts==false };bloodBanks=emptyList()}
+                    BloodFilterBy.CERTAIN_DIRECTORATE->{
+                        if(isSuper || permissions.contains(VIEW_ALL_BLOOD_STOCKS)){filteredHospitals=hospitals}
+                        if(isSuper || permissions.contains(VIEW_NBTS_BLOOD_STOCKS)){bloodBanks=hospitals.filter { it.isNbts==true && it.sectorId==6 }}
+                        if(permissions.contains(VIEW_CERTAIN_DIRECTORATE_BLOOD_STOCKS)){
+                            val directorateHospitals=hospitals.filter{it.sectorId==5}
+                            val grouped=hospitals.groupBy { it.sectorId }
+                            if(hospitals.isNotEmpty()){
+                                grouped.forEach { groupName, list -> Log.e("Grouped","$groupName ${list.size}")}
+                            }else{Log.e("Grouped","Hospitals is Empty")}
+                            if(permissions.contains(CAIRO)){
+                                hController.byCity(CAIRO.replaceBefore(".","").replace(".",""))
+                                Log.e("containsCairo", CAIRO)
+                                if(directorateHospitals.isNotEmpty()){
+                                    directorateHospitals.forEach{
+                                        if((it.city?.slug?: EMPTY_STRING)==CAIRO.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING)){
+                                            Log.e("Cairo HospitalSlug","Sector Id: ${it.sectorId} ${it.name?:EMPTY_STRING} ${it.city?.slug?: EMPTY_STRING}")
+                                        }
+                                        else{
+                                            Log.e("HospitalSlug","Sector Id: ${it.sectorId} ${it.name?:EMPTY_STRING} ${it.city?.slug?: EMPTY_STRING}")
+                                        }
+                                    }
 
-                                if(permissions.contains(CAIRO)){filteredHospitals=hospitals.filter { it.city?.slug== CAIRO && it.sectorId==5 }}
-                                if(permissions.contains(GIZA)){filteredHospitals=hospitals.filter { it.city?.slug== GIZA && it.sectorId==5}}
-                                if(permissions.contains(QALUBIA)){filteredHospitals=hospitals.filter { it.city?.slug== QALUBIA && it.sectorId==5}}
-                                if(permissions.contains(ALEXANDRIA)){filteredHospitals=hospitals.filter { it.city?.slug== ALEXANDRIA && it.sectorId==5}}
-                                if(permissions.contains(ISMAILIA)){filteredHospitals=hospitals.filter { it.city?.slug== ISMAILIA && it.sectorId==5}}
-                                if(permissions.contains(ASWAN)){filteredHospitals=hospitals.filter { it.city?.slug== ASWAN && it.sectorId==5}}
-                                if(permissions.contains(ASUIT)){filteredHospitals=hospitals.filter { it.city?.slug== ASUIT && it.sectorId==5}}
-                                if(permissions.contains(LUXOR)){filteredHospitals=hospitals.filter { it.city?.slug== LUXOR && it.sectorId==5}}
-                                if(permissions.contains(RED_SEA)){filteredHospitals=hospitals.filter { it.city?.slug== RED_SEA && it.sectorId==5}}
-                                if(permissions.contains(BUHIRA)){filteredHospitals=hospitals.filter { it.city?.slug== BUHIRA && it.sectorId==5}}
-                                if(permissions.contains(BANI_SUIF)){filteredHospitals=hospitals.filter { it.city?.slug== BANI_SUIF && it.sectorId==5}}
-                                if(permissions.contains(PORT_SAID)){filteredHospitals=hospitals.filter { it.city?.slug== PORT_SAID && it.sectorId==5}}
-                                if(permissions.contains(DAKAHLIA)){filteredHospitals=hospitals.filter { it.city?.slug== DAKAHLIA && it.sectorId==5}}
-                                if(permissions.contains(DAMIATTA)){filteredHospitals=hospitals.filter { it.city?.slug== DAMIATTA && it.sectorId==5}}
-                                if(permissions.contains(SOHAG)){filteredHospitals=hospitals.filter { it.city?.slug== SOHAG && it.sectorId==5}}
-                                if(permissions.contains(SUEZ)){filteredHospitals=hospitals.filter { it.city?.slug== SUEZ && it.sectorId==5}}
-                                if(permissions.contains(SHARQIA)){filteredHospitals=hospitals.filter { it.city?.slug== SHARQIA && it.sectorId==5}}
-                                if(permissions.contains(NORTH_SINAI)){filteredHospitals=hospitals.filter { it.city?.slug== NORTH_SINAI && it.sectorId==5}}
-                                if(permissions.contains(GHARBIA)){filteredHospitals=hospitals.filter { it.city?.slug== GHARBIA && it.sectorId==5}}
-                                if(permissions.contains(FAYUM)){filteredHospitals=hospitals.filter { it.city?.slug== FAYUM && it.sectorId==5}}
-                                if(permissions.contains(QENA)){filteredHospitals=hospitals.filter { it.city?.slug== QENA && it.sectorId==5}}
-                                if(permissions.contains(KAFR_EL_SHEIKH)){filteredHospitals=hospitals.filter { it.city?.slug== KAFR_EL_SHEIKH && it.sectorId==5}}
-                                if(permissions.contains(MATROUH)){filteredHospitals=hospitals.filter { it.city?.slug== MATROUH && it.sectorId==5}}
-                                if(permissions.contains(MENUFIA)){filteredHospitals=hospitals.filter { it.city?.slug== MENUFIA && it.sectorId==5}}
-                                if(permissions.contains(MINIA)){filteredHospitals=hospitals.filter { it.city?.slug== MINIA && it.sectorId==5}}
-                                if(permissions.contains(NEW_VALLEY)){filteredHospitals=hospitals.filter { it.city?.slug== NEW_VALLEY && it.sectorId==5}}
-                                if(startDate.value!= EMPTY_STRING && selectedTimeBlock.value!=null){selectedHospitals.value=filteredHospitals}
+                                }
+                                filteredHospitals=directorateHospitals.filter {
+                                    val citySlug=it.city?.slug?: EMPTY_STRING
+                                    val cairoOnly=CAIRO.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING)
+                                    citySlug.contains(cairoOnly)}
+                                filteredHospitals.forEach { it->
+                                    Log.e("SlugOnly", it.city?.slug?:EMPTY_STRING)
 
+                                }
                             }
+
+                            if(permissions.contains(GIZA)){             filteredHospitals=hospitals.filter {
+                                (it.city?.slug?: EMPTY_STRING).contains(GIZA.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))             }}
+                            if(permissions.contains(QALUBIA)){          filteredHospitals=hospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(QALUBIA.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))          }}
+                            if(permissions.contains(ALEXANDRIA)){       filteredHospitals=hospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(ALEXANDRIA.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))       }}
+                            if(permissions.contains(ISMAILIA)){         filteredHospitals=hospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(ISMAILIA.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))         }}
+                            if(permissions.contains(ASWAN)){            filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(ASWAN.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))            }}
+                            if(permissions.contains(ASUIT)){            filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(ASUIT.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))            }}
+                            if(permissions.contains(LUXOR)){            filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(LUXOR.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))            }}
+                            if(permissions.contains(RED_SEA)){          filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(RED_SEA.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))          }}
+                            if(permissions.contains(BUHIRA)){           filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(BUHIRA.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))           }}
+                            if(permissions.contains(BANI_SUIF)){        filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(BANI_SUIF.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))        }}
+                            if(permissions.contains(PORT_SAID)){        filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(PORT_SAID.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))        }}
+                            if(permissions.contains(DAKAHLIA)){         filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(DAKAHLIA.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))         }}
+                            if(permissions.contains(DAMIATTA)){         filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(DAMIATTA.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))         }}
+                            if(permissions.contains(SOHAG)){            filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(SOHAG.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))            }}
+                            if(permissions.contains(SUEZ)){             filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(SUEZ.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))             }}
+                            if(permissions.contains(SHARQIA)){          filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(SHARQIA.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))          }}
+                            if(permissions.contains(NORTH_SINAI)){      filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(NORTH_SINAI.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))      }}
+                            if(permissions.contains(GHARBIA)){          filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(GHARBIA.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))          }}
+                            if(permissions.contains(FAYUM)){            filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(FAYUM.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))            }}
+                            if(permissions.contains(QENA)){             filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(QENA.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))             }}
+                            if(permissions.contains(KAFR_EL_SHEIKH)){   filteredHospitals=directorateHospitals.filter { (it.city?.slug?: EMPTY_STRING).contains(KAFR_EL_SHEIKH.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))   }}
+                            if(permissions.contains(MATROUH)){          filteredHospitals=directorateHospitals.filter { (it.city?.slug?:EMPTY_STRING) .contains(MATROUH.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))          }}
+                            if(permissions.contains(MENUFIA)){          filteredHospitals=directorateHospitals.filter { (it.city?.slug?:EMPTY_STRING) .contains(MENUFIA.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))          }}
+                            if(permissions.contains(MINIA)){            filteredHospitals=directorateHospitals.filter { (it.city?.slug?:EMPTY_STRING) .contains(MINIA.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))            }}
+                            if(permissions.contains(NEW_VALLEY)){       filteredHospitals=directorateHospitals.filter { (it.city?.slug?:EMPTY_STRING) .contains(NEW_VALLEY.replaceBefore(".",EMPTY_STRING).replace(".",EMPTY_STRING))       }}
+                            if(startDate.value!= EMPTY_STRING && selectedTimeBlock.value!=null){selectedHospitals.value=filteredHospitals} else {selectedHospitals.value=emptyList()}
+
                         }
-                        else->{filteredHospitals= emptyList();bloodBanks=emptyList()}
+                        else{
+                            Log.e("cannot","cannot browse certain directorate")
+                        }
+                    }
+                    else->{
+                        Log.e("BloodFilterBy","No Permissions")
+                        filteredHospitals= emptyList();bloodBanks=emptyList()
                     }
                 }
+
             }
         }
         LaunchedEffect(selectedHospital.value) {
@@ -811,17 +1035,15 @@ private fun FilterDialog(showDialog: MutableState<Boolean>,
                             item{
                                 Row(modifier= Modifier.fillMaxWidth()
                                     .padding(5.dp), horizontalArrangement = Arrangement.SpaceBetween){
-                                    Row(verticalAlignment = Alignment.CenterVertically){
+                                    Row(modifier=Modifier.fillMaxWidth().weight(1f),
+                                        verticalAlignment = Alignment.CenterVertically){
                                         LabelSpan(value=startDate.value, label = FROM_LABEL)
-                                        if(startDate.value.trim()!=EMPTY_STRING){
-                                            IconButton(R.drawable.ic_cancel_red) { startDate.value=EMPTY_STRING }
-                                        }
+                                        if(startDate.value.trim()!=EMPTY_STRING){IconButton(R.drawable.ic_cancel_red) { startDate.value=EMPTY_STRING }}
                                     }
-                                    Row(verticalAlignment = Alignment.CenterVertically){
+                                    Row(modifier=Modifier.fillMaxWidth().weight(1f),
+                                        verticalAlignment = Alignment.CenterVertically){
                                         LabelSpan(value=endDate.value, label = TO_LABEL)
-                                        if(endDate.value.trim()!=EMPTY_STRING){
-                                            IconButton(R.drawable.ic_cancel_red) { endDate.value=EMPTY_STRING }
-                                        }
+                                        if(endDate.value.trim()!=EMPTY_STRING){IconButton(R.drawable.ic_cancel_red) { endDate.value=EMPTY_STRING }}
 
                                     }
 
@@ -903,9 +1125,7 @@ private fun FilterDialog(showDialog: MutableState<Boolean>,
                                     VerticalSpacer()
                                 }
 
-                                Row(modifier= Modifier
-                                    .fillMaxWidth()
-                                    .padding(5.dp),
+                                Row(modifier= Modifier.fillMaxWidth().padding(5.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween){
                                     CustomButton(label = DATE_FROM_LABEL ,
                                         enabledBackgroundColor = ORANGE,
@@ -929,21 +1149,24 @@ private fun FilterDialog(showDialog: MutableState<Boolean>,
                                     }
                                     if(selectedTimeBlock.value!=null){
                                         if(filterByList.isNotEmpty() ){
-                                            if(filterByList.size>1){
-                                                Row(modifier= Modifier.fillMaxWidth().padding(5.dp),
-                                                    verticalAlignment = Alignment.CenterVertically){
-                                                    Box(modifier= Modifier.fillMaxWidth()){
-                                                        ComboBox(
-                                                            hasTitle = false,
-                                                            loadedItems = filterByList,
-                                                            selectedItem = selectedFilterBy,
-                                                            selectedContent = { CustomInput(selectedFilterBy.value?.second?: FILTER_LABEL)}
-                                                        ) {
-                                                            Label(it?.second?:EMPTY_STRING)
-                                                        }
+
+                                            Row(modifier= Modifier.fillMaxWidth().padding(5.dp),
+                                                verticalAlignment = Alignment.CenterVertically){
+                                                Box(modifier= Modifier.fillMaxWidth()){
+                                                    ComboBox(
+                                                        hasTitle = false,
+                                                        loadedItems = filterByList,
+                                                        selectedItem = selectedFilterBy,
+                                                        selectedContent = { CustomInput(selectedFilterBy.value?.second?: FILTER_LABEL)}
+                                                    ) {
+                                                        Label(it?.second?:EMPTY_STRING)
                                                     }
                                                 }
                                             }
+                                            Row(modifier=Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+                                                Label(selectedFilterBy.value?.second?: EMPTY_STRING)
+                                            }
+
                                             if(selectedFilterBy.value!=null){
                                                 selectedFilterBy.value?.let{
                                                     when(it.first){
@@ -954,7 +1177,8 @@ private fun FilterDialog(showDialog: MutableState<Boolean>,
                                                             BloodFilterBy.EDUCATIONAL_SECTOR,
                                                             BloodFilterBy.INSURANCE_SECTOR,
                                                             BloodFilterBy.CURATIVE_SECTOR
-                                                        )->{
+                                                        )->
+                                                            {
                                                             Row(modifier= Modifier.fillMaxWidth().padding(5.dp),
                                                                 verticalAlignment = Alignment.CenterVertically){
                                                                 Box(modifier= Modifier
@@ -1034,8 +1258,7 @@ private fun FilterDialog(showDialog: MutableState<Boolean>,
 
                                                             }
                                                         }
-
-                                                        else->{}
+                                                        else->{ Label("NA") }
                                                     }
                                                 }
                                             }
@@ -1074,7 +1297,12 @@ private fun FilterDialog(showDialog: MutableState<Boolean>,
                                             }
                                             Row(modifier= Modifier.fillMaxWidth().padding(5.dp).padding(horizontal = 15.dp),
                                                 horizontalArrangement = Arrangement.SpaceBetween){
-                                                CustomButton(label= FILTER_LABEL, buttonShape = rcs(5)) {
+                                                CustomButton(label= FILTER_LABEL,
+                                                    buttonShape = rcs(5),
+                                                    enabled = (permissions.contains(VIEW_ALL_BLOOD_STOCKS) ||
+                                                            (permissions.contains(VIEW_CERTAIN_DIRECTORATE_BLOOD_STOCKS) && selectedHospitals.value.isNotEmpty())
+                                                            )
+                                                ) {
                                                     val created=DailyBloodStockFilterBody(
                                                         hospitalIds =  if(selectedHospitals.value.isNotEmpty())selectedHospitals.value.map { it.id } else null,
                                                         bloodGroupIds = if(selectedBloodGroups.value.isNotEmpty())selectedBloodGroups.value.map { it.id?:0 } else null,
@@ -1087,7 +1315,7 @@ private fun FilterDialog(showDialog: MutableState<Boolean>,
                                                         timeBlock = selectedTimeBlock.value?.first,
                                                     )
                                                     body.value=created
-                                                    controller.filter(created)
+                                                    controller.filterHospitalsBloodStock(created)
 
                                                 }
                                                 CustomButton(label= CANCEL_LABEL, buttonShape = rcs(5), enabledBackgroundColor = Color.Red) { showDialog.value=false }
@@ -1148,8 +1376,8 @@ private fun SpanCell(modifier:Modifier=Modifier, text:String, fontSize:Int, back
             color = Color.White,
             fontSize = fontSize,
             backgroundColor = backgroundColor,
-            startPadding = padding,
-            endPadding = padding
+            paddingStart = padding,
+            paddingEnd = padding
         )
         VerticalSpacer(spacerHeight)
         HorizontalDivider()

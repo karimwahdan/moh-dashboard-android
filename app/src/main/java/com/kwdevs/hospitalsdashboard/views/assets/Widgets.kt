@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -56,8 +57,6 @@ import com.kwdevs.hospitalsdashboard.routes.CancerCureIndexRoute
 import com.kwdevs.hospitalsdashboard.routes.PatientWardAdmissionsCreateRoute
 import com.kwdevs.hospitalsdashboard.routes.PatientsIndexRoute
 import com.kwdevs.hospitalsdashboard.routes.PretermAdmissionsIndexRoute
-import com.kwdevs.hospitalsdashboard.views.LEFT_LAYOUT_DIRECTION
-import com.kwdevs.hospitalsdashboard.views.RIGHT_DIRECTION
 import com.kwdevs.hospitalsdashboard.views.RIGHT_LAYOUT_DIRECTION
 import com.kwdevs.hospitalsdashboard.views.getFormattedDateJavaTime
 import com.kwdevs.hospitalsdashboard.views.patientFullName
@@ -158,10 +157,12 @@ fun Header(text:String,
     if(hasHeader){
         Box(modifier=Modifier.fillMaxWidth().clip(shape),
             contentAlignment = Alignment.CenterEnd){
-            Row(modifier=Modifier.fillMaxWidth(),
-                horizontalArrangement =  Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically){
-                Label(text=text,textAlign=textAlign,color=color,fontSize=fontSize,fontWeight=fontWeight)
+            if(text!= EMPTY_STRING){
+                Row(modifier=Modifier.fillMaxWidth(),
+                    horizontalArrangement =  Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically){
+                    Label(text=text,textAlign=textAlign,color=color,fontSize=fontSize,fontWeight=fontWeight)
+                }
             }
             if(showBackButton){
                 IconButton(background = iconButtonBackground,icon=icon, onClick = onClick, paddingStart = 5, paddingEnd = 5)
@@ -200,16 +201,23 @@ fun ColumnContainer(shape: Shape= rcs(20),
 fun LabelSpan(value:String,label:String,labelColor:Color= BLACK,
               labelWeight: FontWeight=FontWeight.Bold,
               spanColor: Color= BLUE,maximumLines:Int=1,
+              spanSize:Int= Preferences. FontSettings. SpanSettings().get(),
+              labelSize:Int=12,
               layoutDirection: ProvidedValue<LayoutDirection> = RIGHT_LAYOUT_DIRECTION){
     CompositionLocalProvider(layoutDirection) {
-        Row(verticalAlignment = Alignment.CenterVertically){
-            HorizontalSpacer()
-            if(value.trim()!=""){
-                Span(text=value, backgroundColor = spanColor, color = Color.White, maximumLines = maximumLines)
+        Row(modifier=Modifier.background(Color.Transparent)
+            .padding(horizontal = 5.dp),verticalAlignment = Alignment.CenterVertically){
+            if(value.trim()!= EMPTY_STRING){
+                Span(text=value, backgroundColor = spanColor,
+                    color = Color.White, maximumLines = maximumLines, fontSize = spanSize)
                 HorizontalSpacer()
             }
-            Label(text=label, color = labelColor, fontWeight = labelWeight , textOverflow = TextOverflow.Ellipsis, softWrap = true)
-            HorizontalSpacer()
+            Label(text=label, maximumLines = 3, color = labelColor,
+                fontWeight = labelWeight ,
+                textOverflow = TextOverflow.Ellipsis,
+                fontSize = labelSize,
+                softWrap = true)
+
         }
 
 
@@ -232,14 +240,26 @@ fun DatePickerWidget(showDialog:MutableState<Boolean>, datePickerState: DatePick
                     item{
                         Row(modifier=Modifier.fillMaxWidth().padding(5.dp),
                             horizontalArrangement = Arrangement.Center){
-                            CustomButton(label = SAVE_CHANGES_LABEL
-                                , buttonShape = RectangleShape, enabledBackgroundColor = GREEN,
+                            CustomButton(label = SAVE_CHANGES_LABEL,
+                                buttonShadowElevation = 6,
+                                buttonShape = rcs(15), enabledBackgroundColor = GREEN,
                             ){
                                 timeString.value = getFormattedDateJavaTime(datePickerState)
                                 showDialog.value=false
                             }
                         }
-                        DatePicker(state = datePickerState)
+                        DatePicker(state = datePickerState,
+                            title = null,
+                            colors = DatePickerDefaults.colors(
+                                containerColor = WHITE,
+                                selectedDayContainerColor = BLUE,
+                                selectedDayContentColor = WHITE,
+                                selectedYearContentColor = WHITE,
+                                selectedYearContainerColor = ORANGE,
+                                todayDateBorderColor = GRAY,
+
+
+                            ))
                     }
                 }
             }

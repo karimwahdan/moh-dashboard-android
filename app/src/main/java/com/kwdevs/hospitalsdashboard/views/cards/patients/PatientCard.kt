@@ -80,7 +80,7 @@ fun PatientCard(item:Patient,navHostController: NavHostController){
             }
             if(hasAdmissions){
                 Span(text = if(hasActiveAdmission) PATIENT_IS_PRESENT_LABEL else PATIENT_HAS_QUIT_LABEL, backgroundColor = if(hasActiveAdmission) GREEN else BLUE, color = WHITE,
-                    startPadding = 5, endPadding = 5)
+                    paddingStart = 5, paddingEnd = 5)
             }
             Row(modifier=Modifier.padding(horizontal = 5.dp)){
                 IconButton(R.drawable.ic_eye_blue) {

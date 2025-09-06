@@ -1,5 +1,6 @@
 package com.kwdevs.hospitalsdashboard.controller
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,6 +15,7 @@ import com.kwdevs.hospitalsdashboard.models.users.normal.HospitalUserSSResponse
 import com.kwdevs.hospitalsdashboard.models.users.normal.HospitalUserSingleResponse
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.models.superUser.SimpleSuperUserSingleResponse
 import com.kwdevs.hospitalsdashboard.routes.Callers
+import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -87,8 +89,9 @@ class UsersController : ViewModel() {
     fun viewNormal(){
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                withContext(Dispatchers.Main) { superUserDatum.value = UiState.Loading }
-                val response = api.viewNormal(user?.username?:"",user?.password?:"")
+                Log.e("ViewNormal","UserName: ${user?.username} Password:${user?.password}")
+                withContext(Dispatchers.Main) { fullHospitalUserDatum.value = UiState.Loading }
+                val response = api.viewNormal(user?.username,user?.password)
                 withContext(Dispatchers.Main) { fullHospitalUserDatum.value = UiState.Success(response) }
 
             } catch (e: Exception) {
@@ -136,7 +139,7 @@ class UsersController : ViewModel() {
     fun changeHospitalUserPassword(passwordBody: PasswordBody){
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                withContext(Dispatchers.Main) { superUserDatum.value = UiState.Loading }
+                withContext(Dispatchers.Main) { fullHospitalUserDatum.value = UiState.Loading }
                 val response = api.changeHospitalUserPassword(passwordBody)
                 withContext(Dispatchers.Main) { fullHospitalUserDatum.value = UiState.Success(response) }
 

@@ -8,46 +8,31 @@ import com.kwdevs.hospitalsdashboard.models.settings.title.Title
 import com.squareup.moshi.Json
 
 data class HospitalUser(
-    @Json(name = "id")
-    val id: Int,
+    @Json(name = "id") val id: Int,
 
-    @Json(name = "hospital_id")
-    val hospitalId: Int,
+    @Json(name = "hospital_id") val hospitalId: Int,
 
-    @Json(name = "name")
-    val name: String,
+    @Json(name = "name") val name: String,
 
-    @Json(name = "username")
-    val username: String,
+    @Json(name = "username") val username: String,
 
-    @Json(name = "password")
-    val password: String, // optional: hash usually hidden in API
+    @Json(name = "password") val password: String, // optional: hash usually hidden in API
 
-    @Json(name = "title_id")
-    val titleId: Int? = null,
+    @Json(name = "title_id") val titleId: Int? = null,
 
-    @Json(name = "national_id")
-    val nationalId: String? = null,
+    @Json(name = "national_id") val nationalId: String? = null,
 
-    @Json(name = "active")
-    val active: Boolean, // Laravel: cast tinyint(1) to boolean in model
+    @Json(name = "active") val active: Boolean,
 
-    // Optional nested relationships (included if API returns them)
-    @Json(name = "title")
-    val title: Title?=null,
+    @Json(name = "title") val title: Title?=null,
 
-    @Json(name = "hospital")
-    val hospital: SimpleHospital,
+    @Json(name = "hospital") val hospital: SimpleHospital,
 
-    @Json(name = "head_of")
-    val headOf: HospitalDepartment? = null,
+    @Json(name = "head_of") val headOf: HospitalDepartment? = null,
 
-    @Json(name = "deputy_of")
-    val deputyOf: HospitalDepartment? = null,
+    @Json(name = "deputy_of") val deputyOf: HospitalDepartment? = null,
 
-    @Json(name = "logs")
-    val logs: List<HospitalUserLog> = emptyList(),
+    @Json(name = "logs") val logs: List<HospitalUserLog> = emptyList(),
 
-    @Json(name = "roles")
-    val roles:List<Role> = emptyList()
+    @Json(name = "roles") val roles:List<Role> = emptyList()
 )

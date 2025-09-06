@@ -18,6 +18,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -25,14 +27,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kwdevs.hospitalsdashboard.R
 import com.kwdevs.hospitalsdashboard.app.retrofit.UiState
 import com.kwdevs.hospitalsdashboard.bodies.control.SuperUserBody
-import com.kwdevs.hospitalsdashboard.bodies.hospital.HospitalFilterBody
 import com.kwdevs.hospitalsdashboard.controller.AreaController
 import com.kwdevs.hospitalsdashboard.controller.HomeController
 import com.kwdevs.hospitalsdashboard.controller.SettingsController
 import com.kwdevs.hospitalsdashboard.controller.UsersController
 import com.kwdevs.hospitalsdashboard.controller.control.PermissionsController
 import com.kwdevs.hospitalsdashboard.controller.hospital.HospitalController
-import com.kwdevs.hospitalsdashboard.models.hospital.Hospital
 import com.kwdevs.hospitalsdashboard.models.settings.area.AreaWithCount
 import com.kwdevs.hospitalsdashboard.models.settings.area.AreaWithCountResponse
 import com.kwdevs.hospitalsdashboard.models.settings.city.CityWithCount
@@ -43,12 +43,15 @@ import com.kwdevs.hospitalsdashboard.models.settings.sector.Sector
 import com.kwdevs.hospitalsdashboard.models.settings.sector.SectorResponse
 import com.kwdevs.hospitalsdashboard.models.settings.title.Title
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.models.superUser.SimpleSuperUser
-import com.kwdevs.hospitalsdashboard.responses.HospitalsResponse
 import com.kwdevs.hospitalsdashboard.responses.home.HomeResponse
 import com.kwdevs.hospitalsdashboard.views.assets.ACTIVE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.ADD_NEW_SUPER_USER_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.BLACK
+import com.kwdevs.hospitalsdashboard.views.assets.BLUE
+import com.kwdevs.hospitalsdashboard.views.assets.CANCEL_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.ColumnContainer
 import com.kwdevs.hospitalsdashboard.views.assets.ComboBox
+import com.kwdevs.hospitalsdashboard.views.assets.CustomButton
 import com.kwdevs.hospitalsdashboard.views.assets.CustomCheckbox
 import com.kwdevs.hospitalsdashboard.views.assets.CustomInput
 import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
@@ -60,6 +63,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.NAME_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.NATIONAL_ID_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.ORANGE
 import com.kwdevs.hospitalsdashboard.views.assets.PASSWORD_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SAVE_CHANGES_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_CITY_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_ROLE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.SELECT_SECTOR_LABEL
@@ -76,28 +80,13 @@ import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.LoadingScreen
 fun NewSuperUserDialog(showDialog: MutableState<Boolean>, permissionsController: PermissionsController) {
     val userController      : UsersController = viewModel()
     val controller          : HomeController = viewModel()
-    val areasController     : AreaController = viewModel()
-    val hospitalController  : HospitalController = viewModel()
     val userState           by userController.hospitalUserSingleState.observeAsState()
     val dataState           by controller.singleState.observeAsState()
-    val areasState          by areasController.state.observeAsState()
-    val hospitalState       by hospitalController.state.observeAsState()
-
-    var cities              by remember { mutableStateOf<List<CityWithCount>>(emptyList()) }
-    var areas               by remember { mutableStateOf<List<AreaWithCount>>(emptyList()) }
     var titles              by remember { mutableStateOf<List<Title>>(emptyList()) }
-    var hospitals           by remember { mutableStateOf<List<Hospital>>(emptyList()) }
-    var types               by remember { mutableStateOf<List<HospitalType>>(emptyList()) }
-    var sectors             by remember { mutableStateOf<List<Sector>>(emptyList()) }
-    val selectedCity        =  remember { mutableStateOf<CityWithCount?>(null) }
-    val selectedArea        =  remember { mutableStateOf<AreaWithCount?>(null) }
     val selectedTitle       =  remember { mutableStateOf<Title?>(null) }
-    val selectedType        =  remember { mutableStateOf<HospitalType?>(null) }
-    val selectedSector      = remember { mutableStateOf<Sector?>(null) }
     val name                = remember { mutableStateOf(EMPTY_STRING) }
     val username            = remember { mutableStateOf(EMPTY_STRING) }
     val password            = remember { mutableStateOf(EMPTY_STRING) }
-    val nationalId          = remember { mutableStateOf(EMPTY_STRING) }
     val active              = remember { mutableStateOf(true) }
     var stale by remember { mutableStateOf(true) }
     var loading by remember { mutableStateOf(false) }
@@ -128,18 +117,6 @@ fun NewSuperUserDialog(showDialog: MutableState<Boolean>, permissionsController:
                 stale=true
             }
         }
-        when(areasState)   {
-            is UiState.Loading->{}
-            is UiState.Error->{}
-            is UiState.Success->{
-                val s = areasState as UiState.Success<AreaWithCountResponse>
-                val response = s.data
-                val data=response.data
-                areas=data
-            }
-            is UiState.Reload->{}
-            else->{}
-        }
         when(dataState)    {
             is UiState.Loading->{
             }
@@ -149,49 +126,10 @@ fun NewSuperUserDialog(showDialog: MutableState<Boolean>, permissionsController:
                 val s = dataState as UiState.Success<HomeResponse>
                 val response = s.data
                 val data=response.data
-                titles=data.titles
-                cities=data.cities
-                sectors=data.sectors
-                types=data.types
+                titles=data.superTitles
+
             }
             else->{ controller.getHome() }
-        }
-        when(hospitalState){
-            is UiState.Success->{
-                val s = hospitalState as UiState.Success<HospitalsResponse>
-                val response = s.data
-                val data=response.data
-                hospitals=data
-            }
-            else->{}
-        }
-        LaunchedEffect(selectedCity.value) {
-            if(selectedCity.value!=null){
-                val v=selectedCity.value
-                v?.let {areasController.index(v.id?:0)}
-            }
-        }
-        LaunchedEffect(
-            selectedCity.value,
-            selectedArea.value,
-            selectedType.value,
-            selectedSector.value) {
-            if(selectedCity.value!=null &&
-                selectedArea.value!=null &&
-                selectedType.value!=null &&
-                selectedSector.value!=null){
-                val selectedC=selectedCity.value
-                val selectedA=selectedArea.value
-                val selectedT=selectedType.value
-                val selectedS=selectedSector.value
-                val filterBody= HospitalFilterBody(
-                    cityId = selectedC?.id,
-                    areaId = selectedA?.id,
-                    sectorId = selectedS?.id,
-                    typeId = selectedT?.id
-                )
-                hospitalController.filter(filterBody)
-            }
         }
         Dialog(
             properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -199,49 +137,50 @@ fun NewSuperUserDialog(showDialog: MutableState<Boolean>, permissionsController:
         ) {
             ColumnContainer {
                 Column(modifier= Modifier.fillMaxSize().padding(5.dp)){
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Row(modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center){
-                            Label(ADD_NEW_SUPER_USER_LABEL)
-                        }
-                        Row(modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween){
-                            IconButton(R.drawable.ic_cancel_red, paddingStart = 10, paddingEnd = 10) {showDialog.value=false }
-                            IconButton(R.drawable.ic_check_circle_green, paddingStart = 10, paddingEnd = 10, onClick = {
-                                if(username.value.trim()!= EMPTY_STRING && password.value.trim()!= EMPTY_STRING
-                                    && selectedTitle.value!=null){
-                                    val body= SuperUserBody(
-                                        name=name.value,
-                                        username=username.value,
-                                        password = password.value,
-                                        titleId = selectedTitle.value?.id,
-                                        nationalId = nationalId.value,
-                                        active = if(active.value) 1 else 0
-                                    )
-                                    userController.createSuper(body)
-                                    showDialog.value=false
-                                }
-                            })
-                        }
+                    Row(modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center){
+                        Label(ADD_NEW_SUPER_USER_LABEL)
                     }
+
                     VerticalSpacer()
                     if(stale){
                         LazyColumn(modifier= Modifier.fillMaxSize()) {
                             item{
-                                ComboBox(title= TITLE_LABEL, loadedItems = titles, selectedItem = selectedTitle,
-                                    selectedContent = {
-                                        CustomInput(selectedTitle.value?.name?: SELECT_TITLE_LABEL,readOnly = true)
-                                    })
-                                { Label(it?.name?: EMPTY_STRING) }
+                                Box(modifier=Modifier.fillMaxWidth().padding(5.dp)){
+                                    ComboBox(title= TITLE_LABEL, loadedItems = titles, selectedItem = selectedTitle,
+                                        selectedContent = {
+                                            CustomInput(selectedTitle.value?.name?: SELECT_TITLE_LABEL,readOnly = true)
+                                        })
+                                    { Label(it?.name?: EMPTY_STRING) }
 
+                                }
                                 CustomInput(value=name, label = NAME_LABEL)
-
                                 CustomInput(value=username, label = USERNAME_LABEL)
-
                                 CustomInput(value=password, label = PASSWORD_LABEL)
-                                CustomInput(value=nationalId, label = NATIONAL_ID_LABEL)
-
                                 CustomCheckbox(label = ACTIVE_LABEL,active=active)
+                                Row(modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween){
+                                    CustomButton(label= CANCEL_LABEL, buttonShadowElevation = 6,
+                                        enabledBackgroundColor = Color.Red,
+                                        buttonShape = RectangleShape) {
+                                        showDialog.value=false
+                                    }
+                                    CustomButton(label= SAVE_CHANGES_LABEL, buttonShadowElevation = 6,
+                                        enabledBackgroundColor = GREEN,
+                                        enabled = username.value.trim()!= EMPTY_STRING && password.value.trim()!= EMPTY_STRING
+                                                && selectedTitle.value!=null,
+                                        buttonShape = RectangleShape) {
+                                        val body= SuperUserBody(
+                                            name=name.value,
+                                            username=username.value,
+                                            password = password.value,
+                                            titleId = selectedTitle.value?.id,
+                                            active = if(active.value) 1 else 0
+                                        )
+                                        userController.createSuper(body)
+                                        showDialog.value=false
+                                    }
+                                }
                             }
                         }
 
@@ -358,8 +297,14 @@ fun SuperUserDetailsDialog(showDialog: MutableState<Boolean>, user: SimpleSuperU
                         }
                         val permissions=it.permissions
                         permissions.forEach { p->
+                            val s=p.slug?: EMPTY_STRING
+                            val color=when{
+                                s.contains("browse")-> ORANGE
+                                s.contains("view")-> BLUE
+                                else-> BLACK
+                            }
                             Row(modifier=Modifier.fillMaxWidth()){
-                                Label(p.name?: EMPTY_STRING, paddingStart = 10, paddingEnd = 10)
+                                Label(p.name?: EMPTY_STRING, paddingStart = 10, paddingEnd = 10, color = color)
 
                             }
                         }

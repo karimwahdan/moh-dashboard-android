@@ -43,12 +43,15 @@ import com.kwdevs.hospitalsdashboard.responses.HospitalsResponse
 import com.kwdevs.hospitalsdashboard.responses.home.HomeResponse
 import com.kwdevs.hospitalsdashboard.views.assets.ACTIVE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.ADD_NEW_USER_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.BLACK
+import com.kwdevs.hospitalsdashboard.views.assets.BLUE
 import com.kwdevs.hospitalsdashboard.views.assets.CITY_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.ColumnContainer
 import com.kwdevs.hospitalsdashboard.views.assets.ComboBox
 import com.kwdevs.hospitalsdashboard.views.assets.CustomCheckbox
 import com.kwdevs.hospitalsdashboard.views.assets.CustomInput
 import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
+import com.kwdevs.hospitalsdashboard.views.assets.GREEN
 import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_NAME_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.HOSPITAL_TYPE_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.IconButton
@@ -163,7 +166,7 @@ fun NewHospitalUserDialog(showDialog:MutableState<Boolean>,permissionsController
                 }
 
             }
-            else->{hospitalController.indexOptions()}
+            else->{hospitalController.indexAllHospitals()}
         }
         LaunchedEffect(selectedCity.value) {
             if(selectedCity.value!=null){
@@ -335,14 +338,20 @@ fun UserDetailsDialog(showDialog: MutableState<Boolean>, user: SimpleHospitalUse
                         Row(modifier=Modifier.fillMaxWidth().padding(horizontal = 10.dp),
                             verticalAlignment = Alignment.CenterVertically){
                             Span(text=it.name, backgroundColor = ORANGE, color = WHITE)
-                            IconButton(R.drawable.ic_delete_red) {controller.removeRoleFromUser(userId = user.id, roleId = it.id) }
+                            IconButton(R.drawable.ic_delete_red) {controller.removeRoleFromHospitalUser(userId = user.id, roleId = it.id) }
 
                         }
                         val permissions=it.permissions
                         permissions.forEach { p->
+                            val s=p.slug?: EMPTY_STRING
+                            val color=when{
+                                s.contains("browse")->ORANGE
+                                s.contains("view")-> BLUE
+                                s.contains("create")-> GREEN
+                                else -> BLACK
+                            }
                             Row(modifier=Modifier.fillMaxWidth()){
-                                Label(p.name?: EMPTY_STRING, paddingStart = 10, paddingEnd = 10)
-
+                                Label(p.name?: EMPTY_STRING, paddingStart = 10, paddingEnd = 10,color =color)
                             }
                         }
                     }
@@ -380,7 +389,7 @@ fun UserRoleEditorDialog(
                     IconButton(R.drawable.ic_add_circle_green) {
                         if(selectedRole.value!=null){
                             selectedRole.value?.let {
-                                controller.addRoleToUser(userId = user.id, roleId = it.id)
+                                controller.addRoleToHospitalUser(userId = user.id, roleId = it.id)
                             }
                         }
                     }

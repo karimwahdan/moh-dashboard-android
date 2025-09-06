@@ -14,6 +14,9 @@ import com.squareup.moshi.Json
 data class HomeData(
     @Json(name = "titles")
     val titles:List<Title> = emptyList(),
+
+    @Json(name = "super_titles")
+    val superTitles:List<Title> = emptyList(),
     @Json(name = "sectors")
     val sectors:List<Sector> = emptyList(),
 

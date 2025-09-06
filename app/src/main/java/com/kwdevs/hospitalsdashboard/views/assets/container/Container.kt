@@ -34,6 +34,7 @@ import com.kwdevs.hospitalsdashboard.views.assets.Icon
 import com.kwdevs.hospitalsdashboard.views.assets.IconButton
 import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.WHITE
+import com.kwdevs.hospitalsdashboard.views.rcs
 import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,9 +51,9 @@ fun Container(title:String,
               icon:Int= R.drawable.ic_arrow_back_white,
               showSheet:MutableState<Boolean>,
               sheetState: SheetState=rememberModalBottomSheetState(skipPartiallyExpanded = true),
-              //scope: CoroutineScope=rememberCoroutineScope(),
               sheetContent:@Composable ()->Unit={},
               sheetColor: Color=Color.Red,
+              shape: Shape= rcs(20),
               headerOnClick: () -> Unit={},
               sheetOnClick:()->Unit={},
               content:@Composable ()->Unit){
@@ -96,7 +97,7 @@ fun Container(title:String,
             icon = icon,
             onClick = headerOnClick
         )
-        ColumnContainer {
+        ColumnContainer(shape =shape ) {
             content()
         }
     }

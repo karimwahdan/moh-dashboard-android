@@ -77,6 +77,9 @@ interface BloodBankIssuingDepartmentApi {
     @POST("$BB_ISSUING_DEPARTMENT_PREFIX/$DAILY_BLOOD_STOCKS_PREFIX/filter")
     suspend fun filter(@Body body:DailyBloodStockFilterBody):DailyBloodStocksResponse
 
+    @POST("$BB_ISSUING_DEPARTMENT_PREFIX/$DAILY_BLOOD_STOCKS_PREFIX/filter")
+    suspend fun filterHospitalBloodStocks(@Body body:DailyBloodStockFilterBody):HospitalsResponse
+
     @GET("$BB_ISSUING_DEPARTMENT_PREFIX/$ISSUING_REPORTS_PREFIX/$MONTHLY_REPORTS_PREFIX/$INDEX_PREFIX/by-hospital")
     suspend fun indexByHospital(@Query("page")page:Int, @Query("hospitalId")hospitalId:Int):ApiResponse<PaginationData<MonthlyIssuingReport>>
 

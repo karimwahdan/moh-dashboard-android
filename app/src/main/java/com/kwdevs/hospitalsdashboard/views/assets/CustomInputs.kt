@@ -2,7 +2,10 @@ package com.kwdevs.hospitalsdashboard.views.assets
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
@@ -150,13 +154,19 @@ fun CustomInput(value: MutableState<String>,
                 label:String,
                 enabled:Boolean=true,
                 placeHolder:String=label,
+                maxLines: Int=1,
+                paddingStart:Int=5,
+                paddingEnd:Int=5,
+                paddingTop:Int=5,
+                paddingBottom:Int=5,
                 shape: Shape =rcs(5),
                 keyboardOptions: KeyboardOptions,
                 onTextChange:(String)->Unit={}){
     TextField(
-        modifier= Modifier.fillMaxWidth().padding(5.dp)
+        modifier= Modifier.fillMaxWidth().padding(start=paddingStart.dp,end=paddingEnd.dp,top=paddingTop.dp, bottom = paddingBottom.dp)
             .border(width = 1.dp, color = Color.LightGray, shape = shape),
         value = value.value, onValueChange = onTextChange,
+        maxLines = maxLines,
         keyboardOptions = keyboardOptions,
         enabled = enabled,
         label = { Label(label) },
@@ -222,6 +232,21 @@ fun CustomInput(value:String,maxLines: Int=2, readOnly:Boolean=false){
             unfocusedIndicatorColor = Color.Transparent
         ))
 }
+@Composable
+fun CustomInput(value:String,maxLines: Int=2, readOnly:Boolean=false,onTextChange: (String) -> Unit){
+    TextField(
+        modifier= Modifier.fillMaxWidth(),
+        maxLines = maxLines,
+        value = value, onValueChange = onTextChange,
+        readOnly = readOnly,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        ))
+}
+
 
 @Composable
 fun CustomInput(value:String, readOnly:Boolean=false,@DrawableRes icon: Int){
@@ -267,5 +292,28 @@ fun CustomCheckbox(label:String,active: MutableState<Boolean>){
     Row(modifier= Modifier.padding(horizontal = 5.dp),verticalAlignment = Alignment.CenterVertically){
         Label(label)
         Checkbox(checked = active.value, onCheckedChange = { active.value = it })
+    }
+}
+@Composable
+fun CustomCheckbox(label:String,active: Boolean,onCheckChange: (Boolean) -> Unit){
+    Row(modifier= Modifier.padding(horizontal = 5.dp),verticalAlignment = Alignment.CenterVertically){
+        Label(label)
+        Checkbox(checked = active, onCheckedChange = onCheckChange)
+    }
+}
+@Composable
+fun CustomCheckbox(label:@Composable ()->Unit,active: Boolean,onCheckChange: (Boolean) -> Unit){
+    Row(modifier= Modifier.fillMaxWidth().padding(horizontal = 5.dp).clip(rcs(5))
+        .border(width = 1.dp, shape = rcs(5), color = Color.LightGray)
+        .background(color=WHITE, shape = rcs(5))
+        .padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween){
+        Column(modifier=Modifier.fillMaxWidth().weight(1f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.Start){
+            label()
+        }
+        Checkbox(checked = active, onCheckedChange = onCheckChange)
     }
 }

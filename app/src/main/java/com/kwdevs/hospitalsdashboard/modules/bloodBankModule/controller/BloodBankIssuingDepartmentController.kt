@@ -88,6 +88,9 @@ class BloodBankIssuingDepartmentController : ViewModel() {
     private val stockExcel = MutableLiveData<UiState<Response<ResponseBody>>>()
     val stockExcelState: LiveData<UiState<Response<ResponseBody>>> get() = stockExcel
 
+    private val hospitalsData = MutableLiveData<UiState<HospitalsResponse>>()
+    val hospitalsStateState: LiveData<UiState<HospitalsResponse>> get() = hospitalsData
+
     fun reload(){
         viewModelScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
@@ -108,6 +111,19 @@ class BloodBankIssuingDepartmentController : ViewModel() {
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     data.value = UiState.Error(error(e))
+                }
+            }
+        }
+    }
+    fun filterHospitalsBloodStock(filterBody: DailyBloodStockFilterBody){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main) {hospitalsData.value = UiState.Loading}
+                val response = api.filterHospitalBloodStocks(filterBody)
+                withContext(Dispatchers.Main) {hospitalsData.value = UiState.Success(response)}
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    hospitalsData.value = UiState.Error(error(e))
                 }
             }
         }

@@ -1,33 +1,45 @@
 package com.kwdevs.hospitalsdashboard.views.pages.hospitals
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
+import com.kwdevs.hospitalsdashboard.R
 import com.kwdevs.hospitalsdashboard.app.Preferences
 import com.kwdevs.hospitalsdashboard.app.ViewType
 import com.kwdevs.hospitalsdashboard.app.retrofit.UiState
@@ -38,36 +50,63 @@ import com.kwdevs.hospitalsdashboard.models.hospital.HospitalDepartment
 import com.kwdevs.hospitalsdashboard.models.hospital.HospitalWard
 import com.kwdevs.hospitalsdashboard.models.hospital.hospitalDevices.HospitalDevice
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.models.BloodBankKpi
-import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.views.pages.kpis.KpiTable
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.ComponentDepartmentHomeRoute
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.DonationDepartmentHomeRoute
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.subModules.kpis.views.pages.KpiTable
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.BROWSE_HOSPITAL
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.CRUD
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.PermissionSector
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.READ_HOSPITAL
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.SubModule
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_CERTAIN_DIRECTORATE
-import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_HOSPITAL_BLOOD_MODULE
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_HOSPITAL_BLOOD_BANK_MODULE
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_HOSPITAL_DEPARTMENT_MODULE
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_HOSPITAL_DEVICE_MODULE
 import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.VIEW_HOSPITAL_WARD_MODULE
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.hasPermission
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.hasSubModule
+import com.kwdevs.hospitalsdashboard.modules.superUserModule.app.roles.hasSubModulePermission
 import com.kwdevs.hospitalsdashboard.responses.HospitalSingleResponse
 import com.kwdevs.hospitalsdashboard.routes.AreaViewRoute
 import com.kwdevs.hospitalsdashboard.routes.HomeRoute
 import com.kwdevs.hospitalsdashboard.routes.HospitalDepartmentCreateRoute
 import com.kwdevs.hospitalsdashboard.routes.HospitalDeviceCreateRoute
 import com.kwdevs.hospitalsdashboard.routes.HospitalsIndexRoute
+import com.kwdevs.hospitalsdashboard.routes.IssuingDepartmentHomeRoute
 import com.kwdevs.hospitalsdashboard.routes.LoginRoute
+import com.kwdevs.hospitalsdashboard.routes.SettingsRoute
 import com.kwdevs.hospitalsdashboard.views.ARROW_DOWN
 import com.kwdevs.hospitalsdashboard.views.ARROW_UP
 import com.kwdevs.hospitalsdashboard.views.assets.ADD_NEW_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.BLOOD_BANK_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.BLUE
+import com.kwdevs.hospitalsdashboard.views.assets.ColumnContainer
 import com.kwdevs.hospitalsdashboard.views.assets.CustomButton
+import com.kwdevs.hospitalsdashboard.views.assets.CustomButtonWithImage
 import com.kwdevs.hospitalsdashboard.views.assets.DEPARTMENTS_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.DEPARTMENT_COMPONENT_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.DEPARTMENT_DONATION_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.DEPARTMENT_ISSUING_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.DEPARTMENT_SEROLOGY_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.DEPARTMENT_THERAPEUTIC_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.DEVICES_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.DrawerButton
+import com.kwdevs.hospitalsdashboard.views.assets.DrawerMenuButton
 import com.kwdevs.hospitalsdashboard.views.assets.EMPTY_STRING
+import com.kwdevs.hospitalsdashboard.views.assets.GRAY
+import com.kwdevs.hospitalsdashboard.views.assets.GREEN
 import com.kwdevs.hospitalsdashboard.views.assets.HorizontalSpacer
 import com.kwdevs.hospitalsdashboard.views.assets.IN_PATIENT_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.IconButton
 import com.kwdevs.hospitalsdashboard.views.assets.KPI_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.LOADING_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.Label
+import com.kwdevs.hospitalsdashboard.views.assets.NO_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SETTINGS_LABEL
+import com.kwdevs.hospitalsdashboard.views.assets.SIGN_OUT_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.VerticalSpacer
+import com.kwdevs.hospitalsdashboard.views.assets.WHITE
+import com.kwdevs.hospitalsdashboard.views.assets.YES_LABEL
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.FailScreen
 import com.kwdevs.hospitalsdashboard.views.assets.basicSceens.LoadingScreen
 import com.kwdevs.hospitalsdashboard.views.assets.container.Container
@@ -75,42 +114,47 @@ import com.kwdevs.hospitalsdashboard.views.assets.toast
 import com.kwdevs.hospitalsdashboard.views.cards.hospitals.HospitalDepartmentCard
 import com.kwdevs.hospitalsdashboard.views.cards.hospitals.WardCard
 import com.kwdevs.hospitalsdashboard.views.cards.hospitals.devices.HospitalDeviceCard
+import com.kwdevs.hospitalsdashboard.views.deleteData
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("ViewModelConstructorInComposable")
 @Composable
 fun HospitalViewPage(navHostController: NavHostController){
-    val context=LocalContext.current
-    val savedItem=Preferences.Hospitals().get()
-    val area=Preferences.Areas().get()
-    val userType = Preferences.User().getType()
-    val superUser = userType?.let{ if(it== ViewType.SUPER_USER) Preferences.User().getSuper() else null}
-    val isSuper=superUser?.isSuper?:false
-    val roles=superUser?.roles
-    val permissions= roles?.flatMap { r-> r.permissions}?.map { p-> p.slug?: EMPTY_STRING }?: emptyList()
-    if(userType==ViewType.SUPER_USER) {if(superUser==null)navHostController.navigate(LoginRoute.route)}
-    var superUserRoles by remember { mutableStateOf<List<String>>(emptyList()) }
+    val context                     =  LocalContext.current
+    val controller                  =  HospitalController()
+    val showSheet                   =  remember { mutableStateOf(false) }
+    val savedItem                   =  Preferences.Hospitals().get()
+    val area                        =  Preferences.Areas().get()
+    val userType                    =  Preferences.User().getType()
+    val superUser                   =  userType?.let{ if(it== ViewType.SUPER_USER) Preferences.User().getSuper() else null}
+    val isSuper                     =  superUser?.isSuper?:false
+    val roles                       =  superUser?.roles
+    val permissions                 =  roles?.flatMap { r-> r.permissions}?.map { p-> p.slug?: EMPTY_STRING }?: emptyList()
+    val drawerState                 =  rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope                       =  rememberCoroutineScope()
+    var superUserRoles              by remember { mutableStateOf<List<String>>(emptyList()) }
+    var canBrowseHospitals          by remember { mutableStateOf(false) }
+    var canReadHospitals            by remember { mutableStateOf(false) }
+    var canReadCertainDirectorate   by remember { mutableStateOf(false) }
+    var loading                     by remember { mutableStateOf(false) }
+    var success                     by remember { mutableStateOf(false) }
+    var fail                        by remember{ mutableStateOf(false)}
+    var empty                       by remember { mutableStateOf(true)}
+    var hospital                    by remember { mutableStateOf<Hospital?>(null)}
+    val state                       by controller.singleState.observeAsState()
+    var devices                     by remember { mutableStateOf<List<HospitalDevice>>(emptyList()) }
+    var showDevices                 by remember { mutableStateOf(false) }
+    var departments                 by remember { mutableStateOf<List<HospitalDepartment>>(emptyList()) }
+    var showDepartments             by remember { mutableStateOf(false) }
+    var showBloodKpi                by remember { mutableStateOf(false) }
+    var wards                       by remember { mutableStateOf<List<HospitalWard>>(emptyList()) }
+    var showWards                   by remember { mutableStateOf(false) }
+    var bloodKpis                   by remember { mutableStateOf<List<BloodBankKpi>>(emptyList()) }
+    var showExitDialog              by remember { mutableStateOf(false) }
 
-    var canBrowseHospitals by remember { mutableStateOf(false) }
-    var canReadHospitals by remember { mutableStateOf(false) }
-    var canReadCertainDirectorate by remember { mutableStateOf(false) }
-    var loading by remember { mutableStateOf(false) }
-    var success by remember { mutableStateOf(false) }
-    var fail    by remember{ mutableStateOf(false)}
-
-    var empty   by remember { mutableStateOf(true)}
-    var hospital by remember { mutableStateOf<Hospital?>(null)}
-    val controller = HospitalController()
-    val state by controller.singleState.observeAsState()
-    var devices by remember { mutableStateOf<List<HospitalDevice>>(emptyList()) }
-    var showDevices by remember { mutableStateOf(false) }
-    var departments by remember { mutableStateOf<List<HospitalDepartment>>(emptyList()) }
-    var showDepartments by remember { mutableStateOf(false) }
-    var showBloodKpi by remember { mutableStateOf(false) }
-    var wards by remember { mutableStateOf<List<HospitalWard>>(emptyList()) }
-    var showWards by remember { mutableStateOf(false) }
-    var bloodKpis by remember { mutableStateOf<List<BloodBankKpi>>(emptyList()) }
-    val showSheet = remember { mutableStateOf(false) }
+    BackHandler { scope.launch { if(drawerState.isClosed) drawerState.open() else drawerState.close() } }
+    LaunchedEffect(userType) { if(userType==ViewType.SUPER_USER) {if(superUser==null)navHostController.navigate(LoginRoute.route)} }
     LaunchedEffect(Unit) {
         if(superUser!=null){
             if(!isSuper){
@@ -127,7 +171,6 @@ fun HospitalViewPage(navHostController: NavHostController){
             }
         }
     }
-
     when(state){
         is UiState.Loading->{LaunchedEffect(Unit){loading=true;fail=false;success=false;empty=true} }
         is UiState.Error->{LaunchedEffect(Unit){loading=false;fail=true;success=false;empty=true}}
@@ -155,85 +198,228 @@ fun HospitalViewPage(navHostController: NavHostController){
             }
         }
     }
-
-    Container(
-        title = hospital?.name?: LOADING_LABEL,
-        headerShowBackButton = true,
-        showSheet = showSheet,
-        headerIconButtonBackground = BLUE,
-        headerOnClick = {
-            navHostController.navigate( if((canBrowseHospitals || isSuper) && area!=null ) AreaViewRoute.route
-            else if(canReadCertainDirectorate) HomeRoute.route
-            else HospitalsIndexRoute.route )
-        }
-    ) {
-        if(loading) LoadingScreen(modifier=Modifier.fillMaxSize())
-        else{
-            if(success){
-                Column(modifier=Modifier.fillMaxSize()){
-                    LazyColumn(modifier=Modifier.fillMaxSize().weight(1f)) {
-                        item{
-                            if(hospital?.isNBTS==false){
-                                if(permissions.contains(VIEW_HOSPITAL_DEVICE_MODULE)){
-                                    Row(modifier = Modifier.fillMaxWidth().padding(5.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically){
-                                        Label(DEVICES_LABEL, fontWeight = FontWeight.Bold)
-                                        HorizontalSpacer()
-                                        IconButton(if(showDevices) ARROW_UP else ARROW_DOWN, background = BLUE){showDevices=!showDevices}
-                                    }
-                                    HorizontalDivider()
-                                    DevicesSection(hospital,navHostController,showDevices,devices)
-                                    if(showDevices) HorizontalDivider()
-                                }
-                                if(permissions.contains(VIEW_HOSPITAL_DEPARTMENT_MODULE)){
-                                    Row(modifier = Modifier.fillMaxWidth().padding(5.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically){
-                                        Label(DEPARTMENTS_LABEL, fontWeight = FontWeight.Bold)
-                                        HorizontalSpacer()
-                                        IconButton(if(showDepartments) ARROW_UP else ARROW_DOWN, background = BLUE){showDepartments=!showDepartments}
-                                    }
-                                    HorizontalDivider()
-                                    DepartmentsSection(hospital,navHostController,showDepartments,departments)
-                                    if(showDepartments) HorizontalDivider()
-                                }
-                                if(permissions.contains(VIEW_HOSPITAL_WARD_MODULE)){
-                                    Row(modifier = Modifier.fillMaxWidth().padding(5.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically){
-                                        Label(IN_PATIENT_LABEL, fontWeight = FontWeight.Bold)
-                                        HorizontalSpacer()
-                                        IconButton(if(showWards) ARROW_UP else ARROW_DOWN, background = BLUE){showWards=!showWards}
-                                    }
-                                    WardsSection(hospital,navHostController,showWards,wards)
-                                }
-                            }
-                            if(permissions.contains(VIEW_HOSPITAL_BLOOD_MODULE) || superUser?.isSuper==true){
-                                if(bloodKpis.isNotEmpty()){
-                                    HorizontalDivider()
-                                    Row(modifier = Modifier.fillMaxWidth().padding(5.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically){
-                                        Label(KPI_LABEL, fontWeight = FontWeight.Bold)
-                                        HorizontalSpacer()
-                                        IconButton(if(showBloodKpi) ARROW_UP else ARROW_DOWN, background = BLUE){showBloodKpi=!showBloodKpi}
-                                    }
-                                    KpiSection(bloodKpis,showBloodKpi)
-                                }
-                            }
-
+    if(showExitDialog){
+        Dialog(onDismissRequest = {showExitDialog=true}) {
+            Column{
+                ColumnContainer {
+                    VerticalSpacer(5)
+                    Label("هل انت متأكد انك تريد تسجيل الخروج؟")
+                    Row(modifier=Modifier.fillMaxWidth().padding(5.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween){
+                        CustomButton(label = YES_LABEL, enabledBackgroundColor = Color.Red,
+                            buttonShadowElevation = 6, buttonShape = RectangleShape
+                        ) {
+                            deleteData()
+                            navHostController.navigate(LoginRoute.route)
+                            showExitDialog=false
+                        }
+                        CustomButton(label = NO_LABEL, enabledBackgroundColor = GREEN,
+                            buttonShadowElevation = 6, buttonShape = RectangleShape
+                        ) {
+                            showExitDialog=false
                         }
                     }
-
-
                 }
             }
-            if(fail) FailScreen(modifier=Modifier.fillMaxSize())
         }
     }
 
+    ModalNavigationDrawer(
+
+        drawerState=drawerState,
+        drawerContent = {
+            LazyColumn(modifier=Modifier.width(250.dp).fillMaxHeight().background(color= GRAY)){
+                item{
+                    VerticalSpacer(20)
+                    DrawerButton(
+                        icon = R.drawable.ic_exit_red,
+                        label = SIGN_OUT_LABEL,
+                        fontColor = WHITE
+                    ){
+                        showExitDialog=true
+                    }
+                    VerticalSpacer(10)
+                    DrawerButton(navHostController = navHostController,
+                        route = SettingsRoute,
+                        label = SETTINGS_LABEL,
+                        icon = R.drawable.ic_settings_blue,
+                        buttonColor = GRAY,
+                        fontColor = WHITE)
+                    VerticalSpacer()
+
+                    if(hospital!=null && hospital?.bloodBank!=null){
+                        DrawerMenuButton(
+                            label = "$BLOOD_BANK_LABEL (${hospital?.bloodBank?.type?.name})",
+                            icon = R.drawable.ic_blood_drop,
+                            fontColor = WHITE,
+                            buttonColor = GRAY
+                        ) {
+                            VerticalSpacer()
+                            if(
+                                hospital?.hasSubModule(SubModule.BLOOD_ISSUING) == true &&
+                                superUser?.hasSubModulePermission(CRUD.VIEW,SubModule.BLOOD_ISSUING)==true){
+                                DrawerButton(navHostController = navHostController,
+                                    route = IssuingDepartmentHomeRoute,
+                                    label = DEPARTMENT_ISSUING_LABEL,
+                                    icon = R.drawable.ic_heart,
+                                    fontColor = WHITE)
+                                VerticalSpacer()
+                            }
+                            if((hospital?.bloodBank?.bloodBankTypeId?:0)==2 && superUser?.hasSubModulePermission(CRUD.VIEW,SubModule.BLOOD_DONATION )==true){
+                                DrawerButton(navHostController = navHostController,
+                                    route = DonationDepartmentHomeRoute,
+                                    label = DEPARTMENT_DONATION_LABEL,
+                                    icon = R.drawable.ic_blood_bag2,
+                                    fontColor = WHITE)
+                                VerticalSpacer()
+                            }
+                            if((hospital?.bloodBank?.bloodBankTypeId?:0)==2 && superUser?.hasSubModulePermission(CRUD.VIEW,SubModule.BLOOD_COMPONENT)==true){
+                                DrawerButton(navHostController = navHostController,
+                                    route = ComponentDepartmentHomeRoute,
+                                    label = DEPARTMENT_COMPONENT_LABEL,
+                                    icon = R.drawable.ic_blood_drop,
+                                    fontColor = WHITE)
+
+                                VerticalSpacer()
+                            }
+                            if((hospital?.bloodBank?.bloodBankTypeId?:0)==2 && superUser?.hasSubModulePermission(CRUD.VIEW,SubModule.BLOOD_SEROLOGY)==true){
+                                DrawerButton(navHostController = navHostController,
+                                    route = HomeRoute,
+                                    label = DEPARTMENT_SEROLOGY_LABEL,
+                                    icon = R.drawable.ic_blood_drop,
+                                    fontColor = WHITE)
+                                VerticalSpacer()
+                            }
+                            if(superUser?.hasSubModulePermission(CRUD.VIEW,SubModule.THERAPEUTIC_UNIT)==true){
+                                DrawerButton(navHostController = navHostController,
+                                    route = HomeRoute,
+                                    label = DEPARTMENT_THERAPEUTIC_LABEL,
+                                    icon = R.drawable.ic_blood_stocks,
+                                    fontColor = WHITE)
+                                VerticalSpacer()
+                            }
+                        }
+
+                    }
+                    VerticalSpacer()
+                }
+            }
+        }
+    ) {
+        Container(
+            title = hospital?.name?: LOADING_LABEL,
+            headerShowBackButton = true,
+            showSheet = showSheet,
+            headerIconButtonBackground = BLUE,
+            headerOnClick = {
+                navHostController.navigate( if((canBrowseHospitals || isSuper) && area!=null ) AreaViewRoute.route
+                else if(superUser?.hasPermission(CRUD.VIEW,PermissionSector.CERTAIN_DIRECTORATE)==true) HomeRoute.route
+                else HospitalsIndexRoute.route )
+            }
+        ) {
+            if(loading) LoadingScreen(modifier=Modifier.fillMaxSize())
+            else{
+                if(success){
+                    Column(modifier=Modifier.fillMaxSize()){
+                        LazyColumn(modifier=Modifier.fillMaxSize().weight(1f)) {
+                            item{
+                                Row(modifier=Modifier.fillMaxWidth().padding(vertical = 5.dp,horizontal = 10.dp),
+                                    horizontalArrangement = Arrangement.End){
+                                    IconButton(R.drawable.ic_view_timeline_blue) {
+                                        scope.launch {
+                                            if(drawerState.isClosed)drawerState.open() else drawerState.close()
+                                        }
+                                    }
+                                }
+                                if(hospital?.isNBTS==false){
+                                    if(permissions.contains(VIEW_HOSPITAL_DEVICE_MODULE)){
+                                        Row(modifier = Modifier.fillMaxWidth().padding(5.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically){
+                                            Label(DEVICES_LABEL, fontWeight = FontWeight.Bold)
+                                            HorizontalSpacer()
+                                            IconButton(if(showDevices) ARROW_UP else ARROW_DOWN, background = BLUE){showDevices=!showDevices}
+                                        }
+                                        HorizontalDivider()
+                                        DevicesSection(hospital,navHostController,showDevices,devices)
+                                        if(showDevices) HorizontalDivider()
+                                    }
+                                    if(permissions.contains(VIEW_HOSPITAL_DEPARTMENT_MODULE)){
+                                        Row(modifier = Modifier.fillMaxWidth().padding(5.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically){
+                                            Label(DEPARTMENTS_LABEL, fontWeight = FontWeight.Bold)
+                                            HorizontalSpacer()
+                                            IconButton(if(showDepartments) ARROW_UP else ARROW_DOWN, background = BLUE){showDepartments=!showDepartments}
+                                        }
+                                        HorizontalDivider()
+                                        DepartmentsSection(hospital,navHostController,showDepartments,departments)
+                                        if(showDepartments) HorizontalDivider()
+                                    }
+                                    if(permissions.contains(VIEW_HOSPITAL_WARD_MODULE)){
+                                        Row(modifier = Modifier.fillMaxWidth().padding(5.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically){
+                                            Label(IN_PATIENT_LABEL, fontWeight = FontWeight.Bold)
+                                            HorizontalSpacer()
+                                            IconButton(if(showWards) ARROW_UP else ARROW_DOWN, background = BLUE){showWards=!showWards}
+                                        }
+                                        WardsSection(hospital,navHostController,showWards,wards)
+                                    }
+                                }
+                                if(permissions.contains(VIEW_HOSPITAL_BLOOD_BANK_MODULE) || superUser?.isSuper==true){
+                                    Column(modifier=Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally){
+                                        VerticalSpacer()
+                                        Label("$BLOOD_BANK_LABEL ${hospital?.bloodBank?.name} ( ${hospital?.bloodBank?.type?.name?:EMPTY_STRING} )")
+                                        Row(modifier=Modifier.fillMaxWidth().padding(10.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween){
+                                            CustomButtonWithImage(
+                                                label = DEPARTMENT_DONATION_LABEL,
+                                                icon=R.drawable.ic_blood_bag2
+                                            ) {
+
+                                            }
+                                            CustomButtonWithImage(
+                                                label = DEPARTMENT_COMPONENT_LABEL,
+                                                maxWidth = 82,
+                                                icon = R.drawable.ic_blood_drop
+                                            ) {
+
+                                            }
+                                            CustomButtonWithImage(
+                                                label = DEPARTMENT_ISSUING_LABEL,
+                                                icon=R.drawable.ic_heart
+
+                                            ) {
+
+                                            }
+
+                                        }
+                                        VerticalSpacer()
+                                        if(bloodKpis.isNotEmpty()){
+                                            HorizontalDivider()
+                                            Row(modifier = Modifier.fillMaxWidth().padding(5.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically){
+                                                Label(KPI_LABEL, fontWeight = FontWeight.Bold)
+                                                HorizontalSpacer()
+                                                IconButton(if(showBloodKpi) ARROW_UP else ARROW_DOWN, background = BLUE){showBloodKpi=!showBloodKpi}
+                                            }
+                                            KpiSection(bloodKpis,showBloodKpi)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if(fail) FailScreen(modifier=Modifier.fillMaxSize())
+            }
+        }
+    }
 }
+
 @Composable
 private fun KpiSection(bloodKpis:List<BloodBankKpi>,showKpi:Boolean){
     AnimatedVisibility(visible = showKpi,
@@ -249,6 +435,7 @@ private fun KpiSection(bloodKpis:List<BloodBankKpi>,showKpi:Boolean){
         }
     }
 }
+
 @Composable
 private fun DevicesSection(
     hospital: Hospital?,

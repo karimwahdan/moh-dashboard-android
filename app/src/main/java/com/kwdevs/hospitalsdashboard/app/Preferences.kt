@@ -29,6 +29,9 @@ enum class BloodNearExpiredSourceFilter{
 enum class RecipientType{
     GOVERNMENTAL_HOSPITAL,PRIVATE_HOSPITAL,NBTS,IN_PATIENT,OUT_PATIENT
 }
+enum class HomeDisplayTypes{
+    
+}
 enum class BloodFilterBy{
     HOSPITAL,
     SECTOR,
@@ -64,9 +67,19 @@ enum class PatientViewType{
     BY_HOSPITAL,BY_WARD,BY_OPERATION_ROOM
 }
 
+enum class FontSizes{
+    SPAN_FONT_SIZE
+}
+
 @Suppress("MemberVisibilityCanBePrivate")
 open class Preferences {
 
+    class FontSettings{
+        class SpanSettings{
+            fun set(item:Int){Hawk.put(FontSizes.SPAN_FONT_SIZE.name,item)}
+            fun get(): Int {return Hawk.get(FontSizes.SPAN_FONT_SIZE.toString(),14)}
+        }
+    }
     //A
     class Areas {
         fun set(item:Area){Hawk.put(ViewType.AREA.name,item)}

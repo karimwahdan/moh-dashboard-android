@@ -21,6 +21,9 @@ import com.kwdevs.hospitalsdashboard.models.settings.nationality.NationalitiesRe
 import com.kwdevs.hospitalsdashboard.models.settings.sector.SectorResponse
 import com.kwdevs.hospitalsdashboard.models.settings.title.TitleResponse
 import com.kwdevs.hospitalsdashboard.models.settings.wardTypes.WardTypeResponse
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.bodies.DailyBloodStockFilterBody
+import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.bodies.KpiFilterBody
+import com.kwdevs.hospitalsdashboard.modules.hospitalMainModule.subModules.hospitalUserSubModule.responses.HospitalUsersSimpleResponse
 import com.kwdevs.hospitalsdashboard.responses.HospitalsResponse
 import com.kwdevs.hospitalsdashboard.responses.ModulesResponse
 import com.kwdevs.hospitalsdashboard.responses.options.BloodOptionsData
@@ -32,11 +35,14 @@ import com.kwdevs.hospitalsdashboard.routes.Callers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.ResponseBody
+import retrofit2.Response
 
 class SettingsController : ViewModel() {
 
     private val api = Callers().settingsApi()
     val user= Preferences.User().get()
+    val superUser=Preferences.User().getSuper()
     private val deviceStatusData = MutableLiveData<UiState<StatusResponse>>()
     val deviceStatusState: LiveData<UiState<StatusResponse>> get() = deviceStatusData
 
@@ -96,6 +102,23 @@ class SettingsController : ViewModel() {
     private val titlesTypesSectorsCitiesOptionsData = MutableLiveData<UiState<TitlesTypesSectorsCitiesOptionsData>>()
     val titlesTypesSectorsCitiesOptionsState:LiveData<UiState<TitlesTypesSectorsCitiesOptionsData>> get() = titlesTypesSectorsCitiesOptionsData
 
+    private val certainDirectorateBloodKpiExcelData = MutableLiveData<UiState<Response<ResponseBody>>>()
+    val certainDirectorateBloodExcelState: LiveData<UiState<Response<ResponseBody>>> get() = certainDirectorateBloodKpiExcelData
+
+    private val allowedReceiversData = MutableLiveData<UiState<HospitalUsersSimpleResponse>>()
+    val allowedReceiversState: LiveData<UiState<HospitalUsersSimpleResponse>> get() = allowedReceiversData
+
+    fun saveCertainDirectorateBloodKpiToExcel(filterBody: KpiFilterBody) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main){certainDirectorateBloodKpiExcelData.value = UiState.Loading}
+                val response = api.exportCertainDirectorateKpi(filterBody)
+                withContext(Dispatchers.Main) {certainDirectorateBloodKpiExcelData.value = UiState.Success(response) }
+
+            }
+            catch (e: Exception) {withContext(Dispatchers.Main) {certainDirectorateBloodKpiExcelData.value = UiState.Error(error(e))}}
+        }
+    }
     fun sectorHospitalOptions(sectorId:Int){
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -124,11 +147,39 @@ class SettingsController : ViewModel() {
             }
         }
     }
+    fun allowedNotificationReceiversList(){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main) {allowedReceiversData.value = UiState.Reload}
+                val response = api.getAllowedNotificationReceivers(superUser?.id?:0)
+                withContext(Dispatchers.Main) {allowedReceiversData.value = UiState.Success(response)}
+            }
+            catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    allowedReceiversData.value = UiState.Error(error(e))
+                }
+            }
+        }
+    }
     fun areaHospitalOptions(areaId:Int){
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 withContext(Dispatchers.Main) {hospitalOptionsData.value = UiState.Reload}
                 val response = api.areaHospitalOptions(areaId)
+                withContext(Dispatchers.Main) {hospitalOptionsData.value = UiState.Success(response)}
+            }
+            catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    hospitalOptionsData.value = UiState.Error(error(e))
+                }
+            }
+        }
+    }
+    fun cityHospitalOptions(cityId:Int){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main) {hospitalOptionsData.value = UiState.Reload}
+                val response = api.cityHospitalOptions(cityId)
                 withContext(Dispatchers.Main) {hospitalOptionsData.value = UiState.Success(response)}
             }
             catch (e: Exception) {

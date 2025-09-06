@@ -1,13 +1,15 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    //alias(libs.plugins.google.play.services)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.services)
 }
 
 android {
     namespace = "com.kwdevs.hospitalsdashboard"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.kwdevs.hospitalsdashboard"
@@ -35,9 +37,8 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+
+
     buildFeatures {
         compose = true
     }
@@ -51,6 +52,12 @@ android {
     }
 }
 
+kotlin{
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget("1.8")
+
+    }
+}
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -61,9 +68,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.navigation.runtime.android)
-    implementation(libs.play.services.mlkit.text.recognition)
-
+    implementation(libs.androidx.core.i18n)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -79,13 +84,12 @@ dependencies {
     implementation(libs.okhttp)
     implementation (libs.retrofit)
     implementation (libs.logging.interceptor)
-    implementation (libs.retrofit2.kotlin.coroutines.adapter)
-    implementation (libs.moshi)
-    //Material Library
-    implementation (libs.androidx.material)
 
     //Moshi Library
     implementation(libs.moshi.kotlin)
+
+    //Material Library
+    implementation (libs.androidx.material)
 
     //Facebook Library
     implementation (libs.stetho.okhttp3)
@@ -107,27 +111,18 @@ dependencies {
 
     //Animated Transition Library
     implementation (libs.accompanist.navigation.animation)
-    implementation(libs.vision.common)
-    implementation(libs.play.services.mlkit.text.recognition.common)
-    implementation (libs.tesseract4android.openmp)
 
-    //implementation(libs.text.recognition.arabic)
-    //Firebase Cloud Messaging
-    //implementation(platform(libs.google.firebase.bom))
-    //implementation (libs.firebase.messaging)
-    //implementation(libs.firebase.messaging.ktx)
-    //implementation(libs.firebase.iid)
+    //Coil
+    implementation (libs.coil.compose)
 
     //Pusher
     implementation (libs.pusher.java.client)
 
-    //Google Ads
-    //implementation(libs.play.services.ads)
-
-    //Coil
-    implementation (libs.coil)
-    implementation (libs.coil.compose)
-    implementation (libs.accompanist.coil)
+    //Firebase Cloud Messaging
+    implementation(platform(libs.google.firebase.bom))
+    implementation (libs.firebase.messaging)
+    implementation(libs.firebase.messaging.ktx)
+    implementation(libs.firebase.iid)
 
     //Maps
     implementation(libs.maps.compose)      // Compose Maps library
@@ -140,11 +135,6 @@ dependencies {
     //Chart 2
     implementation (libs.charts)
 
-    //Arabic Text Support
-    //implementation (libs.tesseract4android)
-    //implementation(libs.tess.two)
-
-    //implementation (libs.text.recognition.arabic)
     implementation(libs.mlkit.common)
 
     //Capture Images Via Camera
@@ -164,6 +154,25 @@ dependencies {
 
     //Image Cropping
     implementation(libs.ucrop)
+
+
+    implementation(libs.androidx.navigation.runtime.android)
+    implementation(libs.play.services.mlkit.text.recognition)
+    implementation (libs.retrofit2.kotlin.coroutines.adapter)
+    implementation (libs.moshi)
+    implementation(libs.vision.common)
+    implementation(libs.play.services.mlkit.text.recognition.common)
+    implementation (libs.tesseract4android.openmp)
+    implementation (libs.coil)
+    implementation (libs.accompanist.coil)
+    implementation(libs.androidx.appcompat)
+    //Arabic Text Support
+    //implementation(libs.text.recognition.arabic)
+    //implementation (libs.tesseract4android)
+    //implementation(libs.tess.two)
+
+    //Google Ads
+    //implementation(libs.play.services.ads)
 
 
 }

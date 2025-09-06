@@ -25,6 +25,7 @@ import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.models.chartModels.
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.models.chartModels.hospital.ComparativeBloodBankKpiResponse
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.models.chartModels.hospital.HospitalBloodBankKpiResponse
 import com.kwdevs.hospitalsdashboard.modules.bloodBankModule.routes.BLOOD_BANKS_PREFIX
+import com.kwdevs.hospitalsdashboard.modules.hospitalMainModule.subModules.hospitalUserSubModule.responses.HospitalUsersSimpleResponse
 import com.kwdevs.hospitalsdashboard.modules.hospitalMainModule.subModules.hospitalUserSubModule.routes.USERS_PREFIX
 import com.kwdevs.hospitalsdashboard.responses.HospitalsResponse
 import com.kwdevs.hospitalsdashboard.responses.ModulesResponse
@@ -54,6 +55,7 @@ import com.kwdevs.hospitalsdashboard.routes.INDEX_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.MODELS_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.MORGUE_OPTIONS_API
 import com.kwdevs.hospitalsdashboard.routes.NATIONALITIES_PREFIX
+import com.kwdevs.hospitalsdashboard.routes.NOTIFICATIONS_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.OPERATION_STATUSES_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.RENAL_DEVICE_TYPES_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.SECTORS_PREFIX
@@ -63,9 +65,12 @@ import com.kwdevs.hospitalsdashboard.routes.TITLES_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.UPDATE_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.USER_PREFIX
 import com.kwdevs.hospitalsdashboard.routes.WARD_TYPES_PREFIX
+import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface SettingsApi {
@@ -78,6 +83,8 @@ interface SettingsApi {
 
     @POST("$HOSPITALS_PREFIX/$BLOOD_BANKS_PREFIX/certain-directorate-kpi")
     suspend fun certainDirectorateCharts(@Body body: KpiFilterBody): HospitalBloodBankKpiResponse
+    @POST("$HOSPITALS_PREFIX/$BLOOD_BANKS_PREFIX/export-certain-directorate-kpi")
+    suspend fun exportCertainDirectorateKpi(@Body body: KpiFilterBody): Response<ResponseBody>
 
     @POST("$HOSPITALS_PREFIX/$BLOOD_BANKS_PREFIX/educational-chart")
     suspend fun educationalCharts(@Body body: KpiFilterBody): HospitalBloodBankKpiResponse
@@ -137,16 +144,31 @@ interface SettingsApi {
     @GET("$CONTROL_PREFIX/options")
     suspend fun permissionsList(): PermissionsResponse
 
-    @POST("$CONTROL_PREFIX/store-role")
-    suspend fun storeRole(@Body roleBody: RoleBody):RoleSingleResponse
+    @POST("$CONTROL_PREFIX/store-hospital-user-role")
+    suspend fun storeHospitalUserRole(@Body roleBody: RoleBody):RoleSingleResponse
+
+    @POST("$CONTROL_PREFIX/store-super-user-role")
+    suspend fun storeSuperUserRole(@Body roleBody: RoleBody):RoleSingleResponse
     @POST("$CONTROL_PREFIX/update-role")
     suspend fun updateRole(@Body roleBody: RoleBody):RoleSingleResponse
 
     @POST("$CONTROL_PREFIX/store-permission")
     suspend fun storePermission(@Body body: PermissionBody):SinglePermissionResponse
 
+    @POST("$CONTROL_PREFIX/update-permission")
+    suspend fun updatePermission(@Body body: PermissionBody):SinglePermissionResponse
+
+    @POST("$CONTROL_PREFIX/store-super-permission")
+    suspend fun storeSuperPermission(@Body body: PermissionBody):SinglePermissionResponse
+
+    @POST("$CONTROL_PREFIX/update-super-permission")
+    suspend fun updateSuperPermission(@Body body: PermissionBody):SinglePermissionResponse
+
     @POST("$CONTROL_PREFIX/update-role-permissions")
     suspend fun updateRolePermissions(@Body body: RolePermissionsBody):RoleSingleResponse
+
+    @POST("$CONTROL_PREFIX/update-super-role-permissions")
+    suspend fun updateSuperRolePermissions(@Body body: RolePermissionsBody):RoleSingleResponse
 
     @POST("$CONTROL_PREFIX/$MODELS_PREFIX/$STORE_PREFIX")
     suspend fun storeTable(@Body body:CustomModelBody):CustomModelSingleResponse
@@ -192,6 +214,9 @@ interface SettingsApi {
     @GET("$SETTINGS_PREFIX/hospitals-by-area")
     suspend fun areaHospitalOptions(@Query("id")areaId:Int):HospitalsResponse
 
+    @GET("$SETTINGS_PREFIX/hospitals-by-city/{id}")
+    suspend fun cityHospitalOptions(@Path("id")cityId:Int):HospitalsResponse
+
     @GET("$SETTINGS_PREFIX/modules")
     suspend fun modulesOptions():ModulesResponse
 
@@ -212,5 +237,9 @@ interface SettingsApi {
 
     @POST("$USER_PREFIX/add-city-head")
     suspend fun addCityHead(@Query("userId")userId: Int,@Query("cityId")cityId: Int):PermissionDataResponse
+
+    @GET("$NOTIFICATIONS_PREFIX/allowed-receivers/{id}")
+    suspend fun getAllowedNotificationReceivers(@Path("id")id:Int):HospitalUsersSimpleResponse
+
 
 }

@@ -11,6 +11,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
+@Suppress("unused")
 object MapRetrofitBuilder {
     private val client              : OkHttpClient = buildClient()
     private val retrofit            = buildRetrofit()
